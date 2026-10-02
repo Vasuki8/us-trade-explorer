@@ -220,25 +220,82 @@ test('comparisons preserve filters and unavailable baselines, and export sample 
   await expect(page.getByRole('status').first()).toContainText('not included');
   await expect(page.locator('#explore-result')).toBeHidden();
 });
-test('hostile source descriptions stay text and failed downloads keep selected state', async ({
+for (const alteration of ['value', 'description'] as const)
+  test(`otherwise-valid altered ${alteration} fails closed and preserves URL filters`, async ({
+    page,
+  }) => {
+    const altered = structuredClone(sample);
+    if (alteration === 'description')
+      altered.partners.find((p: { id: string }) => p.id === 'canada').name =
+        '<img src=x onerror=alert(1)>';
+    else
+      altered.observations[0].value = altered.observations[0].value.replace(
+        /^./,
+        '9',
+      );
+    await page.route('**/data/*.json', (route) =>
+      route.fulfill({ json: altered }),
+    );
+    const path = sitePath(
+      '/compare/?product=09&flow=exports&period=2026-07&partners=canada&release=sample-2026-07-v1',
+    );
+    await page.goto(path);
+    await expect(page.locator('#explore-message')).toContainText(
+      'could not be loaded',
+    );
+    await expect(page.locator('#explore-result')).toBeHidden();
+    await expect(
+      page.getByRole('button', { name: 'Download selected CSV' }),
+    ).toBeHidden();
+    await expect(page.getByRole('button', { name: 'Copy link' })).toBeHidden();
+    expect(await page.locator('#result-table img').count()).toBe(0);
+    expect(new URL(page.url()).pathname + new URL(page.url()).search).toBe(
+      path,
+    );
+    await page.getByRole('button', { name: 'Apply filters' }).click();
+    await expect(page.locator('#explore-message')).toContainText('not loaded');
+    expect(new URL(page.url()).pathname + new URL(page.url()).search).toBe(
+      path,
+    );
+  });
+
+test('a same-origin release redirect fails without requesting its target', async ({
   page,
 }) => {
-  const altered = structuredClone(sample);
-  altered.partners.find((p: { id: string }) => p.id === 'canada').name =
-    '<img src=x onerror=alert(1)>';
-  await page.route('**/data/*.json', (route) =>
-    route.fulfill({ json: altered }),
+  const target = sitePath('/data/redirected-release.json');
+  const requested: string[] = [];
+  page.on('request', (request) => {
+    if (new URL(request.url()).pathname === target)
+      requested.push(request.url());
+  });
+  await page.route(`**${target}`, (route) =>
+    route.fulfill({
+      body: JSON.stringify(sample),
+      contentType: 'application/json',
+    }),
   );
+  await page.route('**/data/sample-2026-07-v1.json', (route) =>
+    route.fulfill({ status: 302, headers: { location: target } }),
+  );
+  await page.goto(sitePath('/compare/?partners=canada'));
+  await expect(page.locator('#explore-message')).toContainText(
+    'could not be loaded',
+  );
+  await expect(page.locator('#explore-result')).toBeHidden();
+  expect(requested).toEqual([]);
+  await expect(page).toHaveURL(/partners=canada/);
+});
+
+test('failed downloads with authentic pinned data keep selected state', async ({
+  page,
+}) => {
   await page.addInitScript(() => {
     URL.createObjectURL = () => {
       throw new Error('download blocked');
     };
   });
   await page.goto(sitePath('/compare/?partners=canada'));
-  await expect(page.locator('#result-table')).toContainText(
-    '<img src=x onerror=alert(1)>',
-  );
-  expect(await page.locator('#result-table img').count()).toBe(0);
+  await expect(page.locator('#result-table')).toContainText('Canada');
   await page.getByRole('button', { name: 'Download selected CSV' }).click();
   await expect(page.locator('#download-status')).toContainText(
     'could not be prepared',

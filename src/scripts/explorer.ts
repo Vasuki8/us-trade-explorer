@@ -1,5 +1,4 @@
 import {
-  validateRelease,
   parseQuery,
   queryString,
   valueAt,
@@ -13,6 +12,8 @@ import {
   type Query,
   type Observation,
 } from '../../packages/contracts/trade';
+import manifest from '../../releases/sample-2026-07-v1.manifest.json';
+import { fetchPublicRelease } from '../lib/public-fetch';
 const root = document.querySelector<HTMLElement>('#explorer');
 if (root) {
   const form = document.querySelector<HTMLFormElement>('#filters')!,
@@ -177,15 +178,9 @@ if (root) {
   window.addEventListener('popstate', () => {
     if (release) restore();
   });
-  fetch(root.dataset.releaseUrl!, {
-    signal: AbortSignal.timeout(15000),
-    credentials: 'omit',
-  })
-    .then(async (response) => {
-      if (!response.ok) throw new Error('Unavailable');
-      const data = await response.text();
-      if (data.length > 2_000_000) throw new Error('Oversized');
-      release = validateRelease(JSON.parse(data));
+  fetchPublicRelease(manifest, root.dataset.releaseUrl!, location.href)
+    .then((verified) => {
+      release = verified;
       restore();
     })
     .catch(() =>

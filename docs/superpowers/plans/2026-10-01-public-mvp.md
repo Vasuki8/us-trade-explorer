@@ -27,10 +27,10 @@ Examine stale/malformed URL state, decimal precision, incomplete comparisons, ac
 
 Files: `packages/contracts/trade.ts`, `tests/contracts.test.ts`, `tests/fixtures/sample-release.json`, `scripts/make-sample.py`.
 
-- [ ] Write failing tests for duplicate observations, schema/status/coverage failures, zero/missing baselines, exact large-dollar sums, safe exports and bounded share URLs.
-- [ ] Implement typed validation, calculations, filtering, CSV encoding and safe URL handling.
-- [ ] Generate deterministic synthetic data, with release/provenance and explicit scope.
-- [ ] Run `npm test`; expected all contract tests pass.
+- [x] Write failing tests for duplicate observations, schema/status/coverage failures, zero/missing baselines, exact large-dollar sums, safe exports and bounded share URLs.
+- [x] Implement typed validation, calculations, filtering, CSV encoding and safe URL handling.
+- [x] Generate deterministic synthetic data, with release/provenance and explicit scope.
+- [x] Run `npm test`; expected all contract tests pass.
 
 Interface: `Release` describes public data only; `validateRelease`, `change`, `sum`, `csv`, `parseQuery` are shared by build and browser. No private account fields accepted.
 
@@ -38,10 +38,10 @@ Interface: `Release` describes public data only; `validateRelease`, `change`, `s
 
 Files: `astro.config.mjs`, `src/layouts/`, `src/components/`, `src/pages/`, `src/lib/`, `src/styles/`, `src/scripts/`.
 
-- [ ] Build overview, search, product/country profiles, comparison, changes, sources, methodology, release/status and preview privacy pages.
-- [ ] Implement URL-preserved flow/period/product/country controls, accessible tables/charts, ambiguous/empty/error states, share and safe CSV downloads.
-- [ ] Add real 404, canonical/sitemap policies, configurable base path, production release/domain gates and static output verification.
-- [ ] Run `npm run check` and `npm run build`; inspect desktop/mobile browser and failed download behavior.
+- [x] Build overview, search, product/country profiles, comparison, changes, sources, methodology, release/status and preview privacy pages.
+- [x] Implement URL-preserved flow/period/product/country controls, accessible tables/charts, ambiguous/empty/error states, share and safe CSV downloads.
+- [x] Add real 404, canonical/sitemap policies, configurable base path, production release/domain gates and static output verification.
+- [x] Run `npm run check` and `npm run build`; inspect desktop/mobile browser and failed download behavior.
 
 Interface: pages consume Task 1 contract; browser fetches an immutable release URL named in the HTML. Production requires separately reviewed live release and configured domain.
 
@@ -49,18 +49,18 @@ Interface: pages consume Task 1 contract; browser fetches an immutable release U
 
 Files: `pipeline/`, `sources/census.json`, `.github/workflows/`, `infra/cloudfront/`, `docs/operations.md`.
 
-- [ ] First test schema validation, rejected sources/redirects/oversized responses, bounded retry, idempotent immutable storage and failed activation retaining last good release.
-- [ ] Implement fixed Census source adapter and local atomic release store. Acquisition outputs a candidate only; reconciliation and full coverage must be demonstrated before live publication.
-- [ ] Lock dependencies, pin Actions commits, restrict permissions/timeouts and secrets to manual protected-environment acquisition on main.
-- [ ] Provide portable host routing/security policy foundation and concrete operational setup instructions; no fabricated deployment evidence.
-- [ ] Run Python suite plus complete Node/build checks.
+- [x] First test schema validation, rejected sources/redirects/oversized responses, bounded retry, idempotent immutable storage and failed activation retaining last good release.
+- [x] Implement fixed Census source adapter and local atomic release store. Acquisition outputs a candidate only; reconciliation and full coverage must be demonstrated before live publication.
+- [x] Lock dependencies, pin Actions commits, restrict permissions/timeouts and secrets to manual protected-environment acquisition on main.
+- [x] Provide portable host routing/security policy foundation and concrete operational setup instructions; no fabricated deployment evidence.
+- [x] Run Python suite plus complete Node/build checks.
 
 Interface: raw candidate is private acquisition evidence, not a `Release`. Release activation requires the validated public contract and immutable digest; production publication stays disabled in this increment.
 
 ## Task 4 — Verification and handoff
 
-- [ ] Check rendered links/SEO, sample disclosure, bundle size, unsafe rendering, subpath build, failing production gate and browser journeys.
-- [ ] Fresh whole-branch review; reproduce/fix material findings and rerun affected checks.
-- [ ] Record verified results and external blockers in `docs/implementation-status.md`; commit and push feature branch, create a draft PR when connector supports it.
+- [x] Check rendered links/SEO, sample disclosure, bundle size, unsafe rendering, subpath build, failing production gate and browser journeys.
+- [x] Fresh whole-branch review; reproduce/fix material findings and rerun affected checks.
+- [x] Record verified results and external blockers in `docs/implementation-status.md`; commit and push feature branch, create a draft PR when connector supports it.
 
 Five primary failures and evidence: wrong/missing figures (contract tests), corrupted update (atomic-store tests), exposed key (sanitized fetch tests and artifact canary scan), unsafe text/export (render/CSV tests), broken URL navigation (query tests, output link scan, browser checks).

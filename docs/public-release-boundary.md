@@ -41,6 +41,27 @@ The loader snapshots callback buffers before asynchronous hashing. It rejects ch
 
 Build verification also compares the bounded sidecar's raw bytes with the canonical encoding of the reviewed pin. It does not accept parsed equality alone: duplicate keys could otherwise hide a discarded private payload in the downloadable file.
 
+## Browser explorer loading
+
+The browser loading contract pins explorer and comparison to a direct import of the committed `releases/sample-2026-07-v1.manifest.json`. Browser code does not import `src/lib/data.ts` or the fixture, and does not fetch a second manifest. The existing server pin and public endpoints supply the same sample bytes. The transport adapter in `src/lib/public-fetch.ts` has this interface:
+
+```typescript
+fetchPublicRelease(
+  manifest: unknown,
+  releaseURL: string,
+  pageURL: string,
+  fetcher: typeof fetch = fetch,
+): Promise<Release>
+```
+
+The adapter validates the manifest before fetching. It requires an HTTP/HTTPS release URL on the page's origin, rejects URL credentials, and requests with `credentials: 'omit'`, `mode: 'same-origin'` and `redirect: 'error'`. A 15-second deadline covers both fetching and reading the response body; timers and readers must be released on every outcome. No automatic retry, persistent browser cache or service worker is introduced. Cached response bytes undergo the same verification.
+
+The reader counts actual decoded byte chunks and enforces the 512 KiB public release bound before retaining them. Each chunk is copied into bounded storage immediately so later mutation cannot change accumulated bytes. `Content-Length` is not the decoded byte count: gzip/br response lengths may differ from the manifest count, and the header may be absent. Neither length-header equality nor full `text()`/`arrayBuffer()` buffering replaces the streamed bound.
+
+The existing `loadPublicRelease` remains authoritative for SHA-256, exact decoded byte count, fatal UTF-8, canonical JSON, sample-only fields and metadata agreement. Only its verified frozen release may become visible in tables or feed selected CSV downloads. Failed status, timeout, missing/truncated/oversized bodies, read errors or verification failures use the existing generic dataset error, preserve URL filters and hide results; static product profiles remain available. There is no fallback to unverified bytes or an embedded fixture. Browser runtime verification, review and integration require their own dated [handoff receipts](handoff.md).
+
+Web Crypto requires a supported secure browser context, such as HTTPS or the localhost development preview. Unavailable browser support follows the same load failure state; local compatibility does not prove production hosting enforcement.
+
 ## Regenerate the sample manifest
 
 Run this from the repository root with **Node 24** in PowerShell after installing the locked development dependencies. It uses the same encoder/producer as the website and verifies their agreement before writing and formatting the manifest for review:

@@ -105,3 +105,23 @@ test('valid share URLs round-trip and invalid filters cannot silently select mis
     assert.ok(parseQuery(new URLSearchParams(raw), r).error, raw);
   }
 });
+
+test('included-chapter query scope round-trips without changing the omitted chapter default', () => {
+  const r = sample();
+  const q = parseQuery(new URLSearchParams('product=all&partners=canada'), r);
+  assert.equal(q.error, null);
+  assert.equal(q.product, 'all');
+  assert.deepEqual(parseQuery(new URLSearchParams(queryString(q)), r), q);
+  assert.equal(parseQuery(new URLSearchParams(), r).product, '09');
+  for (const product of [
+    'ALL',
+    'All',
+    'all-goods',
+    'world',
+    'all,09',
+    ' all',
+  ]) {
+    assert.ok(parseQuery(new URLSearchParams({ product }), r).error, product);
+  }
+  assert.ok(parseQuery(new URLSearchParams('product=all&product=09'), r).error);
+});

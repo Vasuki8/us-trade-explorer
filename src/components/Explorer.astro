@@ -25,6 +25,7 @@ const { compare = false } = Astro.props;
               HS {p.code} — {p.name}
             </option>
           ))}
+          <option value="all">All included sample chapters</option>
         </select>
       </label>
       <label>
@@ -82,6 +83,7 @@ const { compare = false } = Astro.props;
         <p class="section-label">SELECTED VIEW · SAMPLE</p>
         <h2 id="result-title"></h2>
         <p id="result-basis"></p>
+        <p id="result-scope" class="small"></p>
       </div>
       <button id="share" class="secondary" type="button">
         Copy link ↗

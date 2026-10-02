@@ -44,7 +44,7 @@ const filters = new URLSearchParams({
   flow,
   period: latest,
   release: release.id,
-  ...(kind === 'product' ? { product: id } : { partners: id }),
+  ...(kind === 'product' ? { product: id } : { product: 'all', partners: id }),
 });
 ---
 
@@ -72,7 +72,7 @@ const filters = new URLSearchParams({
     <p class="lede">
       {kind === 'product'
         ? `US ${flow} of this product chapter, with the world and selected partner countries.`
-        : `US ${flow === 'imports' ? 'imports from' : 'exports to'} ${name} across the four chapters in this sample.`}
+        : `US ${flow === 'imports' ? 'imports from' : 'exports to'} ${name} across the ${release.products.length} chapters in this sample (HS ${release.products.map((p) => p.code).join(', ')}). Selected sample coverage; not a country total.`}
     </p>
     <p class="basis">
       {BASIS[flow]} · Census basis · Monthly · Nominal USD · Not seasonally

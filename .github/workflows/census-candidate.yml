@@ -11,6 +11,16 @@ on:
         required: true
         type: choice
         options: [imports, exports]
+      product:
+        description: 'HS2 chapter; start with 09. Use * explicitly for all chapters.'
+        required: true
+        default: '09'
+        type: string
+      partner:
+        description: 'Census partner code; start with 1220 (Canada). Use * explicitly for all source partners.'
+        required: true
+        default: '1220'
+        type: string
 permissions:
   contents: read
 concurrency:
@@ -34,7 +44,9 @@ jobs:
           CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
           REQUEST_PERIOD: ${{ inputs.period }}
           REQUEST_FLOW: ${{ inputs.flow }}
-        run: python -m pipeline.census --period "$REQUEST_PERIOD" --flow "$REQUEST_FLOW"
+          REQUEST_PRODUCT: ${{ inputs.product }}
+          REQUEST_PARTNER: ${{ inputs.partner }}
+        run: python -m pipeline.census --period "$REQUEST_PERIOD" --flow "$REQUEST_FLOW" --product "$REQUEST_PRODUCT" --partner "$REQUEST_PARTNER"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: census-candidate-${{ github.run_id }}

@@ -39,11 +39,11 @@ Files: create `packages/contracts/public-release.ts`, `tests/public-release.test
 
 Interfaces: `projectPublicRelease(input: unknown): Release`; `encodePublicRelease(input: unknown): Uint8Array`; `validatePublicManifest(input: unknown): PublicReleaseManifest`; `createSampleManifest(input: unknown): Promise<PublicReleaseManifest>`; `loadPublicRelease(manifest: unknown, loadBytes: (contentHash: string) => Uint8Array | Promise<Uint8Array>): Promise<Release>`. Export the two byte-limit constants. Import the existing Release validator/types; browser-safe module with no Node filesystem/secret/network dependencies.
 
-- [ ] Add meaningful failing tests for absent interfaces, allowlist reconstruction/nested canaries, independent deep freeze, exact integers/statuses/missing coverage, bounded input, official/private rejection, manifest schema/fields/date/basis/classification rules.
-- [ ] Implement the explicit sample-only projection and deterministic encoding. Validate array bounds before copying, then use the established statistical Release validator and require sample official dates null.
-- [ ] Implement independent strict manifest validation, sample manifest derivation with Web Crypto SHA-256, and bounded loader with pre-callback manifest checks, byte-copy snapshot, checksum/count verification, fatal UTF-8 decode, schema/projection validation and byte-for-byte canonical equality.
-- [ ] Test manifest/body scope/identity/order/date mismatches, tampered/truncated/oversized buffers, duplicate fields/noncanonical JSON/invalid UTF-8, mutable returned buffers and false approval flags. Generate and pin the sample manifest through the implemented encoder/producer; confirm cross-platform deterministic bytes.
-- [ ] Run focused Node tests, primary integration verification, update handoff and commit.
+- [x] Add meaningful failing tests for absent interfaces, allowlist reconstruction/nested canaries, independent deep freeze, exact integers/statuses/missing coverage, bounded input, official/private rejection, manifest schema/fields/date/basis/classification rules.
+- [x] Implement the explicit sample-only projection and deterministic encoding. Validate array bounds before copying, then use the established statistical Release validator and require sample official dates null.
+- [x] Implement independent strict manifest validation, sample manifest derivation with Web Crypto SHA-256, and bounded loader with pre-callback manifest checks, byte-copy snapshot, checksum/count verification, fatal UTF-8 decode, schema/projection validation and byte-for-byte canonical equality.
+- [x] Test manifest/body scope/identity/order/date mismatches, tampered/truncated/oversized buffers, duplicate fields/noncanonical JSON/invalid UTF-8, mutable returned buffers and false approval flags. Generate and pin the sample manifest through the implemented encoder/producer; confirm cross-platform deterministic bytes.
+- [x] Run focused Node tests, primary integration verification, update handoff and commit.
 
 ## Task 2 — Exercise boundary in Astro and downloads
 

@@ -318,6 +318,12 @@ def run_partner_scan(plan, flow, root, key, refresh=False, evidence_secrets=()):
             journal = _journal(plan, flow, generation, attempted_at=attempted_at)
             prospective = files | {'progress.json': canonical(journal)}
             validate_snapshot(plan, flow, prospective, secrets)
+            # A failed attempt adds a diagnostic category to the smaller pending
+            # journal. Reserve the longest permitted failure before any writes
+            # or requests; null HTTP status is longer than any allowed integer.
+            failures = [canonical(_journal(plan, flow, generation, state='failed', category=category,
+                                            attempted_at=attempted_at)) for category in DIAGNOSTIC_CATEGORIES]
+            validate_snapshot(plan, flow, files | {'progress.json': max(failures, key=len)}, secrets)
             atomic_write(root / 'progress.json', prospective['progress.json'])
             try:
                 captured = []
@@ -359,7 +365,11 @@ def run_partner_scan(plan, flow, root, key, refresh=False, evidence_secrets=()):
                 status = error.http_status if isinstance(error, SourceError) else None
                 failed = _journal(plan, flow, generation, state='failed', category=category,
                                   http_status=status, attempted_at=attempted_at)
-                atomic_write(root / 'progress.json', canonical(failed))
+                # Atomic object writes may already have completed. Recheck the
+                # actual retained inventory before changing its failure state.
+                failed_snapshot = _stored_files(root) | {'progress.json': canonical(failed)}
+                validate_snapshot(plan, flow, failed_snapshot, secrets)
+                atomic_write(root / 'progress.json', failed_snapshot['progress.json'])
                 raise SourceError('Private discovery failed; prior successful receipt retained',
                                   category=category, http_status=status) from None
     except (OSError, ValueError, TypeError, KeyError):

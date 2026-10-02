@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
-from contextlib import redirect_stderr, redirect_stdout
+from contextlib import nullcontext, redirect_stderr, redirect_stdout
 from unittest.mock import patch
 
 from pipeline.candidates import canonical, digest
@@ -339,6 +339,108 @@ class PartnerDiscoveryTests(unittest.TestCase):
             self.complete(observations=observations, refresh=True)
         self.assertEqual((self.root / 'complete.json').read_bytes(), pointer)
         self.assertEqual(json.loads((self.root / 'progress.json').read_bytes())['state'], 'failed')
+
+    def padded_partial_snapshot(self, files, spare=0):
+        files = dict(files)
+        for index in range(4):
+            _, raw = evidence(observations=[(f'{index:04d}', 'Detail', '1')])
+            size = min(524288, 2097152 - spare - sum(map(len, files.values())))
+            self.assertGreaterEqual(size, len(raw))
+            raw += b' ' * (size - len(raw))
+            files['raw/' + hashlib.sha256(raw).hexdigest() + '.json'] = raw
+        self.assertEqual(sum(map(len, files.values())), 2097152 - spare)
+        partners.validate_snapshot(PLAN, 'imports', files)
+        return files
+
+    def test_full_pending_snapshot_rejects_before_network_and_keeps_prior_valid_bytes(self):
+        attempted = '2026-10-02T01:02:03Z'
+        journal = {'schemaVersion': 1, 'planId': digest(PLAN), 'flow': 'imports', 'generation': 1,
+                   'state': 'pending', 'scanId': None, 'receiptId': None, 'category': None,
+                   'httpStatus': None, 'attemptedAt': attempted}
+        files = self.padded_partial_snapshot({'progress.json': canonical(journal)})
+        before = dict(files)
+        def write(path, raw):
+            files[path.relative_to(self.root).as_posix()] = raw
+        with patch('pipeline.partners._stored_files', side_effect=lambda root: dict(files)), \
+             patch('pipeline.partners.writer', return_value=nullcontext()), patch('pipeline.partners._now', return_value=attempted), \
+             patch('pipeline.partners.atomic_write', side_effect=write) as writes, \
+             patch('pipeline.partners.fetch_candidate', side_effect=SourceError('safe', category='upstream_unavailable', http_status=503)) as acquire:
+            with self.assertRaises(SourceError):
+                partners.run_partner_scan(PLAN, 'imports', self.root, KEY)
+        self.assertLessEqual(sum(map(len, files.values())), 2097152)
+        self.assertEqual(files, before)
+        partners.validate_snapshot(PLAN, 'imports', files)
+        writes.assert_not_called()
+        acquire.assert_not_called()
+
+    def test_headroom_rejection_retains_prior_pointer_and_pending_generation(self):
+        self.complete()
+        files = files_at(self.root)
+        journal = json.loads(files['progress.json'])
+        journal.update(generation=2, state='pending', scanId=None, receiptId=None,
+                       attemptedAt='2026-10-02T01:02:03Z')
+        files['progress.json'] = canonical(journal)
+        files = self.padded_partial_snapshot(files)
+        before = dict(files)
+        def write(path, raw):
+            files[path.relative_to(self.root).as_posix()] = raw
+        with patch('pipeline.partners._stored_files', side_effect=lambda root: dict(files)), \
+             patch('pipeline.partners._now', return_value='2026-10-02T01:02:03Z'), \
+             patch('pipeline.partners.atomic_write', side_effect=write), \
+             patch('pipeline.partners.fetch_candidate', side_effect=SourceError('safe', category='upstream_unavailable', http_status=503)) as acquire:
+            with self.assertRaises(SourceError):
+                partners.run_partner_scan(PLAN, 'imports', self.root, KEY)
+        self.assertEqual(files, before)
+        partners.validate_snapshot(PLAN, 'imports', files)
+        acquire.assert_not_called()
+
+    def test_source_failure_with_reserved_capacity_records_valid_failed_generation(self):
+        attempted = '2026-10-02T01:02:03Z'
+        journal = {'schemaVersion': 1, 'planId': digest(PLAN), 'flow': 'imports', 'generation': 1,
+                   'state': 'pending', 'scanId': None, 'receiptId': None, 'category': None,
+                   'httpStatus': None, 'attemptedAt': attempted}
+        files = self.padded_partial_snapshot({'progress.json': canonical(journal)}, spare=64)
+        def write(path, raw):
+            files[path.relative_to(self.root).as_posix()] = raw
+        with patch('pipeline.partners._stored_files', side_effect=lambda root: dict(files)), \
+             patch('pipeline.partners.writer', return_value=nullcontext()), patch('pipeline.partners._now', return_value=attempted), \
+             patch('pipeline.partners.atomic_write', side_effect=write), \
+             patch('pipeline.partners.fetch_candidate', side_effect=SourceError('safe', category='upstream_unavailable', http_status=503)):
+            with self.assertRaises(SourceError):
+                partners.run_partner_scan(PLAN, 'imports', self.root, KEY)
+        state = partners.validate_snapshot(PLAN, 'imports', files)
+        self.assertEqual((state['journal']['state'], state['journal']['category'], state['journal']['httpStatus']),
+                         ('failed', 'upstream_unavailable', 503))
+        self.assertLessEqual(sum(map(len, files.values())), 2097152)
+
+    def test_failure_after_partial_object_writes_revalidates_retained_snapshot(self):
+        self.complete()
+        pointer = (self.root / 'complete.json').read_bytes()
+        original_write = partners.atomic_write
+        def fail_after_scan(path, raw):
+            original_write(path, raw)
+            if path.parent.name == 'scans':
+                raise OSError('fabricated storage failure')
+        with patch('pipeline.partners.atomic_write', side_effect=fail_after_scan):
+            with self.assertRaises(SourceError):
+                self.complete(observations=[('1220', 'Canada', '2')], refresh=True)
+        state = partners.validate_snapshot(PLAN, 'imports', files_at(self.root))
+        self.assertEqual((self.root / 'complete.json').read_bytes(), pointer)
+        self.assertEqual(state['journal']['state'], 'failed')
+        self.assertEqual(len(state['scans']), 2)
+
+    def test_failed_journal_is_not_written_over_unexpected_oversized_retained_state(self):
+        self.complete()
+        actual_files = files_at(self.root)
+        overflow = dict(actual_files)
+        overflow['raw/' + 'f' * 64 + '.json'] = b' ' * 2097152
+        with patch('pipeline.partners._stored_files', side_effect=[actual_files, overflow]), \
+             patch('pipeline.partners.atomic_write') as writes, \
+             patch('pipeline.partners.fetch_candidate', side_effect=SourceError('safe', category='upstream_unavailable', http_status=503)):
+            with self.assertRaises(SourceError):
+                partners.run_partner_scan(PLAN, 'imports', self.root, KEY, refresh=True)
+        self.assertEqual(writes.call_count, 1)
+        self.assertEqual(json.loads(writes.call_args.args[1])['state'], 'pending')
 
     def test_restore_is_byte_exact_and_reusable_without_network(self):
         receipt = self.complete()

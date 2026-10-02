@@ -2,6 +2,8 @@
 
 Implementation date: 1 October 2026 (local date). Branch: `feat/public-mvp`.
 
+Update: PR #1 was merged into `main` with explicit user approval. GitHub-first development is now documented in [GitHub development](github-development.md); AWS remains deferred. The subsequent preview-workflow increment adds a tested browser CSP, GitHub project-path browser checks and private build artifacts. GitHub rejected Pages setup under the current repository plan, so no hosted preview is claimed. The original evidence below describes the public-preview increment at its completion; current provider and ingestion results are recorded separately.
+
 ## Implemented
 
 - Astro static public website: overview, searchable product directory, product profiles for both flows, country directory/profiles, comparisons, interactive exploration, changes, sources/methodology, release record, status, preview privacy and a real 404 page.

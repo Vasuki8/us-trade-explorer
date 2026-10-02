@@ -9,6 +9,9 @@ interface Props {
 }
 const { title, description, active = '' } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// Static hosts cannot always set response headers. HMR needs a different policy.
+const previewPolicy =
+  "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'";
 const nav = [
   ['Overview', ''],
   ['Products', 'search/'],
@@ -22,6 +25,10 @@ const nav = [
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    {import.meta.env.PROD && (
+      <meta http-equiv="Content-Security-Policy" content={previewPolicy} />
+    )}
+    <meta name="referrer" content="no-referrer" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} | US Trade Explorer</title>
     <meta name="description" content={description} />

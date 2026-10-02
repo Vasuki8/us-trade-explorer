@@ -19,7 +19,7 @@ export default defineConfig({
   ],
   webServer: {
     command: 'npm run preview -- --port 4321',
-    url: 'http://127.0.0.1:4321',
+    url: `http://127.0.0.1:4321${process.env.BASE_PATH || '/'}`,
     reuseExistingServer: !process.env.CI,
     env: { ASTRO_TELEMETRY_DISABLED: '1' },
   },

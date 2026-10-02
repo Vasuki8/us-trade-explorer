@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "publisher": "US Census Bureau and Bureau of Economic Analysis",
+  "basis": "census-monthly-goods-nsa-usd-v1",
+  "period": "2026-07",
+  "flows": ["imports", "exports"],
+  "officialReleaseDate": "2026-09-03",
+  "officialRevisionDate": null,
+  "sourceURL": "https://www.census.gov/foreign-trade/Press-Release/ft900/ft900_2607.pdf",
+  "documentHash": "c122b8ccee947c58859597a7549bb5dcb6691add3e405180ab915d43f6c43aa0",
+  "claim": "initial-monthly-announcement-only",
+  "apiVintageVerified": false,
+  "reviewedOn": "2026-10-02",
+  "releaseIDs": {
+    "census": "CB26-142",
+    "bea": "BEA26-40"
+  }
+}

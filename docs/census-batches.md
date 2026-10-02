@@ -8,15 +8,19 @@ This increment extends the verified singleton imports/exports connector to bound
 
 The batch validates 1–8 explicit `{flow, period, product, partner}` slots. Wildcards, duplicates, unexpected fields and malformed codes fail before networking. Sorting makes plan identity independent of input order. Each slot must return exactly one valid, in-scope observation on the existing value/aggregation contract. A four-digit partner syntax does not classify it as a country: approved partner kinds remain a later statistical gate.
 
+The separate `sources/batches/coffee-world-2026-07.json` plan contains two world-control slots, one per flow, for the same month and chapter. World uses `CTY_CODE=-` and explicit `SUMMARY_LVL=DET`, which the guide documents for the world row. Missing or non-DET response dimensions fail closed. This extends the existing candidate contract only to a previously unsupported explicit world scope; established market queries, plan identity and stored evidence remain unchanged. See [private control reports](census-controls.md).
+
 The [Census API guide](https://www.census.gov/foreign-trade/reference/guides/Guide_to_International_Trade_Datasets.pdf) documents world `-`, group codes, explicit monthly zeros and HTTP 204 outcomes. `no_results` is retained as a failed slot with HTTP 204; the batch cannot satisfy that slot by inventing zero. A reported numeric `0` remains `reported_zero`. Broader wildcard results must not be presumed to contain every possible product/country pair.
 
 ## Run, resume and refresh
 
-The manual **Acquire Census batch** workflow runs only on trusted `main` in `census-ingestion`, using repository secret `CENSUS_API_KEY`. It acquires eight slots sequentially, shares the single-probe concurrency group, has a 20-minute cap and read-only repository/Actions permissions. Inputs enter environment variables and a quoted argument array. No secrets are available to pull-request checks.
+The manual **Acquire Census batch** workflow runs only on trusted `main` in `census-ingestion`, using repository secret `CENSUS_API_KEY`. Choose `markets` (eight slots, default) or `world-controls` (two slots). A fixed shell mapping permits only those reviewed paths. It acquires slots sequentially, shares the single-probe concurrency group, has a 20-minute cap and read-only repository/Actions permissions. Inputs enter environment variables and a quoted argument array. No secrets are available to pull-request checks.
 
 - Fresh run: leave `resume_run` empty and `refresh` false.
 - Recover a failed or interrupted run: enter its completed run ID, keep `refresh` false. Existing successful evidence is revalidated and only unfinished slots are acquired.
 - Detect revisions: enter the previous run ID and set `refresh` true. Every slot is re-fetched; unchanged evidence keeps its original object and ingestion time. Changed source bytes create a new candidate identity and bundle, retaining previous evidence.
+
+Select the same plan as the prior run when restoring. Market and world snapshots have distinct plan identities and must use separate destinations; a cross-plan restore is rejected before writes. A refresh detects changed bytes; it cannot establish an official revision date.
 
 The preceding run must be in this repository, be a completed manual `main` execution of `.github/workflows/census-batch.yml`, and contain exactly the expected, unexpired `census-batch-{run_id}` artifact. Restore verifies metadata, the archive SHA-256 digest, paths, sizes and all JSON contracts/references before persisting files. The token is sent only to `api.github.com`; the signed artifact-storage redirect receives no authorization header. Both Census and GitHub credential reflections are rejected after JSON decoding.
 
@@ -61,4 +65,6 @@ Required follow-up: approved per-flow commodity/partner inventory including spec
 
 ## Verification receipt
 
-The existing PR #10 imports/exports probes succeeded for July 2026, chapter 09 and Canada. This batch implementation is tested with fabricated source responses and artifact transports; its authenticated eight-slot workflow and Actions-to-Actions recovery require execution after the change is merged to trusted `main`. Local test totals, independent review and CI evidence are recorded in the implementation plan and pull request at completion.
+The PR #10 imports/exports probes succeeded for July 2026, chapter 09 and Canada. After PR #11 merged at `286c8ec333afaad3a962555790d4b5705930fced`, authenticated eight-slot acquisition [run 36973640536](https://github.com/Vasuki8/us-trade-explorer/actions/runs/36973640536) and Actions-to-Actions recovery [run 36973761962](https://github.com/Vasuki8/us-trade-explorer/actions/runs/36973761962) both succeeded. All eight observations passed the scope, schema and numeric/status contracts; both runs produced bundle `2e8ca3d5fb34b378ead182c2826950f6f977fb98f0fde70e9c558cf3077b5830`. The eleven restored files were byte-identical to the fresh artifact. The recovery run reused successful slots without new source requests.
+
+These runs verify authenticated market acquisition and real private artifact recovery, not complete coverage, raw-source archival or reconciliation. Induced live network failure and refresh were not exercised; their behavior is covered by regression tests. The new world acquisition and combined report workflows still require execution after their code reaches trusted `main`. CI and independent review receipts belong to the relevant pull request.

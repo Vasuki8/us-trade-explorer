@@ -41,7 +41,7 @@ def validate_period(period):
         raise SourceError('Period must be YYYY-MM in the supported century')
 
 def validate_scope(product, partner):
-    for value, pattern in ((product, r'(?:[0-9]{2}|\*)'), (partner, r'(?:[0-9]{4}|\*)')):
+    for value, pattern in ((product, r'(?:[0-9]{2}|\*)'), (partner, r'(?:[0-9]{4}|-|\*)')):
         if not isinstance(value, str) or not re.fullmatch(pattern, value):
             raise SourceError('Scope must be an HS2 code and a Census partner code, or explicit * wildcards')
 
@@ -114,12 +114,13 @@ def fetch_bytes(url):
         if response is not None:response.close()
         connection.close()
 
-def parse_rows(data,flow,period):
+def parse_rows(data,flow,period,*,expected_summary=None):
     validate_period(period)
     if flow not in PATHS:raise SourceError('Unsupported flow')
     prefix='I' if flow=='imports' else 'E';value_field='GEN_VAL_MO' if flow=='imports' else 'ALL_VAL_MO'
     dimensions=aggregate_dimensions(flow)
     required={f'{prefix}_COMMODITY',f'{prefix}_COMMODITY_SDESC','CTY_CODE','CTY_NAME',value_field,'COMM_LVL'}|dimensions.keys()
+    if expected_summary is not None:required=required|{'SUMMARY_LVL'}
     allowed=required|{'time','YEAR','MONTH'}
     if not isinstance(data,list) or not 2<=len(data)<=MAX_ROWS+1 or not isinstance(data[0],list):raise SourceError('Empty or oversized source table')
     header=data[0]
@@ -138,6 +139,7 @@ def parse_rows(data,flow,period):
         if not re.fullmatch(r'[0-9]{2}',code) or not re.fullmatch(r'(?:[0-9]{4}|-)',country) or row['COMM_LVL']!='HS2':raise SourceError('Source dimension mismatch')
         if ('time' in row and row['time']!=period) or ('YEAR' in row and (row['YEAR']!=period[:4] or row['MONTH']!=period[5:])):raise SourceError('Source period mismatch')
         if any(row[name]!=expected for name,expected in dimensions.items()):raise SourceError('Unexpected source aggregation')
+        if expected_summary is not None and row['SUMMARY_LVL']!=expected_summary:raise SourceError('Unexpected source summary level')
         if not re.fullmatch(r'(0|[1-9]\d{0,23})',value):raise SourceError('Unknown value or suppression marker; review contract')
         for name in (f'{prefix}_COMMODITY_SDESC','CTY_NAME'):
             if not 0<len(row[name])<=250 or any(ord(c)<32 for c in row[name]):raise SourceError('Invalid source description')
@@ -162,6 +164,9 @@ def fetch_candidate(flow,period,key,*,product='09',partner='1220'):
         'YEAR':period[:4],'MONTH':period[5:],'COMM_LVL':'HS2',
         f'{prefix}_COMMODITY':product,'CTY_CODE':partner,**dimensions,
     }
+    # The guide places world '-' in DET, alongside countries, rather than CGP.
+    # Keep established country queries unchanged; world is a new explicit scope.
+    if partner=='-':query['SUMMARY_LVL']='DET'
     # Credential-bearing URL never leaves this function and fetch_bytes.
     url='https://'+HOST+PATHS[flow]+'?'+urlencode({**query,'key':key})
     for attempt in range(3):
@@ -170,7 +175,7 @@ def fetch_candidate(flow,period,key,*,product='09',partner='1220'):
             if len(raw)>MAX_BYTES or key.encode() in raw:raise SourceError('Response rejected by evidence safety check')
             try:data=json.loads(raw)
             except (ValueError,UnicodeError,RecursionError):raise SourceError('Invalid JSON response') from None
-            rows=parse_rows(data,flow,period)
+            rows=parse_rows(data,flow,period,expected_summary='DET' if partner=='-' else None)
             if any((product!='*' and row['product']!=product) or (partner!='*' and row['partnerCode']!=partner) for row in rows):raise SourceError('Source returned rows outside the requested scope')
             identity={'schemaVersion':2,'flow':flow,'period':period,'sourceQuery':query,'sourceHash':hashlib.sha256(raw).hexdigest()}
             candidate={

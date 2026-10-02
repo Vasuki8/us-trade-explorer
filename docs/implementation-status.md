@@ -1,5 +1,7 @@
 # Public preview implementation status
 
+Current ingestion update (2 October 2026): PR #11's live eight-slot market acquisition and real Actions recovery passed; the [batch record](census-batches.md) records their immutable receipts. The next [private control increment](census-controls.md) adds an explicit world plan, a checksum-pinned official announcement and a subset report. The website still uses synthetic data, remains noindex and rejects production builds. Historical verification counts below describe the original preview; current counts and review evidence are in each subsequent PR.
+
 Implementation date: 1 October 2026 (local date). Branch: `feat/public-mvp`.
 
 Update: PR #1 was merged into `main` with explicit user approval. GitHub-first development is now documented in [GitHub development](github-development.md); AWS remains deferred. The subsequent preview-workflow increment adds a tested browser CSP, GitHub project-path browser checks and private build artifacts. GitHub rejected Pages setup under the current repository plan, so no hosted preview is claimed. The original evidence below describes the public-preview increment at its completion; current provider and ingestion results are recorded separately.

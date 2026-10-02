@@ -23,7 +23,7 @@ def validate_slot(slot):
     require(slot['flow'] in ('imports', 'exports'), 'Unsupported batch flow')
     validate_period(slot['period'])
     require(type(slot['product']) is str and re.fullmatch('[0-9]{2}', slot['product']), 'Batch requires an explicit HS2 product')
-    require(type(slot['partner']) is str and re.fullmatch('[0-9]{4}', slot['partner']), 'Batch requires an explicit partner')
+    require(type(slot['partner']) is str and re.fullmatch('(?:[0-9]{4}|-)', slot['partner']), 'Batch requires an explicit partner or world control')
 
 
 def validate_plan(plan):

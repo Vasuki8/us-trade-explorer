@@ -28,6 +28,8 @@ The existing `CENSUS_API_KEY` repository secret is used only by isolated ingesti
 
 The environment was created and the API confirmed its only selected deployment branch is `main`. Required human environment reviewers and main-branch protection have not been verified. Limit repository write access to trusted administrators; workflow code reviews remain necessary while the key is a repository secret. The initial imports candidate was dispatched from the reviewed, merged PR #1 commit for July 2026; its result must be inspected separately from website validation.
 
+Initial acquisition result: [run 36957552437](https://github.com/Vasuki8/us-trade-explorer/actions/runs/36957552437) failed after three bounded source attempts and skipped artifact upload. The sanitized error did not distinguish transport failure, timeout or a retryable HTTP response, so the precise cause and API-key acceptance remain unverified. No candidate or official public data was produced. Do not weaken validation or substitute invented official figures; next ingestion work should add safe error categories and test a smaller documented source partition if needed.
+
 ## Verification of this increment
 
 The new browser regression failed before the CSP was added, then passed with the meta policy. Nine contract tests, thirteen ingestion/store tests, the Astro type check and all sixteen desktop/mobile browser journeys passed locally. All sixteen browser journeys also passed under `/us-trade-explorer/`, including search, filtering, safe CSV download and a real local HTTP 404. Both builds verified 30 HTML pages and their internal links. This proves local behavior, not enforcement on a deployed GitHub Pages site.

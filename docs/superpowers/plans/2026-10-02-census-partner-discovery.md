@@ -59,7 +59,7 @@ Files: narrowly modify `pipeline/restore.py`; create `pipeline/tests/test_partne
 
 ## Task 4 — Workflow, operator guide, review and live receipt (primary)
 
-- [ ] Add main-only manual `.github/workflows/census-partners.yml` with flow choice, validated refresh/resume env inputs, fixed plan, shared concurrency, pinned Actions, read-only permissions, protected repository secret, twenty-minute job cap and seven-day private partial artifacts excluding locks/temporaries.
-- [ ] Write `docs/census-partners.md` with definitions, bounded operation/restore, failure recovery, source evidence and unresolved inventory/vintage gates. Link README/status/handoff; record completed task receipts as they occur.
+- [x] Add main-only manual `.github/workflows/census-partners.yml` with flow choice, validated refresh/resume env inputs, fixed plan, shared concurrency, pinned Actions, read-only permissions, protected repository secret, twenty-minute job cap and seven-day private partial artifacts excluding locks/temporaries.
+- [x] Write `docs/census-partners.md` with definitions, bounded operation/restore, failure recovery, source evidence and unresolved inventory/vintage gates. Link README/status/handoff; record completed task receipts as they occur.
 - [ ] Full Python suite, web contracts/check/build, documentation links/whitespace and one fresh whole-branch review. Fix material findings test-first. Create/attach PR, final-head CI, merge under standing permission and verify merged-main checks. No new permission request.
 - [ ] Fresh authenticated import/export discovery and Actions recovery on trusted main; independently inspect raw/candidate/receipt/generation and every-byte recovery. Preserve verified private evidence; update handoff with exact results before task completion. Do not claim live verification before successful runs and independent checks.

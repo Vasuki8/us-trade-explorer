@@ -1,0 +1,73 @@
+name: Discover private Census partners
+on:
+  workflow_dispatch:
+    inputs:
+      flow:
+        description: 'Trade flow for the reviewed July 2026 / HS2 09 DET partner query'
+        required: true
+        default: imports
+        type: choice
+        options: [imports, exports]
+      resume_run:
+        description: 'Optional completed main discovery run ID for the same flow'
+        required: false
+        type: string
+      refresh:
+        description: 'Re-fetch the reviewed query; false resumes validated unfinished work'
+        required: true
+        default: false
+        type: boolean
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: census-acquisition
+  cancel-in-progress: false
+jobs:
+  discover:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: census-ingestion
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.14'
+      - name: Discover or recover reviewed private partner observations
+        id: discover
+        env:
+          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          REQUEST_FLOW: ${{ inputs.flow }}
+          REQUEST_RESUME: ${{ inputs.resume_run }}
+          REQUEST_REFRESH: ${{ inputs.refresh }}
+        run: |
+          case "$REQUEST_FLOW" in
+            imports|exports) ;;
+            *) echo 'Invalid reviewed flow'; exit 1 ;;
+          esac
+          args=(--plan sources/scans/coffee-partners-2026-07.json --flow "$REQUEST_FLOW" --output pipeline/output/partners)
+          if [[ -n "$REQUEST_RESUME" ]]; then
+            if [[ ! "$REQUEST_RESUME" =~ ^[1-9][0-9]{0,19}$ ]]; then
+              echo 'Invalid prior partner discovery run ID'
+              exit 1
+            fi
+            args+=(--resume-run "$REQUEST_RESUME")
+          fi
+          if [[ "$REQUEST_REFRESH" == 'true' ]]; then args+=(--refresh); fi
+          python -m pipeline.partners "${args[@]}"
+      - name: Preserve secret-checked private discovery evidence
+        if: ${{ always() && steps.discover.outcome != 'skipped' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: census-partners-${{ github.run_id }}
+          path: |
+            pipeline/output/partners/
+            !pipeline/output/partners/**/.pending-*
+            !pipeline/output/partners/**/batch.lock
+          if-no-files-found: warn
+          retention-days: 7
+      # Observed DET partners remain private and unclassified; this does not publish.

@@ -39,6 +39,8 @@ Coverage contains ordered `productCodes`, `partnerIds`, `periods`, flows `['impo
 
 The loader snapshots callback buffers before asynchronous hashing. It rejects checksum/count mismatches, oversized/truncated bytes, malformed UTF-8, a BOM, duplicate JSON keys, unknown nested fields and any encoding that differs from canonical bytes, even when a supplied digest matches those invalid bytes. Invalid input produces no loaded release or automatic fallback to private evidence.
 
+Build verification also compares the bounded sidecar's raw bytes with the canonical encoding of the reviewed pin. It does not accept parsed equality alone: duplicate keys could otherwise hide a discarded private payload in the downloadable file.
+
 ## Regenerate the sample manifest
 
 Run this from the repository root with **Node 24** in PowerShell after installing the locked development dependencies. It uses the same encoder/producer as the website and verifies their agreement before writing and formatting the manifest for review:

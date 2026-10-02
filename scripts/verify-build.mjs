@@ -19,27 +19,32 @@ const all = files(root),
 function check(ok, msg) {
   if (!ok) throw new Error(msg);
 }
-function readBoundedJSON(path, limit) {
+function readBounded(path, limit) {
   check(statSync(path).size <= limit, 'Public metadata exceeds byte limit');
-  return JSON.parse(readFileSync(path, 'utf8'));
+  return readFileSync(path);
 }
 const pinnedManifest = validatePublicManifest(
-  readBoundedJSON(
-    resolve('releases/sample-2026-07-v1.manifest.json'),
-    MAX_PUBLIC_MANIFEST_BYTES,
+  JSON.parse(
+    new TextDecoder('utf-8', { fatal: true }).decode(
+      readBounded(
+        resolve('releases/sample-2026-07-v1.manifest.json'),
+        MAX_PUBLIC_MANIFEST_BYTES,
+      ),
+    ),
   ),
 );
-const generatedManifest = validatePublicManifest(
-  readBoundedJSON(
-    join(root, 'data', `${pinnedManifest.releaseId}.manifest.json`),
-    MAX_PUBLIC_MANIFEST_BYTES,
-  ),
+const generatedMetadataBytes = readBounded(
+  join(root, 'data', `${pinnedManifest.releaseId}.manifest.json`),
+  MAX_PUBLIC_MANIFEST_BYTES,
 );
+// Check raw bytes: JSON parsing alone can discard duplicate private fields.
 check(
-  JSON.stringify(generatedManifest) === JSON.stringify(pinnedManifest),
-  'Generated metadata differs from the reviewed sample manifest',
+  generatedMetadataBytes.equals(
+    Buffer.from(JSON.stringify(pinnedManifest), 'utf8'),
+  ),
+  'Public metadata is not canonical pinned JSON',
 );
-await loadPublicRelease(generatedManifest, (contentHash) => {
+await loadPublicRelease(pinnedManifest, (contentHash) => {
   check(contentHash === pinnedManifest.contentHash, 'Unexpected public hash');
   const path = join(root, 'data', `${pinnedManifest.releaseId}.json`);
   check(

@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 import re
 
-from pipeline.batch import BASIS, atomic_write, object_bytes, read, referenced_candidate, restore_snapshot, validate_key, validate_plan, verify_bundle, writer
+from pipeline.batch import BASIS, atomic_write, object_bytes, read, referenced_candidate, restore_snapshot, validate_journal, validate_key, validate_plan, verify_bundle, writer
 from pipeline.candidates import canonical, decode, digest, keys, require, timestamp
 from pipeline.census import SourceError, validate_period
 from pipeline.publication import archive_publication, verify_publication
@@ -58,6 +58,17 @@ def observation(entry, root, secrets):
     }
 
 
+def verified_generation(plan, root, secrets):
+    """Last-valid bundles remain recoverable, but cannot disguise a failed refresh."""
+    bundle = verify_bundle(plan, root)
+    journal = validate_journal(read(Path(root) / 'batches' / digest(plan) / 'progress.json', secrets), plan)
+    for current, reference in zip(journal['entries'], bundle['partitions']):
+        require(current['state'] == 'successful', 'Control input generation is incomplete or failed')
+        require(all(current[field] == reference[field] for field in ('slot', 'candidateId', 'objectHash')),
+                'Control input generation differs from its complete bundle; recover the batch before reporting')
+    return bundle, digest(journal)
+
+
 def build_report(check, market_plan, market_root, world_plan, world_root, statement, document, *, secrets=()):
     """Re-verify every input. Announcement evidence does not establish API vintage."""
     check = validate_check(decode(canonical(check), secrets))
@@ -66,8 +77,8 @@ def build_report(check, market_plan, market_root, world_plan, world_root, statem
     require(world_plan == expected_plan(check, ['-']), 'World plan differs from reviewed scope')
     publication = verify_publication(statement, document, secrets=secrets)
     require(publication['period'] == check['period'] and publication['basis'] == check['basis'], 'Publication scope mismatch')
-    markets = verify_bundle(market_plan, market_root)
-    world = verify_bundle(world_plan, world_root)
+    markets, market_journal_id = verified_generation(market_plan, market_root, secrets)
+    world, world_journal_id = verified_generation(world_plan, world_root, secrets)
     checks = []
     for flow in ('imports', 'exports'):
         selected = [observation(entry, market_root, secrets) for entry in markets['partitions'] if entry['slot']['flow'] == flow]
@@ -91,7 +102,8 @@ def build_report(check, market_plan, market_root, world_plan, world_root, statem
         'scope': {'period': check['period'], 'product': check['product'], 'basis': check['basis'],
                   'selectedInventoryId': digest(check), 'inventorySourceURL': check['inventorySourceURL'], 'reviewedOn': check['reviewedOn']},
         'inputs': {'marketPlanId': digest(market_plan), 'marketBundleId': markets['bundleId'],
-                   'worldPlanId': digest(world_plan), 'worldBundleId': world['bundleId']},
+                   'marketJournalId': market_journal_id, 'worldPlanId': digest(world_plan),
+                   'worldBundleId': world['bundleId'], 'worldJournalId': world_journal_id},
         'publication': publication, 'checks': checks, 'publicationBlockers': BLOCKERS,
     }
     report['reportId'] = digest(report)

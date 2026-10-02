@@ -202,6 +202,47 @@ class ControlReportTests(unittest.TestCase):
         save_report(updated, output)
         self.assertEqual(json.loads((output / 'complete.json').read_bytes()), {'reportId': updated['reportId']})
 
+    def test_failed_refresh_cannot_reuse_an_older_complete_bundle_for_a_report(self):
+        for kind in ('markets', 'world'):
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as directory:
+                self.market_root, self.world_root = Path(directory) / 'markets', Path(directory) / 'world'
+                self.acquire()
+                output = Path(directory) / 'reports'
+                save_report(self.report(), output)
+                previous_pointer = (output / 'complete.json').read_bytes()
+                root, plan = (self.market_root, self.market_plan) if kind == 'markets' else (self.world_root, self.world_plan)
+                def partial(url):
+                    if '/imports/' in url:
+                        raise SourceError('fabricated failed refresh', category='no_results', http_status=204)
+                    return source_response(url, value='250')
+                with patch('pipeline.census.fetch_bytes', side_effect=partial), self.assertRaises(SourceError):
+                    run_batch(plan, root, KEY, refresh=True)
+                journal = json.loads(next((root / 'batches').glob('*/progress.json')).read_bytes())
+                self.assertTrue(any(entry['state'] == 'failed' for entry in journal['entries']))
+                self.assertTrue(any(entry['state'] == 'successful' for entry in journal['entries']))
+                with self.assertRaises(SourceError):
+                    save_report(self.report(), output)
+                self.assertEqual((output / 'complete.json').read_bytes(), previous_pointer)
+
+    def test_completed_journal_must_match_pointer_and_can_recover_after_interruption(self):
+        self.acquire()
+        prior_bundle_pointer = next((self.world_root / 'batches').glob('*/complete.json')).read_bytes()
+        def interrupt(path, data):
+            if path.name == 'complete.json':
+                raise OSError('fabricated pointer crash')
+            return atomic_write(path, data)
+        with patch('pipeline.census.fetch_bytes', side_effect=lambda url: source_response(url, value='250')), \
+             patch('pipeline.batch.atomic_write', side_effect=interrupt), self.assertRaises(SourceError):
+            run_batch(self.world_plan, self.world_root, KEY, refresh=True)
+        journal = json.loads(next((self.world_root / 'batches').glob('*/progress.json')).read_bytes())
+        self.assertTrue(all(entry['state'] == 'successful' for entry in journal['entries']))
+        self.assertEqual(next((self.world_root / 'batches').glob('*/complete.json')).read_bytes(), prior_bundle_pointer)
+        with self.assertRaises(SourceError):
+            self.report()
+        with patch('pipeline.census.fetch_bytes', side_effect=AssertionError('Completed journal should recover without fetching')):
+            run_batch(self.world_plan, self.world_root, KEY)
+        self.assertTrue(all(check['worldControlUSD'] == '250' for check in self.report()['checks']))
+
 
 if __name__ == '__main__':
     unittest.main()

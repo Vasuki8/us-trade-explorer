@@ -49,6 +49,8 @@ py -3.14 -m pipeline.controls --market-run MARKET_RUN_ID --world-run WORLD_RUN_I
 
 Use a new empty destination. Operator-supplied run IDs are validated and passed as quoted arguments. Failed or partial input bundles, wrong plans, expired downloads, missing documents, changed hashes or a selected sum above world produce no completed report. The UI and last public release remain untouched.
 
+Each input's current progress journal must be wholly successful and reference exactly the candidate IDs/object hashes in its complete bundle. A failed refresh can retain the old complete pointer for batch recovery, but the report refuses to substitute that older generation. An all-successful journal with an interrupted bundle/pointer write must first be recovered by resuming the batch. To deliberately reuse earlier valid evidence, select its successful prior run. Verified journal identities are recorded alongside bundle identities in the report.
+
 `build_report(...)` also supports offline verification from two preserved batch roots, the reviewed check/statement and archived PDF bytes, without network access or credentials. Known secret canaries can be supplied explicitly for verification. Input hashes, candidate IDs and ingestion times are recorded in the report; a second identical verification yields the same report identity.
 
 ## Recovery and publication boundaries

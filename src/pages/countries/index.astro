@@ -1,0 +1,29 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { countries, countryUrl } from '../../lib/data';
+---
+
+<Layout
+  title="US trading partners"
+  description="Explore US goods trade with Canada, Mexico, China, India and Germany in this synthetic preview."
+  active="Countries"
+>
+  <section class="page-intro">
+    <p class="eyebrow">COUNTRY DIRECTORY</p>
+    <h1>A market-by-market view.</h1>
+    <p class="lede">
+      Explore each partner’s trade with the United States. Country profiles
+      cover the four product chapters available in this sample.
+    </p>
+  </section>
+  <div class="product-grid">
+    {countries.map((p) => (
+      <a class="product-card" href={countryUrl(p.id)}>
+        <span class="section-label">US TRADING PARTNER</span>
+        <h2>{p.name}</h2>
+        <p>View products, monthly changes and the basis of comparison.</p>
+        <span class="card-link">Explore market ↗</span>
+      </a>
+    ))}
+  </div>
+</Layout>

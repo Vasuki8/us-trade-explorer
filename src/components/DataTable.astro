@@ -1,0 +1,65 @@
+---
+import { money, pct } from '../../packages/contracts/trade';
+interface Props {
+  rows: {
+    name: string;
+    code: string;
+    url: string;
+    value: string | null;
+    change: { delta: string | null; percent: number | null };
+  }[];
+  subject: string;
+  caption: string;
+}
+const { rows, subject, caption } = Astro.props;
+---
+
+<div class="table-scroll">
+  <table>
+    <caption>{caption}</caption>
+    <thead>
+      <tr>
+        <th scope="col">{subject}</th>
+        <th scope="col" class="numeric">
+          Trade value
+        </th>
+        <th scope="col" class="numeric">
+          Year over year
+        </th>
+        <th scope="col" class="numeric">
+          Dollar change
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((row) => (
+        <tr>
+          <th scope="row">
+            <a class="row-link" href={row.url}>
+              {row.name}
+              <span aria-hidden="true">↗</span>
+            </a>
+            <span class="row-code">
+              {subject === 'Product' ? `HS ${row.code}` : row.code}
+            </span>
+          </th>
+          <td class="numeric">{money(row.value)}</td>
+          <td class="numeric">
+            <span
+              class:list={[
+                'change',
+                {
+                  positive: (row.change.percent ?? 0) > 0,
+                  negative: (row.change.percent ?? 0) < 0,
+                },
+              ]}
+            >
+              {pct(row.change.percent)}
+            </span>
+          </td>
+          <td class="numeric muted">{money(row.change.delta)}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

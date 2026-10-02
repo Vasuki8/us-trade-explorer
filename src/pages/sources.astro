@@ -1,0 +1,68 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { ATTRIBUTION } from '../../packages/contracts/trade';
+import { href } from '../lib/data';
+---
+
+<Layout
+  title="Sources and provenance"
+  description="Official source references, statistical definitions, attribution, and the status of the sample preview."
+>
+  <article class="prose">
+    <p class="eyebrow">SHOW YOUR WORK</p>
+    <h1>Sources you can inspect.</h1>
+    <p class="lede">
+      This preview contains synthetic fixtures. Its figures were not retrieved
+      from the Census Bureau. The official sources below define the planned live
+      connector.
+    </p>
+    <h2>US Census Bureau — international trade</h2>
+    <p>
+      The live service is designed for monthly US merchandise trade: general
+      imports at customs value, and total exports at free alongside ship (FAS)
+      value. API credentials stay in the ingestion job.
+    </p>
+    <ul>
+      <li>
+        <a href="https://www.census.gov/data/developers/data-sets/international-trade.html">
+          International Trade API documentation
+        </a>
+      </li>
+      <li>
+        <a href="https://api.census.gov/data/timeseries/intltrade/imports/hs/variables.html">
+          Import variables and metadata
+        </a>
+      </li>
+      <li>
+        <a href="https://api.census.gov/data/timeseries/intltrade/exports/hs/variables.html">
+          Export variables and metadata
+        </a>
+      </li>
+      <li>
+        <a href="https://www.census.gov/foreign-trade/guide/sec2.html">
+          Statistical definitions
+        </a>
+      </li>
+      <li>
+        <a href="https://www.census.gov/data/developers/about/terms-of-service.html">
+          API terms of service
+        </a>
+      </li>
+    </ul>
+    <h2>Attribution for the future live service</h2>
+    <blockquote>{ATTRIBUTION}</blockquote>
+    <p>
+      No Census logo, seal or government imagery is used. Calculations and
+      presentation are this project's work.
+    </p>
+    <h2>How publication will work</h2>
+    <p>
+      Acquisition, schema checks, coverage checks and reconciliation precede
+      publication. Failed candidates remain unpublished. Each published page
+      must identify its release and retain the corresponding dataset.
+    </p>
+    <p>
+      <a href={href('methodology/')}>Read the methodology →</a>
+    </p>
+  </article>
+</Layout>

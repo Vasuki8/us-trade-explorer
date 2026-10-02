@@ -1,0 +1,102 @@
+---
+import '../styles/global.css';
+import '../styles/layout.css';
+import { href, release } from '../lib/data';
+interface Props {
+  title: string;
+  description: string;
+  active?: string;
+}
+const { title, description, active = '' } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const nav = [
+  ['Overview', ''],
+  ['Products', 'search/'],
+  ['Countries', 'countries/'],
+  ['Compare', 'compare/'],
+  ['Recent changes', 'changes/'],
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} | US Trade Explorer</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex, follow" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={`${title} | US Trade Explorer`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#102d39" />
+    <link rel="icon" href={href('favicon.svg')} type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip" href="#main">
+      Skip to content
+    </a>
+    <div class="preview-bar">
+      <span class="sample-dot"></span>
+      <strong>Development preview</strong>
+      <span>
+        All figures are synthetic sample data. Not for trade decisions.
+      </span>
+      <a href={href(`releases/${release.id}/`)}>
+        About this release <span aria-hidden="true">↗</span>
+      </a>
+    </div>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href={href('')} aria-label="US Trade Explorer home">
+          <span class="brand-mark" aria-hidden="true">
+            ↗
+          </span>
+          <span>
+            US Trade<span class="brand-light">Explorer</span>
+          </span>
+        </a>
+        <span class="header-note">A public view of US goods trade</span>
+        <a class="source-top" href={href('sources/')}>
+          Data & sources <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+      <nav class="container main-nav" aria-label="Main navigation">
+        {nav.map(([label, path]) => (
+          <a
+            href={href(path)}
+            aria-current={active === label ? 'page' : undefined}
+          >
+            {label}
+          </a>
+        ))}
+      </nav>
+    </header>
+    <main id="main" class="container">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <a class="brand" href={href('')}>
+            US Trade Explorer
+          </a>
+          <p>Explore the numbers. Understand the basis.</p>
+          <p class="small">Sample preview · English · Values in nominal USD</p>
+        </div>
+        <nav aria-label="Information">
+          <a href={href('sources/')}>Sources</a>
+          <a href={href('methodology/')}>Methodology</a>
+          <a href={href('status/')}>Data status</a>
+          <a href={href('privacy/')}>Preview privacy</a>
+        </nav>
+        <p class="small">
+          Independent project. No accounts, billing or advertising trackers are
+          active in this preview. Census is not the source of the sample
+          figures.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

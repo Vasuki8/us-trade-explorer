@@ -1,0 +1,31 @@
+---
+import { release, href, month, latest } from '../lib/data';
+---
+
+<aside class="provenance">
+  <div class="section-label">KNOW YOUR DATA</div>
+  <h2>Every figure has a context.</h2>
+  <dl>
+    <div>
+      <dt>Data period</dt>
+      <dd>{month(latest)}</dd>
+    </div>
+    <div>
+      <dt>Official publication / revision</dt>
+      <dd>Not applicable — sample data</dd>
+    </div>
+    <div>
+      <dt>Fixture generated</dt>
+      <dd>{release.ingestedAt.slice(0, 10)}</dd>
+    </div>
+    <div>
+      <dt>Quantity</dt>
+      <dd>Not aggregated at HS2; units differ</dd>
+    </div>
+  </dl>
+  <p>No explanations of why trade changed are inferred from these figures.</p>
+  <div class="inline-links">
+    <a href={href('methodology/')}>Read the methodology →</a>
+    <a href={href(`releases/${release.id}/`)}>Inspect this release →</a>
+  </div>
+</aside>

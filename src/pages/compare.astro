@@ -1,0 +1,20 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Explorer from '../components/Explorer.astro';
+---
+
+<Layout
+  title="Compare US trading partners"
+  description="Compare up to three countries on the same US goods trade product, flow, month and statistical basis."
+  active="Compare"
+>
+  <section class="page-intro">
+    <p class="eyebrow">SIDE BY SIDE</p>
+    <h1>Different markets. One basis.</h1>
+    <p class="lede">
+      Compare up to three countries for a single product chapter. Start by
+      choosing the markets you want to understand.
+    </p>
+  </section>
+  <Explorer compare />
+</Layout>

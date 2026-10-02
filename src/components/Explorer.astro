@@ -1,0 +1,114 @@
+---
+import { release, href, countries, month, latest } from '../lib/data';
+interface Props {
+  compare?: boolean;
+}
+const { compare = false } = Astro.props;
+---
+
+<div
+  id="explorer"
+  data-mode={compare ? 'compare' : 'explore'}
+  data-release-url={href(`data/${release.id}.json`)}
+>
+  <form
+    id="filters"
+    class="filter-panel"
+    action={href(compare ? 'compare/' : 'explore/')}
+  >
+    <div class="filter-grid">
+      <label>
+        Product
+        <select name="product">
+          {release.products.map((p) => (
+            <option value={p.code}>
+              HS {p.code} — {p.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Trade flow
+        <select name="flow">
+          <option value="imports">US imports</option>
+          <option value="exports">US exports</option>
+        </select>
+      </label>
+      <label>
+        Month
+        <select name="period">
+          {[...release.periods].reverse().map((p) => (
+            <option value={p}>{month(p)}</option>
+          ))}
+        </select>
+      </label>
+    </div>
+    <fieldset>
+      <legend>
+        {compare
+          ? 'Choose up to three countries'
+          : 'Narrow to up to three countries (optional)'}
+      </legend>
+      <div class="checkbox-group">
+        {countries.map((p) => (
+          <label>
+            <input type="checkbox" name="partner" value={p.id} />
+            {p.name}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+    <input type="hidden" name="release" value={release.id} />
+    <button type="submit">
+      Apply filters <span aria-hidden="true">→</span>
+    </button>
+    <a class="reset" href={href(compare ? 'compare/' : 'explore/')}>
+      Reset
+    </a>
+  </form>
+  <noscript>
+    <div class="note">
+      Interactive filtering requires JavaScript.{' '}
+      <a href={href('search/')}>Product profiles</a> contain readable tables and
+      downloads without it.
+    </div>
+  </noscript>
+  <div id="explore-message" class="note" role="status">
+    Loading the release-pinned sample dataset…
+  </div>
+  <section id="explore-result" class="card table-card" hidden>
+    <div class="card-heading">
+      <div>
+        <p class="section-label">SELECTED VIEW · SAMPLE</p>
+        <h2 id="result-title"></h2>
+        <p id="result-basis"></p>
+      </div>
+      <button id="share" class="secondary" type="button">
+        Copy link ↗
+      </button>
+    </div>
+    <div id="result-table" class="table-scroll"></div>
+    <div class="result-actions">
+      <button id="download" type="button">
+        Download selected CSV ↓
+      </button>
+      <a href={href(`data/${release.id}.json`)}>Provenance JSON</a>
+      <p id="download-status" role="status"></p>
+      <input
+        id="share-fallback"
+        class="share-fallback"
+        readonly
+        aria-label="Shareable link"
+        hidden
+      />
+    </div>
+  </section>
+  <p class="small">
+    Preview window: {month(release.periods[0])}–{month(latest)}. Unavailable
+    values are never replaced with zero. Percentages require a nonzero
+    comparable baseline.
+  </p>
+</div>
+<script>
+  import '../scripts/explorer';
+</script>

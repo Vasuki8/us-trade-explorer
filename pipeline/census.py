@@ -123,7 +123,13 @@ def parse_rows(data,flow,period):
     allowed=required|{'time','YEAR','MONTH'}
     if not isinstance(data,list) or not 2<=len(data)<=MAX_ROWS+1 or not isinstance(data[0],list):raise SourceError('Empty or oversized source table')
     header=data[0]
-    if not all(isinstance(h,str) for h in header) or len(header)!=len(set(header)) or not required<=set(header) or not set(header)<=allowed:raise SourceError('Source schema changed')
+    if not all(isinstance(h,str) for h in header):raise SourceError('Source schema changed: invalid column names')
+    names=set(header)
+    if len(header)!=len(names) or not required<=names or not names<=allowed:
+        # Only our fixed contract names and numeric counts may enter diagnostics.
+        # Never echo an unexpected source column: it could reflect a credential.
+        missing=','.join(sorted(required-names)) or 'none'
+        raise SourceError(f'Source schema changed: missing known columns={missing}; duplicate columns={len(header)-len(names)}; unknown columns={len(names-allowed)}')
     if ('YEAR' in header)!=('MONTH' in header) or not ('time' in header or {'YEAR','MONTH'}<=set(header)):raise SourceError('Source period fields are missing or incomplete')
     rows=[];seen=set()
     for raw in data[1:]:

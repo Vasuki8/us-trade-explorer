@@ -49,11 +49,11 @@ Interfaces: `projectPublicRelease(input: unknown): Release`; `encodePublicReleas
 
 Files: modify `src/lib/data.ts`, `src/pages/data/[id].json.ts`, `src/pages/downloads/[id].csv.ts` if needed, `src/pages/releases/[id].astro`, `scripts/verify-build.mjs`, `tests/browser/journeys.spec.ts`; create `src/pages/data/[id].manifest.json.ts`.
 
-- [ ] Add a failing browser download journey for the metadata link/endpoint, actual JSON response digest/byte count, public-only metadata and unchanged sample disclosure. Run it against the pre-integration sample build to observe the missing sidecar.
-- [ ] Encode the fixed sample fixture, load through its committed pinned manifest and export one validated frozen release plus its exact public bytes and validated public manifest. Callback maps only the pinned hash to sample bytes; no arbitrary paths/URLs/environment input or official switch.
-- [ ] Existing JSON endpoint serves the pinned canonical bytes; CSV consumes the same frozen release. Add sidecar `/data/{releaseId}.manifest.json` and a clear metadata download link on the release page. Explain that its checksum verifies download integrity; figures remain synthetic.
-- [ ] Extend build verification to bind the actual generated JSON to the sidecar digest/count and inspect public DTO/manifest allowlists, so accidental private-field leakage or endpoint drift fails the build. Keep existing internal-link/asset/sample/production checks.
-- [ ] Verify full Node/Astro/build suite, root and configured project-path browser journeys and production rejection. Update handoff and commit.
+- [x] Add a failing browser download journey for the metadata link/endpoint, actual JSON response digest/byte count, public-only metadata and unchanged sample disclosure. Run it against the pre-integration sample build to observe the missing sidecar.
+- [x] Encode the fixed sample fixture, load through its committed pinned manifest and export one validated frozen release plus its exact public bytes and validated public manifest. Callback maps only the pinned hash to sample bytes; no arbitrary paths/URLs/environment input or official switch.
+- [x] Existing JSON endpoint serves the pinned canonical bytes; CSV consumes the same frozen release. Add sidecar `/data/{releaseId}.manifest.json` and a clear metadata download link on the release page. Explain that its checksum verifies download integrity; figures remain synthetic.
+- [x] Extend build verification to bind the actual generated JSON to the sidecar digest/count and inspect public DTO/manifest allowlists, so accidental private-field leakage or endpoint drift fails the build. Keep existing internal-link/asset/sample/production checks.
+- [x] Verify full Node/Astro/build suite, root and configured project-path browser journeys and production rejection. Update handoff and commit.
 
 ## Task 3 — Coverage review, guide, independent review and integration
 

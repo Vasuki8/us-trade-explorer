@@ -45,11 +45,17 @@ export function getStaticPaths() {
         official data freshness.
       </dd>
     </dl>
+    <p>
+      The downloadable metadata includes a checksum to verify the JSON
+      download's integrity. It does not establish official data approval; these
+      figures remain synthetic.
+    </p>
     <div class="inline-links">
-      <a href={href(`data/${release.id}.json`)}>
-        Download full JSON with metadata
-      </a>
+      <a href={href(`data/${release.id}.json`)}>Download full sample JSON</a>
       <a href={href(`downloads/${release.id}.csv`)}>Download sample CSV</a>
+      <a href={href(`data/${release.id}.manifest.json`)}>
+        Download sample metadata
+      </a>
     </div>
   </article>
 </Layout>

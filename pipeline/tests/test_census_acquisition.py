@@ -20,6 +20,17 @@ IMPORT_ROW = ['09', 'Coffee, tea', '1220', 'Canada', '123456', '2026', '07', 'HS
 
 
 class AcquisitionTests(unittest.TestCase):
+    def test_schema_diagnostics_identify_known_missing_fields_without_echoing_source_names(self):
+        for header, row, expected in [
+            (IMPORT_HEADER[:-1], IMPORT_ROW[:-1], 'missing known columns=RP'),
+            (IMPORT_HEADER + ['CTY_CODE'], IMPORT_ROW + ['1220'], 'duplicate columns=1'),
+            (IMPORT_HEADER + [KEY], IMPORT_ROW + [KEY], 'unknown columns=1'),
+        ]:
+            with self.subTest(expected=expected), self.assertRaises(SourceError) as raised:
+                parse_rows([header, row], 'imports', '2026-07')
+            self.assertIn(expected, str(raised.exception))
+            self.assertNotIn(KEY, str(raised.exception))
+
     def response(self, status=200):
         response = MagicMock()
         response.status = status

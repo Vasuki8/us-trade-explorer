@@ -24,7 +24,7 @@ Repository: [Vasuki8/us-trade-explorer](https://github.com/Vasuki8/us-trade-expl
 
 The sibling worktree is a manually linked Git worktree, not a managed Codex attachment. Retain it, especially ignored `.local/` evidence, unless recovery copies have been preserved. Verify `git status`, branch and current main before making changes; do not reset or clean another worker's modifications.
 
-Verified runtime baseline: [PR #15](https://github.com/Vasuki8/us-trade-explorer/pull/15), main merge **`ae769e9e530703c5aaf9bddc7783ea53908c8783`**. Its final head was `cd7b6ad27e32d41301d16719c1fc3ab1341e9112`; final-head and merged-main Checks passed. Authenticated discovery workflow results are below; recovery and independent evidence verification remain pending. Subsequent documentation-only changes record receipts without changing that runtime. Check the [repository history](https://github.com/Vasuki8/us-trade-explorer/commits/main/) for the current main commit.
+Verified runtime baseline: [PR #15](https://github.com/Vasuki8/us-trade-explorer/pull/15), main merge **`ae769e9e530703c5aaf9bddc7783ea53908c8783`**. Its final head was `cd7b6ad27e32d41301d16719c1fc3ab1341e9112`; final-head and merged-main Checks passed. Authenticated import/export discovery and recovery were independently verified below. Subsequent documentation-only changes record receipts without changing that runtime. Check the [repository history](https://github.com/Vasuki8/us-trade-explorer/commits/main/) for the current main commit.
 
 The owner explicitly granted **standing authorization to merge tested, reviewed PRs**: “from now onward you dont have to ask me for merge permission.” This instruction supersedes the earlier automatic review restriction to individually named PRs; **do not re-ask for merge permission**. Complete implementation, relevant tests, independent review and final-head CI before merging, and record the merge and subsequent checks here. This authority does not change the private-repository, spending, provider, AWS-deferral or public-launch boundaries above.
 
@@ -36,7 +36,7 @@ Thirty prerendered HTML pages cover overview, search, product and country profil
 
 The website uses **synthetic data only**: four HS2 chapters, five countries plus illustrative world totals, and 25 months. Pages are labelled sample and noindex; the sample sitemap is empty. `PUBLICATION_MODE=production` deliberately fails. `src/lib/data.ts` still selects the sample fixture; real private candidates/reports do not feed HTML or downloads. Do not remove the production guard or label sample values official because acquisition passes.
 
-GitHub's Pages setup returned HTTP 422 because the current plan does not support Pages for this private repository. No Pages website was created; `ENABLE_GITHUB_PAGES_PREVIEW` is unset. Latest [private preview build 37035527239](https://github.com/Vasuki8/us-trade-explorer/actions/runs/37035527239) succeeded on PR #13's main merge and skipped deployment. Local preview and private 14-day build artifacts are available; the intended `vasuki8.github.io/us-trade-explorer/` URL is **not a verified hosted site**. GitHub Pages also lacks the planned production header/log controls and has commercial-use restrictions. See [GitHub development](github-development.md); AWS remains deferred.
+GitHub's Pages setup returned HTTP 422 because the current plan does not support Pages for this private repository. No Pages website was created; `ENABLE_GITHUB_PAGES_PREVIEW` is unset. Latest runtime [private preview build 37043548932](https://github.com/Vasuki8/us-trade-explorer/actions/runs/37043548932) succeeded on PR #15's main merge and skipped deployment. Local preview and private 14-day build artifacts are available; the intended `vasuki8.github.io/us-trade-explorer/` URL is **not a verified hosted site**. GitHub Pages also lacks the planned production header/log controls and has commercial-use restrictions. See [GitHub development](github-development.md); AWS remains deferred.
 
 ## Verified private data baseline
 
@@ -73,7 +73,7 @@ See [acquisition](census-acquisition.md), [batch/recovery contracts](census-batc
 
 Actions ingestion/report artifacts expire after **seven days** and are not backups. Existing market artifacts expire on 9 October 2026; the report artifact expires **2026-10-09T15:23:56Z**. Its ID is `11236035043`, compressed size 1,656,621 bytes, archive SHA-256 `5e0c511bab31e6c9a5335d4073a0d1fb9b4ff6493d02a982f747eafc289f66c0`.
 
-Verified private development copies are under the worktree's ignored `.local/batch-evidence/`, `.local/control-evidence/` and `.local/archive-evidence/`. Their `verification.json` files record checks without source amounts or credentials. The control copy preserves both normalized snapshots, the announcement proof/PDF and the report. The archive copy contains four verified run directories, described below. `.local/inspect-live-batches.py`, `.local/inspect-control-evidence.py` and `.local/inspect-archive-evidence.py` are ignored, machine-specific helpers, not a portable interface. Preserve needed evidence in controlled private storage before expiry; local copies are not independent durable backups.
+Verified private development copies are under the worktree's ignored `.local/batch-evidence/`, `.local/control-evidence/`, `.local/archive-evidence/` and `.local/partner-evidence/`. Their `verification.json` files record checks without source amounts or credentials. The control copy preserves both normalized snapshots, the announcement proof/PDF and the report. The archive and partner copies each contain four verified run directories, described below. `.local/inspect-live-batches.py`, `.local/inspect-control-evidence.py`, `.local/inspect-archive-evidence.py` and `.local/inspect-partner-evidence.py` are ignored, machine-specific helpers, not portable interfaces. Preserve needed evidence in controlled private storage before expiry; local copies are not independent durable backups.
 
 To recover while an artifact is unexpired, use trusted main workflows and the same reviewed plan. **Acquire Census batch** and **Acquire archived Census batch** accept `markets` or `world-controls`, `resume_run` and `refresh`; market and world snapshots must use separate destinations. Select the archived workflow to retain actual source bytes; its restore entry point accepts only archived workflow artifacts. **Verify private Census controls** accepts completed successful normalized market/world run IDs; it does not consume new archived snapshots. Restore verifies repository/workflow/main origin, digest, sizes, paths, JSON and object relationships before writing. A failed refresh may preserve an earlier batch pointer, but the report/archive verifier refuses to silently use that earlier generation. Recover the batch first or deliberately select its earlier successful run.
 
@@ -159,16 +159,16 @@ Sandboxed Windows temporary-directory access and subprocess spawning have previo
 ## Next publication and launch gates
 
 1. Preserve the verified archived market/world snapshots before their 9 October artifact expiry. Exact source capture, trusted-main acquisition/recovery and independent byte verification are complete for these ten singleton observations; controlled local copies still need a durable private backup strategy.
-2. Design a bounded full-leaf scan and approve per-flow/per-period partner and commodity inventories, including special statistical buckets, US territories and non-overlapping aggregate rules. Reporting-code lists or selected markets are not a complete inventory.
+2. Review the verified DET discovery observations and approve per-flow/per-period partner and commodity inventories, including special statistical buckets, US territories and non-overlapping aggregate rules. The bounded July chapter 09 discovery is complete; observed codes and current reporting lists still do not establish a complete additive leaf inventory. Generalize periods/products only after those rules are evidenced.
 3. Establish compatible dimensions and revision vintage, exact full-world reconciliation with documented rules and classification comparability. A `LAST_UPDATE` label, matched month or unchanged code alone is insufficient evidence.
 4. Build an explicit public DTO/release projection and loader with provenance, validation receipts and missing states. Keep private evidence out of public output, preserve the last valid release on failed updates, and add meaningful production-boundary tests before changing sample/noindex/canonical/sitemap behavior.
 5. After development is complete, resolve the domain/provider/company facts and scoped legal/tax questions, provision the approved host, verify real security/log/backup/rollback behavior and notices, then launch the public commercial site. Authentication, private workspaces, recurring billing and alerts remain later server-backed work.
 
 The owner requires **a handoff update after every completed task**, including implementation subtasks, verification/review, merges and live checks. Record what changed, exact verification, current branch/integration state, remaining gates and recovery instructions before moving to the next task. Commit the relevant handoff change with that task. Leave uncertain facts explicitly unresolved; repository/PR history records documentation-only integration receipts without requiring recursive receipt PRs.
 
-## Active increment — partner discovery
+## Partner discovery implementation and live verification
 
-Branch `feat/census-partner-discovery` starts from main `dbdbf03606e9355783b201499d1386d16d9d2759` (merged documentation PR #14; main Checks 37038097016 passed). The [plan](superpowers/plans/2026-10-02-census-partner-discovery.md) captures all observed DET partners for July 2026 / HS2 09, preserving exact raw bytes, independently verified observations, bounded cache/restore and attempt state. Maximum 500 rows, 512 KiB per object, 2 MiB snapshots, 20 files/24 ZIP entries. It labels numeric codes unreviewed detail rather than approving geographic leaves; world `-` remains a separate control. No authenticated discovery run is claimed yet. Existing public/sample and publication gates remain.
+Implementation branch `feat/census-partner-discovery` started from main `dbdbf03606e9355783b201499d1386d16d9d2759` (merged documentation PR #14; main Checks 37038097016 passed). The [plan](superpowers/plans/2026-10-02-census-partner-discovery.md) is implemented, reviewed, merged and live-verified within July 2026 / HS2 09, preserving exact raw bytes, independently verified observations, bounded cache/restore and attempt state. Maximum 500 rows, 512 KiB per object, 2 MiB snapshots, 20 files/24 ZIP entries. Numeric codes remain unreviewed detail; world `-` is a separate control. The task receipts below distinguish each intermediate state from the final live verification. Existing public/sample and publication gates remain.
 
 Completed task 1: added explicit DET, smaller transport/normalization limits and strict bounded JSON decoding while preserving default singleton queries and identities. Eight new source tests were first observed failing for the absent interfaces, then passed with implementation. The focused command `py -3.14 -m unittest pipeline.tests.test_partner_source pipeline.tests.test_census_acquisition pipeline.tests.test_world_controls pipeline.tests.test_raw -q` passed **30 tests**.
 
@@ -193,3 +193,43 @@ Completed final-head verification and merge: [Checks 37043267776](https://github
 Completed merged-main verification: [Checks 37043549038](https://github.com/Vasuki8/us-trade-explorer/actions/runs/37043549038), job `110959266353`, passed the full **205 Python tests on Linux without skips**, 9 Node tests, Astro/build checks, both 16-journey browser suites and production rejection on merged runtime `ae769e9e530703c5aaf9bddc7783ea53908c8783`. [Private preview 37043548932](https://github.com/Vasuki8/us-trade-explorer/actions/runs/37043548932) passed its build; deployment was skipped. Pages remains unavailable, and no live hosted website is claimed.
 
 Completed authenticated fresh discovery workflows on that runtime: imports [37043703299](https://github.com/Vasuki8/us-trade-explorer/actions/runs/37043703299), job `110959788040`, passed with **138 observed rows/partners**; exports [37043711698](https://github.com/Vasuki8/us-trade-explorer/actions/runs/37043711698), job `110959891483`, passed with **122 observed rows/partners**. Logs confirmed each requested flow and private publication-blocked state; no source amounts or credentials were printed locally. Artifact recovery and independent raw/scan/receipt/generation verification remain next. These counts alone do not establish approved geographic leaves or world reconciliation.
+
+Completed Actions recovery and independent evidence verification on 2 October 2026: import recovery [37044026813](https://github.com/Vasuki8/us-trade-explorer/actions/runs/37044026813), job `110960870538`, and export recovery [37044035338](https://github.com/Vasuki8/us-trade-explorer/actions/runs/37044035338), job `110961031523`, passed. All four executions are completed successful manual main runs of `.github/workflows/census-partners.yml` on runtime `ae769e9e530703c5aaf9bddc7783ea53908c8783`. An independent inspector checked that provenance, exact artifact names, run/repository bindings, ZIP digest/size/path limits and API-only authorization; independently reparsed every raw row and regenerated candidate/scan/receipt identities, query/scope/date/dimension relationships and the successful journal/pointer; then staged and reverified each preserved snapshot offline before atomic promotion. **Every member and byte matched its flow's fresh/recovery pair.** ZIP container hashes differ; member bytes do not.
+
+| Flow | Observed rows/partners | World controls | Unreviewed detail | Explicit reported zeros | Files / unpacked bytes |
+|---|---|---|---|---|---|
+| Imports | 138 | 1 | 137 | 25 | 5 / 49,949 |
+| Exports | 122 | 1 | 121 | 31 | 5 / 43,974 |
+
+Each snapshot contains one raw response, one scan, one immutable receipt, a successful generation-1 journal and its pointer. Absent rows remain unobserved. No four-digit code is automatically approved as a country or additive leaf. Shared reviewed plan ID: `5ffb6842559df8b89c6149ab54bc7cfc0d14b4e59a93acb3f2bbcf9dffd1e305`.
+
+```text
+imports source    2919f984337dd3eb32d73fdea98795b1f40b82545094d206355a764897f364a8
+imports scan      fe01fea0fbafb02770d00e62bc69e67bad177f2a607330ba3b16a57743847f2a
+imports receipt   4f7d8bce7e0f1a8553bf3527835365a713de0631753ff3ea054d3013ea10808f
+imports inventory 0409c8c596e5cc68a0c7721ff0c290fd926e0426eb1c351b81cef436a8f2fa9c
+exports source    65f44acedfc7191ade9b0dd4769afb01f1b0714b2c089d1b2ef33813424d2417
+exports scan      2e0dcca537fd99a82198e911fa46adf5cc3b1a14e202008f8fbab5c912046c31
+exports receipt   fcbf818cd63f4fe6063a94c15a414156217bf5a6e9d252d972f0f75ece672f0f
+exports inventory e6bd356d24f4bb42706249187c97f0e57196d454a202fe78babdb9f89926924e
+```
+
+| Role | Artifact ID | ZIP bytes | Expires (UTC) |
+|---|---|---|---|
+| Imports fresh | `11244250426` | 8,432 | 2026-10-09 17:53:07 |
+| Imports recovery | `11243342495` | 8,432 | 2026-10-09 17:56:04 |
+| Exports fresh | `11243691737` | 7,679 | 2026-10-09 17:53:30 |
+| Exports recovery | `11242947918` | 7,679 | 2026-10-09 17:56:31 |
+
+Verified archive SHA-256 values:
+
+```text
+imports fresh    e87c634e4fa44867cf73656409b2138e52f056a86cb7ab9e0cb7f8b08a925828
+imports recovery 81f70cced8e036571d0d4d2ae7ce0a6e18597a1283ec3033bfc21b4edc74d385
+exports fresh    359c593e6737b17038ced33cc1d40cc07946f441408a9a07b7dd0667a5ebe4f5
+exports recovery 30dc9cd9f45382add049b3ce4440e846779f27f9dc28022b11800ef24792e622
+```
+
+Private copies are `.local/partner-evidence/{runId}/`, with sanitized `.local/partner-evidence/verification.json`. The inspector did **not read or possess the Census key**; its reflection checks ran in protected workflows. The local inspector checked its in-memory GitHub credential against raw and decoded evidence. Seven-day artifacts and these local copies are not independent durable backups. Live induced failures/refreshes were not exercised; regression tests cover their storage/recovery boundaries. API revision vintage, official revision date, period-effective additive inventory, full-world reconciliation, classification comparability and validated public projection remain unverified. The website remains synthetic/noindex, production-blocked and unhosted; AWS and commercial integrations stay deferred.
+
+The receipt branch `docs/census-partner-live` records these completed tasks from runtime baseline PR #15. Repository/PR history records its documentation-only review/checks/integration without changing or recursively replacing that runtime evidence.

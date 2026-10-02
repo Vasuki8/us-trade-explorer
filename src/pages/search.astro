@@ -30,13 +30,15 @@ import { release, href, productUrl } from '../lib/data';
     </div>
   </form>
   <p id="search-summary" role="status">
-    Showing all four sample chapters. HS2022 · 2-digit classification.
+    Showing all {release.products.length} sample chapters. HS2022 · 2-digit
+    classification.
   </p>
   <div class="product-grid" id="product-results">
     {release.products.map((p) => (
       <a
         class="product-card"
-        data-search={`${p.code} ${p.name}`.toLowerCase()}
+        data-product-code={p.code}
+        data-product-name={p.name}
         href={productUrl(p.code)}
       >
         <span class="code-pill">HS {p.code}</span>
@@ -49,10 +51,14 @@ import { release, href, productUrl } from '../lib/data';
     ))}
   </div>
   <div id="empty-search" class="empty-state" hidden>
-    <h2>No matching sample chapter</h2>
-    <p>
-      This preview covers only four chapters. Try a broader word or a two-digit
-      code. A missing result does not mean that trade is zero.
+    <h2 id="search-guidance-title">No matching sample chapter</h2>
+    <p id="search-guidance">
+      This preview covers only {release.products.length} sample chapters. Try a
+      broader word or a two-digit code. A missing result does not mean that
+      trade is zero.
+    </p>
+    <p id="parent-suggestion" hidden>
+      <a id="parent-chapter" href={href('search/')}></a>
     </p>
     <button id="clear-search" class="secondary" type="button">
       Show all sample chapters
@@ -64,42 +70,6 @@ import { release, href, productUrl } from '../lib/data';
     customs decisions. This site does not provide tariff or customs advice.
   </aside>
   <script>
-    const form = document.querySelector<HTMLFormElement>('#product-search')!,
-      input = document.querySelector<HTMLInputElement>('#search')!;
-    function filter() {
-      const term = input.value.trim().toLowerCase().slice(0, 120);
-      let count = 0;
-      document.querySelectorAll<HTMLElement>('[data-search]').forEach((el) => {
-        const show = el.dataset.search!.includes(term);
-        el.hidden = !show;
-        if (show) count++;
-      });
-      document.querySelector('#search-summary')!.textContent =
-        `${count} matching sample chapter${count === 1 ? '' : 's'}. HS2022 · 2-digit classification.`;
-      document.querySelector<HTMLElement>('#empty-search')!.hidden =
-        count !== 0;
-    }
-    function restore() {
-      input.value = (new URL(location.href).searchParams.get('q') ?? '').slice(
-        0,
-        120,
-      );
-      filter();
-    }
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const url = new URL(location.href);
-      url.search = '';
-      if (input.value.trim()) url.searchParams.set('q', input.value.trim());
-      history.pushState({}, '', url);
-      filter();
-    });
-    document.querySelector('#clear-search')!.addEventListener('click', () => {
-      input.value = '';
-      form.requestSubmit();
-      input.focus();
-    });
-    window.addEventListener('popstate', restore);
-    restore();
+    import '../scripts/product-search';
   </script>
 </Layout>

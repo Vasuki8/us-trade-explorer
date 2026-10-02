@@ -20,6 +20,23 @@ IMPORT_ROW = ['09', 'Coffee, tea', '1220', 'Canada', '123456', '2026', '07', 'HS
 
 
 class AcquisitionTests(unittest.TestCase):
+    def test_query_remains_valid_when_census_echoes_filter_columns(self):
+        # Model echoed predicate fields: reproduces the six-duplicate diagnostic
+        # observed live. Values remain fabricated, not official statistics.
+        for flow, prefix, value_field in [('imports', 'I', 'GEN_VAL_MO'), ('exports', 'E', 'ALL_VAL_MO')]:
+            def source_reply(url):
+                query = parse_qs(urlsplit(url).query)
+                header = query['get'][0].split(',') + [name for name in query if name not in ('get', 'key')]
+                values = {name: entries[0] for name, entries in query.items() if name not in ('get', 'key')}
+                values.update({f'{prefix}_COMMODITY_SDESC': 'Coffee, tea', 'CTY_NAME': 'Canada', value_field: '123456'})
+                return json.dumps([header, [values[name] for name in header]]).encode()
+            with self.subTest(flow=flow), patch('pipeline.census.fetch_bytes', side_effect=source_reply):
+                candidate = fetch_candidate(flow, '2026-07', KEY)
+                self.assertEqual(candidate['rows'][0]['value'], '123456')
+                self.assertEqual(candidate['rows'][0]['flow'], flow)
+                requested = candidate['sourceQuery']
+                self.assertTrue(set(requested['get'].split(',')).isdisjoint(set(requested) - {'get'}))
+
     def test_schema_diagnostics_identify_known_missing_fields_without_echoing_source_names(self):
         for header, row, expected in [
             (IMPORT_HEADER[:-1], IMPORT_ROW[:-1], 'missing known columns=RP'),

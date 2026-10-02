@@ -10,6 +10,8 @@ The current [Census trade API guide](https://www.census.gov/foreign-trade/refere
 
 ## Implemented behavior
 
+After PRs #7–#9 were merged, the narrow imports probe [36966381001](https://github.com/Vasuki8/us-trade-explorer/actions/runs/36966381001) returned JSON but reported `missing known columns=none; duplicate columns=6; unknown columns=0`. Six fields appeared in both the request's `get` list and its filter predicates. Modelling the API appending filter columns reproduces that exact failure. The follow-up makes those lists disjoint: request descriptions/value in `get`, and receive codes, period and aggregate dimensions from the filters. The response validator still rejects every duplicated column; no ambiguous fields are silently collapsed. Live acquisition with the corrected query still needs verification after merge.
+
 - A fixed set of safe error categories and optional numeric HTTP status survives retries. Logs omit URLs, headers, bodies, credentials and raw exception messages.
 - The default is a single-month HS2 09 / Canada 1220 probe. Inputs are validated before networking. Broader wildcards are explicit choices and remain subject to the original size/time/retry limits.
 - YEAR/MONTH predicates replace `time` in requests. Returned YEAR/MONTH and legacy `time` representations are validated; contradictory representations fail.

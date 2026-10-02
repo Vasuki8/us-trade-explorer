@@ -15,7 +15,10 @@ export function searchProducts(
   raw: string,
   chapters: SearchChapter[],
 ): ProductSearch {
-  const term = raw.trim().slice(0, 120);
+  const term = raw
+    .replace(/[\r\n]/g, '')
+    .trim()
+    .slice(0, 120);
   if (!term) return { term, kind: 'all', matches: chapters };
 
   const code = /^(?:HS\s*)?(\d+)$/i.exec(term)?.[1];

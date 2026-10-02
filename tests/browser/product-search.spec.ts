@@ -214,6 +214,49 @@ test('external and submitted terms share a bounded URL state', async ({
   );
 });
 
+test('external CR and LF terms keep visible input, matching and URL equal through resubmission and reload', async ({
+  page,
+}) => {
+  const cases = [
+    { raw: '09\n0111', term: '090111', detail: true },
+    { raw: '0\r\n9', term: '09', detail: false },
+    { raw: 'H\rS \n09', term: 'HS 09', detail: false },
+    { raw: 'cof\r\nfee', term: 'coffee', detail: false },
+  ];
+  for (const { raw, term, detail } of cases) {
+    await page.goto(searchPath(raw));
+    await expect(page.getByLabel('Product name or HS code')).toHaveValue(term);
+    if (detail) {
+      await expect(
+        page.getByRole('link', { name: /Explore broader HS 09 chapter/ }),
+      ).toBeVisible();
+      await expect(page.getByRole('status')).toContainText(
+        /cannot verify.*detailed code.*report its trade/,
+      );
+      await expect(
+        page.locator('#product-results .product-card:visible'),
+      ).toHaveCount(0);
+    } else {
+      await expect(
+        page.locator('#product-results .product-card:visible'),
+      ).toHaveCount(1);
+      await expect(
+        page.getByRole('link', { name: /HS 09 Coffee/ }),
+      ).toBeVisible();
+    }
+    expect(new URL(page.url()).searchParams.get('q')).toBe(term);
+    const status = await page.getByRole('status').textContent();
+    await page.getByRole('button', { name: 'Search', exact: true }).click();
+    await expect(page.getByLabel('Product name or HS code')).toHaveValue(term);
+    await expect(page.getByRole('status')).toHaveText(status!);
+    expect(new URL(page.url()).searchParams.get('q')).toBe(term);
+    await page.reload();
+    await expect(page.getByLabel('Product name or HS code')).toHaveValue(term);
+    await expect(page.getByRole('status')).toHaveText(status!);
+    expect(new URL(page.url()).searchParams.get('q')).toBe(term);
+  }
+});
+
 test('hostile query text stays inert and visible through URL restoration', async ({
   page,
 }) => {

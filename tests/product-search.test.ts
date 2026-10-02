@@ -110,3 +110,30 @@ test('hostile text remains a literal term without creating a match or a parent',
   assert.deepEqual(result.matches, []);
   assert.equal(result.parent, undefined);
 });
+
+test('embedded CR and LF normalize before chapter, detail, name matching and bounds', () => {
+  const cases = [
+    { raw: '0\r\n9', term: '09', kind: 'chapter', codes: ['09'] },
+    { raw: 'H\rS \n09', term: 'HS 09', kind: 'chapter', codes: ['09'] },
+    { raw: '09\n0111', term: '090111', kind: 'detail', codes: [] },
+    { raw: 'hs\r09\n0111', term: 'hs090111', kind: 'detail', codes: [] },
+    { raw: '  cof\r\nfee  ', term: 'coffee', kind: 'name', codes: ['09'] },
+    {
+      raw: 'x'.repeat(119) + '\r\nyextra',
+      term: 'x'.repeat(119) + 'y',
+      kind: 'name',
+      codes: [],
+    },
+  ];
+  for (const { raw, term, kind, codes } of cases) {
+    const result = searchProducts(raw, chapters);
+    assert.equal(result.term, term, JSON.stringify(raw));
+    assert.equal(result.kind, kind, JSON.stringify(raw));
+    assert.deepEqual(
+      result.matches.map((p) => p.code),
+      codes,
+      JSON.stringify(raw),
+    );
+    assert.equal(result.parent?.code, kind === 'detail' ? '09' : undefined);
+  }
+});

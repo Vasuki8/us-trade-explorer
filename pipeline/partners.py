@@ -376,12 +376,17 @@ def run_partner_scan(plan, flow, root, key, refresh=False, evidence_secrets=()):
         raise SourceError('Private discovery storage or verification failed; prior receipt retained') from None
 
 
-def verify_partner_scan(plan, flow, root, secrets=()):
+def read_partner_snapshot(plan, flow, root, secrets=()):
+    """Load once and return the complete validated evidence used by consumers."""
     plan = _scope(plan, flow)
     try:
-        return validate_snapshot(plan, flow, _stored_files(Path(root)), secrets, require_complete=True)['receipt']
+        return validate_snapshot(plan, flow, _stored_files(Path(root)), secrets, require_complete=True)
     except (OSError, ValueError, TypeError, KeyError):
         raise SourceError('Private discovery verification failed') from None
+
+
+def verify_partner_scan(plan, flow, root, secrets=()):
+    return read_partner_snapshot(plan, flow, root, secrets)['receipt']
 
 
 def restore_partner_snapshot(plan, flow, files, root, key, evidence_secrets=()):

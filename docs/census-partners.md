@@ -96,6 +96,8 @@ The [implementation plan](superpowers/plans/2026-10-02-census-partner-discovery.
 
 Publication still requires reviewed per-flow/per-period inventories covering special statistical buckets and territories, non-overlapping aggregate rules, compatible source dimensions and revision vintage, exact full-world reconciliation with documented rules, classification comparability and an explicit validated public projection/loader. Observed-partner counts or a successful receipt cannot satisfy those gates.
 
+The [offline coverage diagnostic](partner-coverage-diagnostics.md) revalidates these preserved snapshots and derives private operator scenarios with exact totals and residuals. It adds no acquisition/restore protocol and cannot approve the publication gates. Its handoff receipts distinguish local tests, independent review and integration.
+
 The website remains synthetic, labelled sample and noindex, with production publication blocked. Private raw responses, scan history and credentials stay outside Git and public artifacts. AWS provisioning, spending, advertising and commercial integrations remain deferred. Existing [Census API terms and attribution safeguards](census-archive.md) and the [dated legal/privacy matrix](design/05-legal-and-privacy.md) continue to apply; discovery adds no broader reuse or compliance claim.
 
 See the [exact-response archive guide](census-archive.md), [selected-market control guide](census-controls.md) and [operations guide](operations.md) for their distinct evidence protocols and recovery procedures.

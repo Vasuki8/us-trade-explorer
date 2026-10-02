@@ -4,6 +4,8 @@ This increment is a working sample website and tested acquisition/release founda
 
 ## Local development
 
+For the current GitHub-first development phase, see [GitHub development](github-development.md). The AWS contract below is a future deployment plan; no AWS account is needed to build or test the preview.
+
 Requirements: Node 24 LTS and Python 3.12 or newer (tested on Python 3.14). Python pipeline code uses only the standard library.
 
 ```sh

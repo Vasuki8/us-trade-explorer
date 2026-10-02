@@ -1,5 +1,41 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+const previewOrigin = 'http://127.0.0.1:4321';
+const sitePath = (path: string) =>
+  `${process.env.BASE_PATH || '/'}${path.replace(/^\//, '')}`;
+
+test('built pages block injected inline and off-origin scripts', async ({
+  page,
+}) => {
+  const external: string[] = [];
+  await page.route('https://untrusted.example.test/**', (route) => {
+    external.push(route.request().url());
+    return route.abort();
+  });
+  await page.goto(sitePath('/compare/'));
+  await page.evaluate(() => {
+    document.addEventListener('securitypolicyviolation', (event) => {
+      document.body.dataset.blocked = `${document.body.dataset.blocked || ''}|${event.blockedURI}`;
+    });
+    const inline = document.createElement('script');
+    inline.textContent = "document.body.dataset.injected = 'yes'";
+    document.head.append(inline);
+    const remote = document.createElement('script');
+    remote.src = 'https://untrusted.example.test/injected.js';
+    document.head.append(remote);
+  });
+  await expect(page.locator('body')).toHaveAttribute('data-blocked', /inline/);
+  await expect(page.locator('body')).toHaveAttribute(
+    'data-blocked',
+    /https:\/\/untrusted.example.test/,
+  );
+  await expect(page.locator('body')).not.toHaveAttribute('data-injected');
+  expect(external).toEqual([]);
+  await page.getByLabel('Canada', { exact: true }).check();
+  await page.getByRole('button', { name: 'Apply filters' }).click();
+  await expect(page.locator('#result-table')).toContainText('Canada');
+});
+
 const sample = JSON.parse(
   readFileSync(
     new URL('../fixtures/sample-release.json', import.meta.url),
@@ -11,7 +47,7 @@ test('overview fits the viewport and search leads to a substantive product profi
 }, info) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.goto('/');
+  await page.goto(sitePath('/'));
   await expect(
     page.getByRole('heading', { name: 'A clearer view of US trade.' }),
   ).toBeVisible();
@@ -48,7 +84,7 @@ test('clipboard fallback cannot share a previous filter selection', async ({
       throw new Error('denied');
     };
   });
-  await page.goto('/compare/?partners=canada');
+  await page.goto(sitePath('/compare/?partners=canada'));
   await page.getByRole('button', { name: 'Copy link' }).click();
   await expect(
     page.getByRole('textbox', { name: 'Shareable link' }),
@@ -78,7 +114,7 @@ test('the proposed strict CSP permits filtering without inline scripts', async (
       headers: { ...response.headers(), 'Content-Security-Policy': policy },
     });
   });
-  await page.goto('/compare/');
+  await page.goto(sitePath('/compare/'));
   await page.getByLabel('Canada', { exact: true }).check();
   await page.getByRole('button', { name: 'Apply filters' }).click();
   await expect(page.locator('#result-table')).toContainText('Canada');
@@ -87,7 +123,7 @@ test('the proposed strict CSP permits filtering without inline scripts', async (
 test('comparisons preserve filters and unavailable baselines, and export sample metadata', async ({
   page,
 }) => {
-  await page.goto('/compare/');
+  await page.goto(sitePath('/compare/'));
   await expect(page.getByRole('status').first()).toContainText(
     'comparison is empty',
   );
@@ -108,7 +144,7 @@ test('comparisons preserve filters and unavailable baselines, and export sample 
   await page.reload();
   await expect(page.getByLabel('India', { exact: true })).toBeChecked();
   await expect(page.locator('#result-table')).toContainText('Canada');
-  await page.goto('/compare/?period=2026-13');
+  await page.goto(sitePath('/compare/?period=2026-13'));
   await expect(page.getByRole('status').first()).toContainText('not included');
   await expect(page.locator('#explore-result')).toBeHidden();
 });
@@ -126,7 +162,7 @@ test('hostile source descriptions stay text and failed downloads keep selected s
       throw new Error('download blocked');
     };
   });
-  await page.goto('/compare/?partners=canada');
+  await page.goto(sitePath('/compare/?partners=canada'));
   await expect(page.locator('#result-table')).toContainText(
     '<img src=x onerror=alert(1)>',
   );
@@ -141,18 +177,18 @@ test('failed datasets, no search matches and real 404 responses are explicit', a
   page,
 }) => {
   await page.route('**/data/*.json', (route) => route.abort());
-  await page.goto('/explore/?product=09');
+  await page.goto(sitePath('/explore/?product=09'));
   await expect(page.getByRole('status').first()).toContainText(
     'could not be loaded',
   );
   await expect(page.locator('#explore-result')).toBeHidden();
-  await page.goto('/search/?q=unfindable');
+  await page.goto(sitePath('/search/?q=unfindable'));
   await expect(
     page.getByRole('heading', { name: 'No matching sample chapter' }),
   ).toBeVisible();
   await page.getByRole('button', { name: 'Show all sample chapters' }).click();
   await expect(page.getByRole('status')).toContainText('4 matching');
-  const response = await page.goto('/this-page-does-not-exist/');
+  const response = await page.goto(sitePath('/this-page-does-not-exist/'));
   expect(response?.status()).toBe(404);
 });
 test('public profiles remain readable without JavaScript and need no third party resources', async ({
@@ -165,7 +201,7 @@ test('public profiles remain readable without JavaScript and need no third party
     if (new URL(request.url()).hostname !== '127.0.0.1')
       external.push(request.url());
   });
-  await page.goto('http://127.0.0.1:4321/products/hs/HS2022/09/imports/');
+  await page.goto(previewOrigin + sitePath('/products/hs/HS2022/09/imports/'));
   await expect(
     page.getByRole('heading', { name: 'Coffee, tea & spices', exact: true }),
   ).toBeVisible();

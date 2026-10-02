@@ -35,8 +35,12 @@ jobs:
       - name: Verify configured base path
         run: npm run build
         env:
-          BASE_PATH: /trade/
-          SITE_URL: https://preview.example.invalid
+          BASE_PATH: /us-trade-explorer/
+          SITE_URL: https://vasuki8.github.io
+      - name: Exercise GitHub project-path journeys
+        run: npx playwright test
+        env:
+          BASE_PATH: /us-trade-explorer/
       - name: Production publication must remain blocked
         run: |
           if PUBLICATION_MODE=production npm run build > /tmp/production-gate.log 2>&1; then

@@ -25,6 +25,8 @@ Build a fast public reference for US merchandise imports and exports. Visitors s
 
 ## Recommendation
 
+**Current development decision:** develop and test in GitHub, using a temporary sample preview where Pages eligibility permits. AWS is deferred until development is complete. See [GitHub development and preview setup](docs/github-development.md) for the build workflow, hosting limitations and transition plan. The architecture below remains the commercial launch target.
+
 Use Astro static pages and small TypeScript interactions, with a Python/DuckDB ingestion pipeline in bounded GitHub Actions jobs. Store immutable raw and normalized releases in private object storage; publish only validated aggregates, compact datasets and HTML. Use GitHub for code, specifications, source registries, schemas, reviewed release manifests and deployment receipts, not the historical data warehouse.
 
 For this India-based business, prefer private AWS S3 buckets in Mumbai behind CloudFront, using pay-as-you-go configuration, short-lived CI identity, configurable security headers and an explicit security-log archive in India. This adds some infrastructure setup but makes logging, private storage and future backend boundaries explicit. An alternative Cloudflare Pages deployment is simpler, subject to resolving log access and retention requirements. GitHub Pages is unsuitable for the planned commercial service under its [published restrictions](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits).

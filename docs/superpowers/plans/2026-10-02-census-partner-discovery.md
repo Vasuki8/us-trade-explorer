@@ -53,9 +53,9 @@ Interfaces: `validate_plan(plan)`; `normalize_scan(candidate,raw,*,plan,flow,sec
 
 Files: narrowly modify `pipeline/restore.py`; create `pipeline/tests/test_partner_restore.py`.
 
-- [ ] Failing tests then `fetch_partner_snapshot(repository,run_id,token)` trusting only completed manual main `.github/workflows/census-partners.yml` and `census-partners-{runId}`. Failure artifacts remain selectable for recovery; core validators decide complete generation.
-- [ ] New mode allows only raw/scans/receipts hash JSON, progress.json and complete.json, 512 KiB members, 20 files/24 ZIP entries, 2 MiB total. Existing normalized/archived modes retain exactly their bounds, paths and trust.
-- [ ] Cover metadata, digest, redirects/authorization, traversal, symlink/type, oversized/duplicate/extra entries, protocol confusion, prior modes still rejecting new paths/large members. Update handoff and commit after root integration verification.
+- [x] Failing tests then `fetch_partner_snapshot(repository,run_id,token)` trusting only completed manual main `.github/workflows/census-partners.yml` and `census-partners-{runId}`. Failure artifacts remain selectable for recovery; core validators decide complete generation.
+- [x] New mode allows only raw/scans/receipts hash JSON, progress.json and complete.json, 512 KiB members, 20 files/24 ZIP entries, 2 MiB total. Existing normalized/archived modes retain exactly their bounds, paths and trust.
+- [x] Cover metadata, digest, redirects/authorization, traversal, symlink/type, oversized/duplicate/extra entries, protocol confusion, prior modes still rejecting new paths/large members. Update handoff and commit after root integration verification. New 26 tests first RED; focused new/legacy restore suite 57 tests passed and independently rerun.
 
 ## Task 4 — Workflow, operator guide, review and live receipt (primary)
 

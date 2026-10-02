@@ -18,12 +18,17 @@ MAX_METADATA_BYTES = 64 * 1024
 MAX_ARCHIVE_BYTES = 2 * 1024 * 1024
 MAX_MEMBER_BYTES = 64 * 1024
 MAX_ENTRIES = 48
+MAX_PARTNER_MEMBER_BYTES = 512 * 1024
+MAX_PARTNER_FILES = 20
+MAX_PARTNER_ENTRIES = 24
 READ_SECONDS = 30
 STORAGE_SUFFIXES = ('.blob.core.windows.net', '.actions.githubusercontent.com', '.githubusercontent.com')
 MEMBER_PATH = re.compile(r'(?:objects/[0-9a-f]{64}\.json|bundles/[0-9a-f]{64}\.json|batches/[0-9a-f]{64}/(?:progress|complete)\.json)')
 DIRECTORY_PATH = re.compile(r'(?:objects/|bundles/|batches/|batches/[0-9a-f]{64}/)')
 ARCHIVED_MEMBER_PATH = re.compile(r'(?:' + MEMBER_PATH.pattern + r'|raw/[0-9a-f]{64}\.json|archive/(?:[0-9a-f]{64}|complete)\.json)')
 ARCHIVED_DIRECTORY_PATH = re.compile(r'(?:' + DIRECTORY_PATH.pattern + r'|raw/|archive/)')
+PARTNER_MEMBER_PATH = re.compile(r'(?:(?:raw|scans|receipts)/[0-9a-f]{64}\.json|progress\.json|complete\.json)')
+PARTNER_DIRECTORY_PATH = re.compile(r'(?:raw/|scans/|receipts/)')
 
 
 class SnapshotError(Exception):
@@ -148,15 +153,25 @@ def _storage_target(location):
     return host, target
 
 
-def _members(raw, archived=False):
+def _members(raw, archived=False, *, partners=False):
+    _require(type(partners) is bool and not (partners and archived))
     result = {}
     member_path = ARCHIVED_MEMBER_PATH if archived else MEMBER_PATH
     directory_path = ARCHIVED_DIRECTORY_PATH if archived else DIRECTORY_PATH
+    maximum_member = MAX_MEMBER_BYTES
+    maximum_entries = MAX_ENTRIES
+    if partners:
+        _require(len(raw) <= MAX_ARCHIVE_BYTES)
+        member_path = PARTNER_MEMBER_PATH
+        directory_path = PARTNER_DIRECTORY_PATH
+        maximum_member = MAX_PARTNER_MEMBER_BYTES
+        maximum_entries = MAX_PARTNER_ENTRIES
     with zipfile.ZipFile(io.BytesIO(raw)) as archive:
         entries = archive.infolist()
-        _require(0 < len(entries) <= MAX_ENTRIES)
+        _require(0 < len(entries) <= maximum_entries)
         seen = set()
         unpacked = 0
+        file_count = 0
         for entry in entries:
             name = entry.filename
             _require(entry.orig_filename == name and name not in seen)
@@ -171,7 +186,9 @@ def _members(raw, archived=False):
                 continue
             _require(member_path.fullmatch(name) is not None)
             _require(stat.S_IFMT(mode) in (0, stat.S_IFREG))
-            _require(0 <= entry.file_size <= MAX_MEMBER_BYTES)
+            _require(0 <= entry.file_size <= maximum_member)
+            file_count += 1
+            _require(not partners or file_count <= MAX_PARTNER_FILES)
             unpacked += entry.file_size
             _require(unpacked <= MAX_ARCHIVE_BYTES)
         # Validate the complete index before decompressing any member.
@@ -179,15 +196,16 @@ def _members(raw, archived=False):
             if entry.is_dir():
                 continue
             with archive.open(entry) as member:
-                contents = member.read(MAX_MEMBER_BYTES + 1)
-            _require(len(contents) == entry.file_size and len(contents) <= MAX_MEMBER_BYTES)
+                contents = member.read(maximum_member + 1)
+            _require(len(contents) == entry.file_size and len(contents) <= maximum_member)
             result[entry.filename] = contents
     _require(bool(result))
     return result
 
 
-def _fetch_snapshot(repository, run_id, token, archived=False):
+def _fetch_snapshot(repository, run_id, token, archived=False, *, partners=False):
     _validate_inputs(repository, run_id, token)
+    _require(type(partners) is bool and not (partners and archived))
     api_headers = {
         'Authorization': 'Bearer ' + token,
         'Accept': 'application/vnd.github+json',
@@ -202,6 +220,9 @@ def _fetch_snapshot(repository, run_id, token, archived=False):
     _require(run.get('event') == 'workflow_dispatch' and run.get('head_branch') == 'main')
     workflow = '.github/workflows/census-archive.yml' if archived else '.github/workflows/census-batch.yml'
     artifact_name = f'census-archive-{run_id}' if archived else f'census-batch-{run_id}'
+    if partners:
+        workflow = '.github/workflows/census-partners.yml'
+        artifact_name = f'census-partners-{run_id}'
     _require(run.get('path') == workflow and run.get('status') == 'completed')
     artifacts = _json_object(_request(API_HOST, run_path + '/artifacts?per_page=100', api_headers, status=200, maximum=MAX_METADATA_BYTES, metadata=True))
     _require(type(artifacts.get('total_count')) is int and artifacts['total_count'] == 1)
@@ -218,6 +239,8 @@ def _fetch_snapshot(repository, run_id, token, archived=False):
     storage_headers = {'Accept': 'application/zip', 'Accept-Encoding': 'identity', 'User-Agent': 'US-Trade-Explorer/0.1'}
     raw = _request(host, target, storage_headers, status=200, maximum=MAX_ARCHIVE_BYTES)
     _require(hmac.compare_digest(hashlib.sha256(raw).hexdigest(), digest[7:]))
+    if partners:
+        return _members(raw, partners=True)
     return _members(raw, archived=archived)
 
 
@@ -235,6 +258,15 @@ def fetch_archived_snapshot(repository: str, run_id: int, token: str) -> dict[st
     """Trust only the fixed main archive workflow; callers validate raw and normalized evidence."""
     try:
         return _fetch_snapshot(repository, run_id, token, archived=True)
+    except Exception:
+        pass
+    raise SnapshotError() from None
+
+
+def fetch_partner_snapshot(repository: str, run_id: int, token: str) -> dict[str, bytes]:
+    """Trust only main partner discovery; callers validate partial or complete generations."""
+    try:
+        return _fetch_snapshot(repository, run_id, token, partners=True)
     except Exception:
         pass
     raise SnapshotError() from None

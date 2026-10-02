@@ -158,7 +158,7 @@ Sandboxed Windows temporary-directory access and subprocess spawning have previo
 
 ## Next publication and launch gates
 
-1. Preserve the verified archived market/world snapshots before their 9 October artifact expiry. Exact source capture, trusted-main acquisition/recovery and independent byte verification are complete for these ten singleton observations; controlled local copies still need a durable private backup strategy.
+1. Preserve the verified archived market/world and partner-discovery snapshots before their 9 October artifact expiry. Exact source capture, trusted-main acquisition/recovery and independent byte verification are complete for the ten singleton observations and reviewed partner queries; controlled local copies still need a durable private backup strategy.
 2. Review the verified DET discovery observations and approve per-flow/per-period partner and commodity inventories, including special statistical buckets, US territories and non-overlapping aggregate rules. The bounded July chapter 09 discovery is complete; observed codes and current reporting lists still do not establish a complete additive leaf inventory. Generalize periods/products only after those rules are evidenced.
 3. Establish compatible dimensions and revision vintage, exact full-world reconciliation with documented rules and classification comparability. A `LAST_UPDATE` label, matched month or unchanged code alone is insufficient evidence.
 4. Build an explicit public DTO/release projection and loader with provenance, validation receipts and missing states. Keep private evidence out of public output, preserve the last valid release on failed updates, and add meaningful production-boundary tests before changing sample/noindex/canonical/sitemap behavior.

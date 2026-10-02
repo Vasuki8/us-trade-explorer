@@ -60,6 +60,8 @@ The reader counts actual decoded byte chunks and enforces the 512 KiB public rel
 
 The existing `loadPublicRelease` remains authoritative for SHA-256, exact decoded byte count, fatal UTF-8, canonical JSON, sample-only fields and metadata agreement. Only its verified frozen release may become visible in tables or feed selected CSV downloads. Failed status, timeout, missing/truncated/oversized bodies, read errors or verification failures use the existing generic dataset error, preserve URL filters and hide results; static product profiles remain available. There is no fallback to unverified bytes or an embedded fixture. Browser runtime verification, review and integration require their own dated [handoff receipts](handoff.md).
 
+Web Crypto requires a supported secure browser context, such as HTTPS or the localhost development preview. Unavailable browser support follows the same load failure state; local compatibility does not prove production hosting enforcement.
+
 ## Regenerate the sample manifest
 
 Run this from the repository root with **Node 24** in PowerShell after installing the locked development dependencies. It uses the same encoder/producer as the website and verifies their agreement before writing and formatting the manifest for review:

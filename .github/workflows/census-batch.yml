@@ -1,0 +1,62 @@
+name: Acquire Census batch
+on:
+  workflow_dispatch:
+    inputs:
+      resume_run:
+        description: 'Optional completed main batch run ID; restore its private evidence before continuing'
+        required: false
+        type: string
+      refresh:
+        description: 'Re-fetch all eight slots to detect source revisions; leave false to resume unfinished work'
+        required: true
+        default: false
+        type: boolean
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: census-acquisition
+  cancel-in-progress: false
+jobs:
+  acquire:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: census-ingestion
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.14'
+      - name: Acquire or resume the reviewed eight-partition plan
+        id: acquire
+        env:
+          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          REQUEST_RESUME: ${{ inputs.resume_run }}
+          REQUEST_REFRESH: ${{ inputs.refresh }}
+        run: |
+          args=(--plan sources/batches/coffee-markets-2026-07.json --output pipeline/output/batch)
+          if [[ -n "$REQUEST_RESUME" ]]; then
+            if [[ ! "$REQUEST_RESUME" =~ ^[1-9][0-9]{0,19}$ ]]; then
+              echo 'Invalid prior batch run ID'
+              exit 1
+            fi
+            args+=(--resume-run "$REQUEST_RESUME")
+          fi
+          if [[ "$REQUEST_REFRESH" == 'true' ]]; then args+=(--refresh); fi
+          python -m pipeline.batch "${args[@]}"
+      - name: Preserve validated private evidence, including partial failure
+        if: ${{ always() && steps.acquire.outcome != 'skipped' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: census-batch-${{ github.run_id }}
+          path: |
+            pipeline/output/batch/
+            !pipeline/output/batch/**/.pending-*
+            !pipeline/output/batch/batch.lock
+          if-no-files-found: warn
+          retention-days: 7
+      # This workflow never builds public data or activates a release.

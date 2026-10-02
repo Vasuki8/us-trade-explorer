@@ -149,11 +149,12 @@ def parse_rows(data,flow,period,*,expected_summary=None):
         rows.append({'product':code,'description':row[f'{prefix}_COMMODITY_SDESC'],'partnerCode':country,'partnerName':row['CTY_NAME'],'flow':flow,'period':period,'value':value,'status':'reported_zero' if value=='0' else 'reported'})
     return rows
 
-def fetch_candidate(flow,period,key,*,product='09',partner='1220'):
+def fetch_candidate(flow,period,key,*,product='09',partner='1220',capture=None):
     validate_period(period)
     validate_scope(product,partner)
     if flow not in PATHS:raise SourceError('Unsupported flow')
     if not isinstance(key,str) or not key or len(key)>256 or any(c.isspace() for c in key):raise SourceError('CENSUS_API_KEY is missing or invalid')
+    if capture is not None and not callable(capture):raise SourceError('Invalid source capture adapter')
     prefix='I' if flow=='imports' else 'E';value='GEN_VAL_MO' if flow=='imports' else 'ALL_VAL_MO'
     # Census recommends YEAR/MONTH and smaller queries to reduce timeouts.
     dimensions=aggregate_dimensions(flow)
@@ -188,6 +189,9 @@ def fetch_candidate(flow,period,key,*,product='09',partner='1220'):
                 'rows':rows,'publicationBlockers':['Live dimensions and coverage not yet reconciled','Official publication evidence not yet attached'],
             }
             if key in json.dumps(candidate,ensure_ascii=False):raise SourceError('Response rejected by evidence safety check')
+            # A trusted archival adapter receives only validated source bytes,
+            # never the credential-bearing URL or a request object.
+            if capture is not None:capture(raw)
             return candidate
         except (SourceError,OSError) as error:
             safe=error if isinstance(error,SourceError) else RetryableSourceError('Source transport failed',category='connection_error')

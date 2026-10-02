@@ -1,6 +1,6 @@
 # US Trade Explorer
 
-Design baseline: 1 October 2026. Status: working local public preview with synthetic data, plus tested ingestion and release-safety foundations. No production website, accounts, advertisements or payment integration has been deployed.
+Design baseline: 1 October 2026. Status updated: 2 October 2026. The working public preview uses synthetic data; authenticated private Census acquisition, recovery and selected-market/world checks have passed. No production website, accounts, advertisements or payment integration has been deployed. Start with the [development handoff](docs/handoff.md) for current commits, verification receipts, operating boundaries and next steps.
 
 ## Run the preview
 
@@ -56,7 +56,9 @@ The seven public sections are overview, product search, product profiles, countr
 
 Official source documentation, current API authentication requirements, major hosting terms and selected jurisdiction requirements were checked on 1 October 2026. The repository was confirmed empty before these documents were added. Important findings include Census API authentication and attribution requirements, India’s phased DPDP commencement, CERT-In logging/reporting requirements, the 2025 Mexico subscription amendments, and Stripe's invite-only onboarding in India. Each substantive finding is linked in the relevant document.
 
-No live Census dataset has been ingested or reconciled. Local contract, recovery, browser and static-output checks are now implemented; see the implementation status for specific evidence and limitations. Actual provider logging, production security enforcement, comprehensive accessibility, payment and cross-region hosting tests remain outstanding. Some primary legal pages could not be fully retrieved; those gaps are identified instead of being treated as verified law.
+Authenticated private Census acquisition has passed for July 2026, HS2 chapter 09: eight selected-market observations and two world controls. Real Actions recovery preserved the market evidence, and the [private control report](docs/census-controls.md) independently verified its normalized inputs and the pinned initial-release announcement. Its two subset checks passed; full world reconciliation, API revision vintage and classification comparability remain unverified. The website still uses synthetic data and rejects production builds. Exact [raw statistical-response archiving](docs/census-archive.md) is the current development increment; it has not yet reached trusted `main` or been exercised against Census.
+
+Local contract, recovery, browser and static-output checks are implemented; see the [implementation status](docs/implementation-status.md) and [handoff](docs/handoff.md) for specific evidence and limits. Actual provider logging, production security enforcement, comprehensive accessibility, payment and cross-region hosting tests remain outstanding. Some primary legal pages could not be fully retrieved; those gaps are identified instead of being treated as verified law.
 
 ## Decisions still needed
 

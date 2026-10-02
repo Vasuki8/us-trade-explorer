@@ -1,8 +1,6 @@
 import {
   parseQuery,
   queryString,
-  valueAt,
-  previousYear,
   change,
   money,
   pct,
@@ -14,6 +12,7 @@ import {
 } from '../../packages/contracts/trade';
 import manifest from '../../releases/sample-2026-07-v1.manifest.json';
 import { fetchPublicRelease } from '../lib/public-fetch';
+import { explorerView } from '../lib/explorer-view';
 const root = document.querySelector<HTMLElement>('#explorer');
 if (root) {
   const form = document.querySelector<HTMLFormElement>('#filters')!,
@@ -51,32 +50,31 @@ if (root) {
       );
       return;
     }
-    const partners = query.partners.length
-      ? query.partners
-      : release.partners.filter((p) => p.kind === 'country').map((p) => p.id);
-    selected = release.observations.filter(
-      (o) =>
-        o.flow === query.flow &&
-        o.period === query.period &&
-        o.product === query.product &&
-        partners.includes(o.partner),
-    );
+    const view = explorerView(release, query);
+    selected = view.observations;
+    const allChapters = query.product === 'all';
+    const chapterCodes = release.products.map((p) => p.code).join(', ');
     message.hidden = true;
     result.hidden = false;
     document.querySelector('#result-title')!.textContent =
-      `${release.products.find((p) => p.code === query.product)!.name} · ${query.period}`;
+      `${allChapters ? 'Included sample chapters' : release.products.find((p) => p.code === query.product)!.name} · ${query.period}`;
     document.querySelector('#result-basis')!.textContent =
       `${BASIS[query.flow]} · nominal USD · not seasonally adjusted · sample figures`;
+    document.querySelector('#result-scope')!.textContent = allChapters
+      ? `Calculated sum of ${release.products.length} included sample chapters (HS ${chapterCodes}). Sample coverage only; not a country total. CSV contains underlying chapter observations for the selected month, not calculated sums.`
+      : `Included sample chapter HS ${query.product}. CSV contains underlying chapter observations for the selected month.`;
     const table = document.createElement('table'),
       caption = document.createElement('caption');
-    caption.textContent = `Sample ${query.flow} for HS ${query.product}, ${query.period}`;
+    caption.textContent = allChapters
+      ? `Sample ${query.flow} for ${release.products.length} included chapters (HS ${chapterCodes}), ${query.period}`
+      : `Sample ${query.flow} for HS ${query.product}, ${query.period}`;
     table.append(caption);
     const head = table.createTHead().insertRow();
     for (const text of [
       'Partner',
       'Trade value (USD)',
       'Year over year',
-      'Value status',
+      allChapters ? 'Calculation basis' : 'Value status',
     ]) {
       const th = document.createElement('th');
       th.scope = 'col';
@@ -84,7 +82,7 @@ if (root) {
       head.append(th);
     }
     const body = table.createTBody();
-    for (const row of selected) {
+    for (const row of view.rows) {
       const tr = body.insertRow(),
         th = document.createElement('th');
       th.scope = 'row';
@@ -92,19 +90,8 @@ if (root) {
       tr.append(th);
       for (const text of [
         money(row.value, false),
-        pct(
-          change(
-            row.value,
-            valueAt(
-              release,
-              row.product,
-              row.partner,
-              row.flow,
-              previousYear(row.period),
-            ),
-          ).percent,
-        ),
-        row.status.replaceAll('_', ' '),
+        pct(change(row.value, row.previous).percent),
+        row.statusLabel,
       ]) {
         const td = tr.insertCell();
         td.textContent = text;

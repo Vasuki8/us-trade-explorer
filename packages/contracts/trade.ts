@@ -387,7 +387,8 @@ export function parseQuery(params: URLSearchParams, r: Release): Query {
     else result.error = 'This period is not included in this release.';
   }
   if (product) {
-    if (r.products.some((p) => p.code === product)) result.product = product;
+    if (product === 'all' || r.products.some((p) => p.code === product))
+      result.product = product;
     else result.error = 'This product is not included in this release.';
   }
   if (release && release !== r.id)

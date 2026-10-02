@@ -61,4 +61,19 @@ Preserve needed evidence before its seven-day Actions expiry. Artifacts are temp
 
 Full publication still requires an approved per-flow leaf inventory including special statistical buckets, archived and independently revalidated raw statistical responses, matched API revision vintage, complete exact reconciliation, classification comparability and an explicit public data projection/loader. Reporting-code lists and a four-country subset cannot satisfy these gates. No public loader, indexing, deployment, ads or subscription behavior is changed here.
 
-World-query behavior and the report workflow are verified locally with fabricated values and bounded HTTP/artifact doubles. The official document itself has been downloaded and checked. Authenticated world acquisition and the combined Actions report await execution after approved merge; no live world reconciliation is claimed.
+## Verification receipt — 2 October 2026
+
+[PR #12](https://github.com/Vasuki8/us-trade-explorer/pull/12) merged with explicit owner approval at `3b0f42d8704f4424c15aa2351cbb2a2593b48281`. Main [Checks run 37026368794](https://github.com/Vasuki8/us-trade-explorer/actions/runs/37026368794) passed: 96 Python tests, 9 Node tests, Astro checks/build verification and 16 browser journeys under each configured path. The [private preview run 37026368465](https://github.com/Vasuki8/us-trade-explorer/actions/runs/37026368465) built successfully and skipped Pages deployment.
+
+Authenticated [world acquisition run 37026467626](https://github.com/Vasuki8/us-trade-explorer/actions/runs/37026467626) and [combined report run 37026664906](https://github.com/Vasuki8/us-trade-explorer/actions/runs/37026664906) both passed on that trusted main commit. The report restored market evidence from successful [fresh run 36973640536](https://github.com/Vasuki8/us-trade-explorer/actions/runs/36973640536). Its 20 preserved files were independently verified and the report recomputed from the normalized inputs and pinned PDF. Separate recovery run 36973761962 had previously reproduced the same normalized files; it was not the selected report input.
+
+| Evidence | Immutable identity |
+|---|---|
+| Market bundle | `2e8ca3d5fb34b378ead182c2826950f6f977fb98f0fde70e9c558cf3077b5830` |
+| World bundle | `f624a46363ebfd9821021c1941d20398a8d6ec7715220b024a32506d5fde87d1` |
+| Private report | `fe6327d05521da9b928977aab8bf3b2672f4c0e920f35e7d8a4071ba6fff1cb1` |
+| Report artifact SHA-256 | `5e0c511bab31e6c9a5335d4073a0d1fb9b4ff6493d02a982f747eafc289f66c0` |
+
+Both exact subset checks passed, with a positive amount outside the selected countries. The report retains `publicationReady=false`, `coverage=selected-markets-only`, `apiVintageVerified=false`, `fullWorldReconciliation=not-verified` and a null official revision date. The PDF supports initial announcement date 2026-09-03 only. No full world reconciliation or official public release is claimed.
+
+The report artifact expires **2026-10-09 at 15:23:56 UTC**. Verified private copies and a redacted receipt are preserved under ignored `.local/control-evidence/`; these remain development copies, not durable backups. The Census key was available only to the protected workflows, where reflection checks ran. The local verifier used a GitHub credential held in memory and did not have the Census key. See the [handoff](handoff.md) for recovery and the current raw-archive development boundary.

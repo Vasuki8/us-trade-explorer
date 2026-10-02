@@ -164,9 +164,11 @@ def validate_key(key):
     require(type(key) is str and 0 < len(key) <= 256 and not any(c.isspace() for c in key), 'CENSUS_API_KEY is missing or invalid')
 
 
-def run_batch(plan, root, key, refresh=False, evidence_secrets=()):
+def run_batch(plan, root, key, refresh=False, evidence_secrets=(), acquire=None):
     plan = validate_plan(plan)
     validate_key(key)
+    require(acquire is None or callable(acquire), 'Invalid candidate acquisition adapter')
+    acquisition = fetch_candidate if acquire is None else acquire
     secrets = (key, *evidence_secrets)
     root = Path(root)
     plan_id = digest(plan)
@@ -191,7 +193,7 @@ def run_batch(plan, root, key, refresh=False, evidence_secrets=()):
                 slot = entry['slot']
                 attempted = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
                 try:
-                    candidate = fetch_candidate(slot['flow'], slot['period'], key, product=slot['product'], partner=slot['partner'])
+                    candidate = acquisition(slot['flow'], slot['period'], key, product=slot['product'], partner=slot['partner'])
                     reference = save_candidate(root, candidate, slot, secrets)
                 except SourceError as error:
                     entry.update(state='failed', candidateId=None, objectHash=None, category=error.category, httpStatus=error.http_status, attemptedAt=attempted)
@@ -213,14 +215,11 @@ def run_batch(plan, root, key, refresh=False, evidence_secrets=()):
         raise SourceError('Batch storage or state verification failed; prior complete evidence retained') from None
 
 
-def restore_snapshot(plan, files, root, key, evidence_secrets=()):
+def validate_snapshot(plan, files, secrets=()):
+    """Validate every normalized snapshot member and reference without writing."""
     plan = validate_plan(plan)
-    validate_key(key)
-    secrets = (key, *evidence_secrets)
     require(type(files) is dict and 1 <= len(files) <= MAX_SNAPSHOT_FILES and all(type(v) is bytes for v in files.values()), 'Invalid snapshot inventory')
     require(sum(map(len, files.values())) <= MAX_SNAPSHOT_BYTES, 'Oversized snapshot')
-    root = Path(root)
-    require(not root.exists() or not any(root.iterdir()), 'Restore requires an empty destination')
     plan_id = digest(plan)
     objects, bundles, journal, pointer = {}, {}, None, None
     # Validate ALL files and references in memory before making a filesystem write.
@@ -256,6 +255,14 @@ def restore_snapshot(plan, files, root, key, evidence_secrets=()):
     for bundle in bundles.values():
         validate_bundle(bundle, plan, lookup, secrets)
     require(pointer is None or pointer['bundleId'] in bundles, 'Missing snapshot bundle')
+    return {'objects': objects, 'bundles': bundles, 'journal': journal, 'pointer': pointer}
+
+
+def restore_snapshot(plan, files, root, key, evidence_secrets=()):
+    validate_key(key)
+    root = Path(root)
+    require(not root.exists() or not any(root.iterdir()), 'Restore requires an empty destination')
+    validate_snapshot(plan, files, (key, *evidence_secrets))
     try:
         with writer(root):
             for name in sorted(files, key=lambda p: (0 if p.startswith('objects/') else 1 if p.startswith('bundles/') else 2 if p.endswith('/progress.json') else 3, p)):

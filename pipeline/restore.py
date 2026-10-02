@@ -22,6 +22,8 @@ READ_SECONDS = 30
 STORAGE_SUFFIXES = ('.blob.core.windows.net', '.actions.githubusercontent.com', '.githubusercontent.com')
 MEMBER_PATH = re.compile(r'(?:objects/[0-9a-f]{64}\.json|bundles/[0-9a-f]{64}\.json|batches/[0-9a-f]{64}/(?:progress|complete)\.json)')
 DIRECTORY_PATH = re.compile(r'(?:objects/|bundles/|batches/|batches/[0-9a-f]{64}/)')
+ARCHIVED_MEMBER_PATH = re.compile(r'(?:' + MEMBER_PATH.pattern + r'|raw/[0-9a-f]{64}\.json|archive/(?:[0-9a-f]{64}|complete)\.json)')
+ARCHIVED_DIRECTORY_PATH = re.compile(r'(?:' + DIRECTORY_PATH.pattern + r'|raw/|archive/)')
 
 
 class SnapshotError(Exception):
@@ -146,8 +148,10 @@ def _storage_target(location):
     return host, target
 
 
-def _members(raw):
+def _members(raw, archived=False):
     result = {}
+    member_path = ARCHIVED_MEMBER_PATH if archived else MEMBER_PATH
+    directory_path = ARCHIVED_DIRECTORY_PATH if archived else DIRECTORY_PATH
     with zipfile.ZipFile(io.BytesIO(raw)) as archive:
         entries = archive.infolist()
         _require(0 < len(entries) <= MAX_ENTRIES)
@@ -162,10 +166,10 @@ def _members(raw):
             _require(not stat.S_ISLNK(mode))
             _require(entry.compress_type in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED))
             if entry.is_dir():
-                _require(DIRECTORY_PATH.fullmatch(name) is not None and entry.file_size == 0)
+                _require(directory_path.fullmatch(name) is not None and entry.file_size == 0)
                 _require(stat.S_IFMT(mode) in (0, stat.S_IFDIR))
                 continue
-            _require(MEMBER_PATH.fullmatch(name) is not None)
+            _require(member_path.fullmatch(name) is not None)
             _require(stat.S_IFMT(mode) in (0, stat.S_IFREG))
             _require(0 <= entry.file_size <= MAX_MEMBER_BYTES)
             unpacked += entry.file_size
@@ -182,7 +186,7 @@ def _members(raw):
     return result
 
 
-def _fetch_snapshot(repository, run_id, token):
+def _fetch_snapshot(repository, run_id, token, archived=False):
     _validate_inputs(repository, run_id, token)
     api_headers = {
         'Authorization': 'Bearer ' + token,
@@ -196,13 +200,15 @@ def _fetch_snapshot(repository, run_id, token):
     _require(_positive_integer(run.get('id')) and run['id'] == run_id)
     _require(type(run.get('repository')) is dict and run['repository'].get('full_name') == repository)
     _require(run.get('event') == 'workflow_dispatch' and run.get('head_branch') == 'main')
-    _require(run.get('path') == '.github/workflows/census-batch.yml' and run.get('status') == 'completed')
+    workflow = '.github/workflows/census-archive.yml' if archived else '.github/workflows/census-batch.yml'
+    artifact_name = f'census-archive-{run_id}' if archived else f'census-batch-{run_id}'
+    _require(run.get('path') == workflow and run.get('status') == 'completed')
     artifacts = _json_object(_request(API_HOST, run_path + '/artifacts?per_page=100', api_headers, status=200, maximum=MAX_METADATA_BYTES, metadata=True))
     _require(type(artifacts.get('total_count')) is int and artifacts['total_count'] == 1)
     _require(type(artifacts.get('artifacts')) is list and len(artifacts['artifacts']) == 1)
     artifact = artifacts['artifacts'][0]
     _require(type(artifact) is dict and _positive_integer(artifact.get('id')))
-    _require(artifact.get('name') == f'census-batch-{run_id}' and artifact.get('expired') is False)
+    _require(artifact.get('name') == artifact_name and artifact.get('expired') is False)
     _require(_positive_integer(artifact.get('size_in_bytes')) and artifact['size_in_bytes'] <= MAX_ARCHIVE_BYTES)
     digest = artifact.get('digest')
     _require(isinstance(digest, str) and re.fullmatch(r'sha256:[0-9a-f]{64}', digest) is not None)
@@ -212,7 +218,7 @@ def _fetch_snapshot(repository, run_id, token):
     storage_headers = {'Accept': 'application/zip', 'Accept-Encoding': 'identity', 'User-Agent': 'US-Trade-Explorer/0.1'}
     raw = _request(host, target, storage_headers, status=200, maximum=MAX_ARCHIVE_BYTES)
     _require(hmac.compare_digest(hashlib.sha256(raw).hexdigest(), digest[7:]))
-    return _members(raw)
+    return _members(raw, archived=archived)
 
 
 def fetch_snapshot(repository: str, run_id: int, token: str) -> dict[str, bytes]:
@@ -221,5 +227,14 @@ def fetch_snapshot(repository: str, run_id: int, token: str) -> dict[str, bytes]
         return _fetch_snapshot(repository, run_id, token)
     except Exception:
         # Raise outside the handler so even __context__ cannot retain a secret.
+        pass
+    raise SnapshotError() from None
+
+
+def fetch_archived_snapshot(repository: str, run_id: int, token: str) -> dict[str, bytes]:
+    """Trust only the fixed main archive workflow; callers validate raw and normalized evidence."""
+    try:
+        return _fetch_snapshot(repository, run_id, token, archived=True)
+    except Exception:
         pass
     raise SnapshotError() from None

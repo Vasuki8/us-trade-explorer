@@ -49,7 +49,9 @@ def aggregate_dimensions(flow):
     # Census International Trade API User Guide, p. 7: '-' means total.
     return {'DISTRICT': '-', **({'CTY_SUBCODE': '-', 'RP': '-'} if flow == 'imports' else {'DF': '-'})}
 
-def fetch_bytes(url):
+def fetch_bytes(url,*,maximum=MAX_BYTES):
+    if type(maximum) is not int or not 0<maximum<=MAX_BYTES:
+        raise SourceError('Invalid source response limit')
     parsed=urlsplit(url)
     if parsed.scheme!='https' or parsed.netloc!=HOST or parsed.path not in PATHS.values() or parsed.fragment:
         raise SourceError('Source is not allowlisted')
@@ -85,17 +87,17 @@ def fetch_bytes(url):
         content_type=response.getheader('Content-Type','').split(';')[0].strip().lower()
         if content_type not in ('application/json','text/json'):raise SourceError('Source did not return JSON')
         size=response.getheader('Content-Length')
-        if size is not None and (not size.isdigit() or int(size)>MAX_BYTES):raise SourceError('Response exceeds size limit')
+        if size is not None and (not size.isdigit() or int(size)>maximum):raise SourceError('Response exceeds size limit')
         phase='body'
         chunks=[];length=0
         while True:
             remaining=deadline-time.monotonic()
             if remaining<=0:raise RetryableSourceError('Source request timed out',category='body_timeout')
             transport.settimeout(remaining)
-            chunk=response.read1(min(65536,MAX_BYTES+1-length))
+            chunk=response.read1(min(65536,maximum+1-length))
             if not chunk:break
             chunks.append(chunk);length+=len(chunk)
-            if length>MAX_BYTES:raise SourceError('Response exceeds size limit')
+            if length>maximum:raise SourceError('Response exceeds size limit')
         if expired.is_set() or time.monotonic()>=deadline:raise RetryableSourceError('Source request timed out',category='body_timeout')
         return b''.join(chunks)
     except SourceError:
@@ -149,10 +151,16 @@ def parse_rows(data,flow,period,*,expected_summary=None):
         rows.append({'product':code,'description':row[f'{prefix}_COMMODITY_SDESC'],'partnerCode':country,'partnerName':row['CTY_NAME'],'flow':flow,'period':period,'value':value,'status':'reported_zero' if value=='0' else 'reported'})
     return rows
 
-def fetch_candidate(flow,period,key,*,product='09',partner='1220',capture=None):
+def fetch_candidate(flow,period,key,*,product='09',partner='1220',capture=None,summary=None,response_limit=None,row_limit=None):
     validate_period(period)
     validate_scope(product,partner)
     if flow not in PATHS:raise SourceError('Unsupported flow')
+    if summary is not None and (type(summary) is not str or summary!='DET'):
+        raise SourceError('Unsupported source summary constraint')
+    if response_limit is not None and (type(response_limit) is not int or not 0<response_limit<=MAX_BYTES):
+        raise SourceError('Invalid source response limit')
+    if row_limit is not None and (type(row_limit) is not int or not 0<row_limit<=MAX_ROWS):
+        raise SourceError('Invalid source row limit')
     if not isinstance(key,str) or not key or len(key)>256 or any(c.isspace() for c in key):raise SourceError('CENSUS_API_KEY is missing or invalid')
     if capture is not None and not callable(capture):raise SourceError('Invalid source capture adapter')
     prefix='I' if flow=='imports' else 'E';value='GEN_VAL_MO' if flow=='imports' else 'ALL_VAL_MO'
@@ -167,16 +175,19 @@ def fetch_candidate(flow,period,key,*,product='09',partner='1220',capture=None):
     }
     # The guide places world '-' in DET, alongside countries, rather than CGP.
     # Keep established country queries unchanged; world is a new explicit scope.
-    if partner=='-':query['SUMMARY_LVL']='DET'
+    expected_summary='DET' if partner=='-' else summary
+    if expected_summary is not None:query['SUMMARY_LVL']=expected_summary
     # Credential-bearing URL never leaves this function and fetch_bytes.
     url='https://'+HOST+PATHS[flow]+'?'+urlencode({**query,'key':key})
     for attempt in range(3):
         try:
-            raw=fetch_bytes(url)
-            if len(raw)>MAX_BYTES or key.encode() in raw:raise SourceError('Response rejected by evidence safety check')
+            raw=fetch_bytes(url) if response_limit is None else fetch_bytes(url,maximum=response_limit)
+            if type(raw) is not bytes or len(raw)>(response_limit or MAX_BYTES) or key.encode() in raw:raise SourceError('Response rejected by evidence safety check')
             try:data=json.loads(raw)
             except (ValueError,UnicodeError,RecursionError):raise SourceError('Invalid JSON response') from None
-            rows=parse_rows(data,flow,period,expected_summary='DET' if partner=='-' else None)
+            if row_limit is not None and (type(data) is not list or not 2<=len(data)<=row_limit+1):
+                raise SourceError('Empty or oversized source table')
+            rows=parse_rows(data,flow,period,expected_summary=expected_summary)
             if any((product!='*' and row['product']!=product) or (partner!='*' and row['partnerCode']!=partner) for row in rows):raise SourceError('Source returned rows outside the requested scope')
             identity={'schemaVersion':2,'flow':flow,'period':period,'sourceQuery':query,'sourceHash':hashlib.sha256(raw).hexdigest()}
             candidate={

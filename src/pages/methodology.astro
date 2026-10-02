@@ -1,0 +1,81 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { href } from '../lib/data';
+---
+
+<Layout
+  title="How to read US goods trade"
+  description="Understand general imports, exports, nominal values, HS classifications, missing data, changes and revisions."
+>
+  <article class="prose">
+    <p class="eyebrow">BEHIND THE NUMBERS</p>
+    <h1>Know what a figure means.</h1>
+    <p class="lede">
+      A meaningful comparison starts with the same product definition, partner,
+      flow, period and statistical basis.
+    </p>
+    <h2>The statistical basis</h2>
+    <dl class="definition-list">
+      <dt>US reporter, goods only</dt>
+      <dd>
+        Countries are US trading partners. Services and trade between two non-US
+        countries are outside this dataset.
+      </dd>
+      <dt>Imports and exports</dt>
+      <dd>
+        General imports use customs value. Total exports use FAS value. Neither
+        is a goods-and-services balance-of-payments series.
+      </dd>
+      <dt>Monthly, nominal USD</dt>
+      <dd>
+        Values are current dollars, not adjusted for inflation or seasonal
+        effects. A dollar increase does not necessarily mean more physical
+        goods.
+      </dd>
+      <dt>HS2022 chapters</dt>
+      <dd>
+        Two-digit chapters group products. Detailed import HTSUS codes and
+        export Schedule B codes are not interchangeable. Classification changes
+        require explicit concordance.
+      </dd>
+    </dl>
+    <h2>Changes and comparisons</h2>
+    <p>
+      Year-over-year change is (current / previous-year value − 1) × 100. Dollar
+      changes use exact integer arithmetic. Displayed percentages are rounded
+      directly from the exact ratio to one decimal place, with half values
+      rounded away from zero; CSV values preserve integer dollars. A zero
+      baseline has no defined percentage growth. Missing values remain
+      unavailable.
+    </p>
+    <p>
+      Market shares require a source-consistent world denominator. We never use
+      the sum of displayed countries as if it represented the world. Country
+      profiles in this preview sum only the four selected chapters.
+    </p>
+    <h2>Missing and suppressed information</h2>
+    <p>
+      Not available, suppressed, not reported and reported zero are separate
+      states. A gap in a chart is not a zero. We do not reconstruct suppressed
+      values. Quantities are omitted at HS2 because combining unlike units would
+      be misleading.
+    </p>
+    <h2>Four different dates</h2>
+    <p>
+      The data period describes when trade occurred. The official release date
+      describes publication; the official revision date describes a
+      publisher-announced revision. Ingestion time describes our retrieval. An
+      unknown official date remains unknown. Sample fixture generation is not an
+      official release date.
+    </p>
+    <h2>What the numbers cannot tell you</h2>
+    <p>
+      Measured changes alone do not establish a cause, market price, tariff
+      liability or business opportunity. The sample preview does not describe
+      actual trade and should not support business decisions.
+    </p>
+    <p>
+      <a href={href('sources/')}>Inspect the source definitions →</a>
+    </p>
+  </article>
+</Layout>

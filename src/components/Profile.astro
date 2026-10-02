@@ -1,0 +1,170 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Trend from './Trend.astro';
+import DataTable from './DataTable.astro';
+import Provenance from './Provenance.astro';
+import {
+  release,
+  latest,
+  month,
+  href,
+  total,
+  profileRows,
+  productUrl,
+  countryUrl,
+} from '../lib/data';
+import {
+  money,
+  change,
+  pct,
+  valueAt,
+  previousYear,
+  BASIS,
+  type Flow,
+} from '../../packages/contracts/trade';
+interface Props {
+  kind: 'product' | 'country';
+  id: string;
+  flow: Flow;
+}
+const { kind, id, flow } = Astro.props;
+const name =
+  kind === 'product'
+    ? release.products.find((p) => p.code === id)!.name
+    : release.partners.find((p) => p.id === id)!.name;
+const getValue = (period: string) =>
+  kind === 'product'
+    ? valueAt(release, id, 'world', flow, period)
+    : total(id, flow, period);
+const value = getValue(latest),
+  diff = change(value, getValue(previousYear(latest)));
+const url = (f: Flow) =>
+  kind === 'product' ? productUrl(id, f) : countryUrl(id, f);
+const filters = new URLSearchParams({
+  flow,
+  period: latest,
+  release: release.id,
+  ...(kind === 'product' ? { product: id } : { partners: id }),
+});
+---
+
+<Layout
+  title={`${name} — US ${flow}`}
+  description={`Explore ${name} US ${flow}, monthly changes, comparisons, and the statistical basis. Synthetic development preview.`}
+  active={kind === 'product' ? 'Products' : 'Countries'}
+>
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href={href('')}>Overview</a>
+    <span>/</span>
+    <a href={href(kind === 'product' ? 'search/' : 'countries/')}>
+      {kind === 'product' ? 'Products' : 'Countries'}
+    </a>
+    <span>/</span>
+    <span>{kind === 'product' ? `HS ${id}` : name}</span>
+  </nav>
+  <section class="profile-heading">
+    <p class="eyebrow">
+      {kind === 'product'
+        ? `PRODUCT PROFILE · HS2022 · CHAPTER ${id}`
+        : 'COUNTRY PROFILE · UNITED STATES REPORTER'}
+    </p>
+    <h1>{name}</h1>
+    <p class="lede">
+      {kind === 'product'
+        ? `US ${flow} of this product chapter, with the world and selected partner countries.`
+        : `US ${flow === 'imports' ? 'imports from' : 'exports to'} ${name} across the four chapters in this sample.`}
+    </p>
+    <p class="basis">
+      {BASIS[flow]} · Census basis · Monthly · Nominal USD · Not seasonally
+      adjusted
+    </p>
+  </section>
+  <div class="toolbar">
+    <nav class="segmented" aria-label="Trade flow">
+      <a
+        href={url('imports')}
+        aria-current={flow === 'imports' ? 'page' : undefined}
+      >
+        Imports
+      </a>
+      <a
+        href={url('exports')}
+        aria-current={flow === 'exports' ? 'page' : undefined}
+      >
+        Exports
+      </a>
+    </nav>
+    <span>{month(latest)}</span>
+    <a class="button secondary" href={`${href('explore/')}?${filters}`}>
+      Change period & explore ↗
+    </a>
+  </div>
+  <div class="stat-grid">
+    <article class="stat">
+      <p>{flow.toUpperCase()} · SAMPLE</p>
+      <strong>{money(value)}</strong>
+      <span>
+        {kind === 'product'
+          ? 'World total for this chapter'
+          : 'Selected chapters only; not a country total'}
+      </span>
+    </article>
+    <article class="stat">
+      <p>YEAR OVER YEAR</p>
+      <strong>{pct(diff.percent)}</strong>
+      <span>Compared with {month(previousYear(latest))}</span>
+    </article>
+    <article class="stat">
+      <p>ABSOLUTE CHANGE</p>
+      <strong>{money(diff.delta)}</strong>
+      <span>A measured difference, not a causal explanation</span>
+    </article>
+  </div>
+  <section class="card">
+    <div class="card-heading">
+      <h2>The monthly picture</h2>
+      <span class="badge">Sample data</span>
+    </div>
+    <Trend
+      points={release.periods.map((period) => ({
+        period,
+        value: getValue(period),
+      }))}
+      label={`Sample ${flow} — ${name}`}
+    />
+  </section>
+  <section class="card table-card">
+    <div class="card-heading">
+      <div>
+        <p class="section-label">EXPLORE THE BREAKDOWN</p>
+        <h2>
+          {kind === 'product' ? 'Trading partners' : 'Products in this sample'}
+        </h2>
+      </div>
+      <a href={`${href('compare/')}?${filters}`}>Compare markets →</a>
+    </div>
+    <DataTable
+      rows={profileRows(kind, id, flow)}
+      subject={kind === 'product' ? 'Country' : 'Product'}
+      caption={`${name} · sample ${flow} · ${month(latest)}`}
+    />
+  </section>
+  <div class="action-strip">
+    <div>
+      <h2>Take the context with you.</h2>
+      <p>
+        Downloads include the data mode, period, statistical basis and release
+        ID.
+      </p>
+    </div>
+    <a
+      class="button secondary"
+      href={href(`downloads/${release.id}.csv`)}
+      download
+    >
+      Download full sample CSV ↓
+    </a>
+    <a href={href(`data/${release.id}.json`)}>Release metadata (JSON)</a>
+  </div>
+  <Provenance />
+</Layout>

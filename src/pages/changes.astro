@@ -1,0 +1,55 @@
+---
+import Layout from '../layouts/Layout.astro';
+import DataTable from '../components/DataTable.astro';
+import { release, latest, month, productUrl } from '../lib/data';
+import { valueAt, change, previousYear } from '../../packages/contracts/trade';
+const rows = release.products
+  .map((p) => ({
+    name: p.name,
+    code: p.code,
+    url: productUrl(p.code),
+    value: valueAt(release, p.code, 'world', 'imports', latest),
+    change: change(
+      valueAt(release, p.code, 'world', 'imports', latest),
+      valueAt(release, p.code, 'world', 'imports', previousYear(latest)),
+    ),
+  }))
+  .sort(
+    (a, b) => (b.change.percent ?? -Infinity) - (a.change.percent ?? -Infinity),
+  );
+---
+
+<Layout
+  title="Recent changes in goods trade"
+  description="Separate changes between periods from revisions to previously published data."
+  active="Recent changes"
+>
+  <section class="page-intro">
+    <p class="eyebrow">WHAT MOVED</p>
+    <h1>Change, with context.</h1>
+    <p class="lede">
+      Year-over-year movement compares two periods in the same release. A
+      revision changes a previously published observation. They are different
+      events.
+    </p>
+  </section>
+  <section class="card table-card">
+    <div class="card-heading">
+      <h2>Sample import changes</h2>
+      <span class="badge">Year over year</span>
+    </div>
+    <DataTable
+      rows={rows}
+      subject="Product"
+      caption={`Sample world imports · ${month(latest)} vs ${month(previousYear(latest))}`}
+    />
+  </section>
+  <div class="note">
+    <h2>Revision history</h2>
+    <p>
+      No official data releases have been ingested into this preview. Revision
+      history will appear only when a validated official release differs from an
+      earlier one. These sample movements do not explain actual economic events.
+    </p>
+  </div>
+</Layout>

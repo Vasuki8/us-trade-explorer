@@ -1,0 +1,36 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { release, href } from '../lib/data';
+---
+
+<Layout
+  title="Data and service status"
+  description="Live ingestion and hosting status, with an explicit sample data disclosure."
+>
+  <article class="prose">
+    <p class="eyebrow">SERVICE STATUS</p>
+    <h1>Preview, clearly labelled.</h1>
+    <div class="note">
+      <strong>Official data is not connected to this website yet.</strong>
+      <p>
+        The local release is synthetic. Live freshness and availability cannot
+        be assessed from it.
+      </p>
+    </div>
+    <h2>Available in this version</h2>
+    <p>
+      Public product and country profiles, product search, monthly filters,
+      comparisons, shareable URLs and CSV downloads.
+    </p>
+    <h2>Before public launch</h2>
+    <p>
+      Live source reconciliation, complete coverage, cloud hosting, domain
+      configuration, security logging and verified operating notices must be
+      completed. Production publication is blocked in the build configuration
+      until then.
+    </p>
+    <p>
+      <a href={href(`releases/${release.id}/`)}>Inspect the active sample →</a>
+    </p>
+  </article>
+</Layout>

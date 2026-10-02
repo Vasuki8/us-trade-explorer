@@ -1,0 +1,55 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { release, href, month } from '../../lib/data';
+export function getStaticPaths() {
+  return [{ params: { id: release.id } }];
+}
+---
+
+<Layout
+  title={`Release ${release.id}`}
+  description="Inspect the sample release's provenance, coverage, dates and limitations."
+>
+  <article class="prose">
+    <p class="eyebrow">RELEASE RECORD · SAMPLE</p>
+    <h1>A transparent starting point.</h1>
+    <p class="lede">{release.scope}</p>
+    <dl class="definition-list">
+      <dt>Release ID</dt>
+      <dd>
+        <code>{release.id}</code>
+      </dd>
+      <dt>Data window</dt>
+      <dd>
+        {month(release.periods[0])}–{month(release.periods.at(-1)!)}
+      </dd>
+      <dt>Official release date</dt>
+      <dd>Not applicable — synthetic fixture</dd>
+      <dt>Official revision date</dt>
+      <dd>Not applicable — synthetic fixture</dd>
+      <dt>Fixture generation timestamp</dt>
+      <dd>{release.ingestedAt}</dd>
+      <dt>Coverage</dt>
+      <dd>
+        {release.products.length} chapters, 5 countries plus illustrative world
+        totals, {release.periods.length} periods, both flows.
+      </dd>
+      <dt>Validation</dt>
+      <dd>
+        Schema, uniqueness and declared sample coverage are checked during the
+        build. No official reconciliation is claimed.
+      </dd>
+      <dt>Freshness</dt>
+      <dd>
+        Live freshness monitoring is not active. Sample dates do not demonstrate
+        official data freshness.
+      </dd>
+    </dl>
+    <div class="inline-links">
+      <a href={href(`data/${release.id}.json`)}>
+        Download full JSON with metadata
+      </a>
+      <a href={href(`downloads/${release.id}.csv`)}>Download sample CSV</a>
+    </div>
+  </article>
+</Layout>

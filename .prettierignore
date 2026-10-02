@@ -1,0 +1,9 @@
+node_modules
+dist
+.astro
+.local
+.superpowers
+test-results
+package-lock.json
+tests/fixtures/*.json
+docs/design

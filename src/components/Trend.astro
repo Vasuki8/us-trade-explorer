@@ -1,0 +1,94 @@
+---
+import { money, chartTick } from '../../packages/contracts/trade';
+interface Props {
+  points: { period: string; value: string | null }[];
+  label: string;
+}
+const { points, label } = Astro.props;
+const values = points.map((p) => (p.value === null ? null : Number(p.value)));
+const max =
+  Math.max(1, ...values.filter((v): v is number => v !== null)) * 1.18;
+const x = (i: number) => 60 + i * (700 / Math.max(points.length - 1, 1)),
+  y = (v: number) => 200 - (v / max) * 165;
+const segments: string[] = [];
+let segment = '';
+values.forEach((v, i) => {
+  if (v === null) {
+    if (segment) segments.push(segment);
+    segment = '';
+  } else segment += `${segment ? ' L' : 'M'} ${x(i)} ${y(v)}`;
+});
+if (segment) segments.push(segment);
+---
+
+<figure class="trend">
+  <svg viewBox="0 0 800 250" role="img" aria-label={label}>
+    {[0, 0.5, 1].map((t) => (
+      <g>
+        <line
+          x1="60"
+          x2="760"
+          y1={y(max * t)}
+          y2={y(max * t)}
+          stroke="#e5ebed"
+          stroke-dasharray="3 5"
+        />
+        <text x="0" y={y(max * t) + 4} fill="#667983" font-size="12">
+          {chartTick(max * t)}
+        </text>
+      </g>
+    ))}
+    {segments.map((d) => (
+      <path
+        d={d}
+        fill="none"
+        stroke="#138177"
+        stroke-width="3"
+        stroke-linejoin="round"
+      />
+    ))}
+    {points
+      .filter(
+        (_, i) =>
+          i === 0 ||
+          i === Math.floor(points.length / 2) ||
+          i === points.length - 1,
+      )
+      .map((p) => (
+        <text
+          x={x(points.indexOf(p))}
+          y="237"
+          text-anchor="middle"
+          font-size="12"
+          fill="#667983"
+        >
+          {p.period}
+        </text>
+      ))}
+  </svg>
+  <figcaption>
+    {label}. Nominal USD, not seasonally adjusted. Gaps mean unavailable data.
+  </figcaption>
+  <details>
+    <summary>View chart data</summary>
+    <div class="table-scroll">
+      <table>
+        <caption>{label}— exact values</caption>
+        <thead>
+          <tr>
+            <th scope="col">Month</th>
+            <th scope="col">Value (USD)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {points.map((p) => (
+            <tr>
+              <th scope="row">{p.period}</th>
+              <td class="numeric">{money(p.value, false)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </details>
+</figure>

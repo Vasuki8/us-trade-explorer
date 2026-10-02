@@ -1,0 +1,105 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { release, href, productUrl } from '../lib/data';
+---
+
+<Layout
+  title="Find a product or HS chapter"
+  description="Search descriptive product names and HS chapter codes. Choose the classification that matches your product."
+  active="Products"
+>
+  <section class="page-intro">
+    <p class="eyebrow">THE PRODUCT DIRECTORY</p>
+    <h1>Find the right chapter.</h1>
+    <p class="lede">
+      Search a product name or a two-digit HS code. Broad terms may match
+      several chapters; choose a description before exploring.
+    </p>
+  </section>
+  <form id="product-search" class="search-form" action={href('search/')}>
+    <label for="search">Product name or HS code</label>
+    <div class="search-row">
+      <input
+        id="search"
+        name="q"
+        type="search"
+        maxlength="120"
+        placeholder="Coffee, electrical, vehicles…"
+      />
+      <button type="submit">Search</button>
+    </div>
+  </form>
+  <p id="search-summary" role="status">
+    Showing all four sample chapters. HS2022 · 2-digit classification.
+  </p>
+  <div class="product-grid" id="product-results">
+    {release.products.map((p) => (
+      <a
+        class="product-card"
+        data-search={`${p.code} ${p.name}`.toLowerCase()}
+        href={productUrl(p.code)}
+      >
+        <span class="code-pill">HS {p.code}</span>
+        <h2>{p.name}</h2>
+        <p>Explore US imports, exports and trading partners.</p>
+        <span class="card-link">
+          View chapter <span aria-hidden="true">↗</span>
+        </span>
+      </a>
+    ))}
+  </div>
+  <div id="empty-search" class="empty-state" hidden>
+    <h2>No matching sample chapter</h2>
+    <p>
+      This preview covers only four chapters. Try a broader word or a two-digit
+      code. A missing result does not mean that trade is zero.
+    </p>
+    <button id="clear-search" class="secondary" type="button">
+      Show all sample chapters
+    </button>
+  </div>
+  <aside class="note">
+    <strong>A chapter is a starting point.</strong> HS2 groups many products.
+    Confirm detailed classifications with official schedules before making
+    customs decisions. This site does not provide tariff or customs advice.
+  </aside>
+  <script>
+    const form = document.querySelector<HTMLFormElement>('#product-search')!,
+      input = document.querySelector<HTMLInputElement>('#search')!;
+    function filter() {
+      const term = input.value.trim().toLowerCase().slice(0, 120);
+      let count = 0;
+      document.querySelectorAll<HTMLElement>('[data-search]').forEach((el) => {
+        const show = el.dataset.search!.includes(term);
+        el.hidden = !show;
+        if (show) count++;
+      });
+      document.querySelector('#search-summary')!.textContent =
+        `${count} matching sample chapter${count === 1 ? '' : 's'}. HS2022 · 2-digit classification.`;
+      document.querySelector<HTMLElement>('#empty-search')!.hidden =
+        count !== 0;
+    }
+    function restore() {
+      input.value = (new URL(location.href).searchParams.get('q') ?? '').slice(
+        0,
+        120,
+      );
+      filter();
+    }
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const url = new URL(location.href);
+      url.search = '';
+      if (input.value.trim()) url.searchParams.set('q', input.value.trim());
+      history.pushState({}, '', url);
+      filter();
+    });
+    document.querySelector('#clear-search')!.addEventListener('click', () => {
+      input.value = '';
+      form.requestSubmit();
+      input.focus();
+    });
+    window.addEventListener('popstate', restore);
+    restore();
+  </script>
+</Layout>

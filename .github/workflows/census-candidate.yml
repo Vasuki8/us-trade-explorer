@@ -1,0 +1,44 @@
+name: Acquire Census candidate
+on:
+  workflow_dispatch:
+    inputs:
+      period:
+        description: One month in YYYY-MM format
+        required: true
+        type: string
+      flow:
+        description: Statistical flow
+        required: true
+        type: choice
+        options: [imports, exports]
+permissions:
+  contents: read
+concurrency:
+  group: census-acquisition
+  cancel-in-progress: false
+jobs:
+  acquire:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: census-ingestion
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.14'
+      - name: Fetch and validate one candidate
+        env:
+          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+          REQUEST_PERIOD: ${{ inputs.period }}
+          REQUEST_FLOW: ${{ inputs.flow }}
+        run: python -m pipeline.census --period "$REQUEST_PERIOD" --flow "$REQUEST_FLOW"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: census-candidate-${{ github.run_id }}
+          path: pipeline/output/*.json
+          if-no-files-found: error
+          retention-days: 7
+      # A candidate is evidence, not publication approval. No automatic promotion.

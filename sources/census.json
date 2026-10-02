@@ -1,0 +1,12 @@
+{
+  "sourceId": "census-international-trade-hs",
+  "approvedHost": "api.census.gov",
+  "approvedPaths": ["/data/timeseries/intltrade/imports/hs", "/data/timeseries/intltrade/exports/hs"],
+  "reviewedAt": "2026-10-01",
+  "terms": "https://www.census.gov/data/developers/about/terms-of-service.html",
+  "attribution": "This product uses the Census Bureau Data API but is not endorsed or certified by the Census Bureau.",
+  "flowVariables": {"imports": "GEN_VAL_MO", "exports": "ALL_VAL_MO"},
+  "level": "HS2",
+  "readiness": "candidate-only; live response, zero semantics, default dimensions and reconciliation require verification",
+  "quantityPolicy": "No mixed-unit HS2 quantity aggregation. Never infer suppressed quantities."
+}

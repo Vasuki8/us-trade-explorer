@@ -1,0 +1,180 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Trend from '../components/Trend.astro';
+import DataTable from '../components/DataTable.astro';
+import Provenance from '../components/Provenance.astro';
+import {
+  release,
+  latest,
+  month,
+  href,
+  total,
+  productUrl,
+  countryUrl,
+  countries,
+} from '../lib/data';
+import {
+  money,
+  change,
+  pct,
+  valueAt,
+  previousYear,
+} from '../../packages/contracts/trade';
+const imports = total('world', 'imports'),
+  exports = total('world', 'exports'),
+  growth = change(imports, total('world', 'imports', previousYear(latest)));
+const rows = release.products.map((p) => ({
+  name: p.name,
+  code: p.code,
+  url: productUrl(p.code),
+  value: valueAt(release, p.code, 'world', 'imports', latest),
+  change: change(
+    valueAt(release, p.code, 'world', 'imports', latest),
+    valueAt(release, p.code, 'world', 'imports', previousYear(latest)),
+  ),
+}));
+---
+
+<Layout
+  title="Explore US import and export data"
+  description="Explore a sample of product and country profiles, compare markets, and inspect the statistical basis of US goods trade."
+  active="Overview"
+>
+  <section class="hero">
+    <div>
+      <p class="eyebrow">US GOODS TRADE / PUBLIC PREVIEW</p>
+      <h1>
+        A clearer view
+        <br />
+        of US trade.
+      </h1>
+      <p class="lede">
+        Follow products across markets. See what changed.
+        <br class="desktop-only" /> Start with the numbers, then explore the
+        context.
+      </p>
+      <form class="hero-search" action={href('search/')}>
+        <label for="home-search" class="sr-only">
+          Search a product or HS code
+        </label>
+        <span aria-hidden="true">⌕</span>
+        <input
+          id="home-search"
+          name="q"
+          placeholder="Try coffee, machinery, or HS 09"
+          maxlength="120"
+        />
+        <button type="submit">
+          Explore <span aria-hidden="true">→</span>
+        </button>
+      </form>
+    </div>
+    <aside class="hero-note">
+      <span class="mini-globe" aria-hidden="true">
+        ◎
+      </span>
+      <p class="section-label">ONE REPORTER. MANY MARKETS.</p>
+      <h2>
+        The US is the
+        <br />
+        starting point.
+      </h2>
+      <p>
+        Countries are trading partners of the United States. This is not a view
+        of all trade between every country.
+      </p>
+      <a href={href('methodology/')}>How to read the data →</a>
+    </aside>
+  </section>
+  <div class="section-heading">
+    <div>
+      <h2>
+        The latest snapshot <span class="badge">Sample</span>
+      </h2>
+      <p>
+        {month(latest)} · 4 illustrative HS2 chapters · World partner totals
+      </p>
+    </div>
+    <a class="button secondary" href={href('explore/')}>
+      Change flow or period <span aria-hidden="true">↗</span>
+    </a>
+  </div>
+  <div class="stat-grid">
+    <article class="stat">
+      <p>GENERAL IMPORTS</p>
+      <strong>{money(imports)}</strong>
+      <span>
+        <b class="positive">{pct(growth.percent)}</b> compared with a year
+        earlier
+      </span>
+      <small>Customs value · selected chapters only</small>
+    </article>
+    <article class="stat">
+      <p>TOTAL EXPORTS</p>
+      <strong>{money(exports)}</strong>
+      <span>US goods shipped to world markets</span>
+      <small>FAS value · selected chapters only</small>
+    </article>
+    <article class="stat">
+      <p>EXPLORE THE SAMPLE</p>
+      <strong>
+        4 <span class="stat-unit">products</span>
+      </strong>
+      <span>5 partner countries · 25 monthly periods</span>
+      <small>Invented figures to demonstrate the experience</small>
+    </article>
+  </div>
+  <div class="content-grid">
+    <section class="card">
+      <div class="card-heading">
+        <div>
+          <p class="section-label">THE LONGER VIEW</p>
+          <h2>Imports over time</h2>
+        </div>
+        <span class="legend">
+          <i></i> Selected chapters
+        </span>
+      </div>
+      <Trend
+        points={release.periods.map((period) => ({
+          period,
+          value: total('world', 'imports', period),
+        }))}
+        label="Sample imports for the four selected chapters"
+      />
+    </section>
+    <aside class="card market-card">
+      <p class="section-label">START WITH A MARKET</p>
+      <h2>Where goods move</h2>
+      <p>Explore the US trade relationship with a partner.</p>
+      <ul class="market-list">
+        {countries.map((p, i) => (
+          <li>
+            <a href={countryUrl(p.id)}>
+              <span class="country-initial">
+                {['CA', 'MX', 'CN', 'IN', 'DE'][i]}
+              </span>
+              <span>{p.name}</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  </div>
+  <section class="card table-card">
+    <div class="card-heading">
+      <div>
+        <p class="section-label">FIND YOUR PRODUCT</p>
+        <h2>A closer look by chapter</h2>
+      </div>
+      <a href={href('search/')}>Browse products →</a>
+    </div>
+    <DataTable
+      rows={rows}
+      subject="Product"
+      caption={`Sample general imports · world · ${month(latest)} · nominal USD`}
+    />
+  </section>
+  <Provenance />
+</Layout>

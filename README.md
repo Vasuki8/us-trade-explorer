@@ -1,6 +1,17 @@
-# US Trade Explorer design
+# US Trade Explorer
 
-Design baseline: 1 October 2026. Status: preimplementation design for review. No website, ingestion, accounts, advertisements or payment integration has been deployed.
+Design baseline: 1 October 2026. Status: working local public preview with synthetic data, plus tested ingestion and release-safety foundations. No production website, accounts, advertisements or payment integration has been deployed.
+
+## Run the preview
+
+```sh
+npm ci --ignore-scripts
+npm run dev
+```
+
+Requires Node 24. Open the loopback URL printed by Astro. The sample has four product chapters, five countries and 25 months; its figures are invented. All pages are noindex, and production publication is deliberately blocked. See [operations and Census key setup](docs/operations.md), [implementation status](docs/implementation-status.md), and the [implementation plan](docs/superpowers/plans/2026-10-01-public-mvp.md).
+
+Run `npm test`, `npm run check`, `npm run build`, and `python -m unittest discover -s pipeline/tests -v`. Browser journeys use `npx playwright test` after `npx playwright install chromium`. Tests cover data contracts, missing values, exact dollars, safe exports, source limits, recovery, UI journeys and failed downloads.
 
 Build a fast public reference for US merchandise imports and exports. Visitors should find a product or trading partner, understand its measured changes, compare markets, and download a reproducible result. Public profiles remain useful and free when subscriptions arrive.
 
@@ -43,7 +54,7 @@ The seven public sections are overview, product search, product profiles, countr
 
 Official source documentation, current API authentication requirements, major hosting terms and selected jurisdiction requirements were checked on 1 October 2026. The repository was confirmed empty before these documents were added. Important findings include Census API authentication and attribution requirements, India’s phased DPDP commencement, CERT-In logging/reporting requirements, the 2025 Mexico subscription amendments, and Stripe's invite-only onboarding in India. Each substantive finding is linked in the relevant document.
 
-No live Census dataset has been ingested or reconciled. No runtime security, performance, accessibility, recovery, payment or cross-region hosting test has run. Actual provider logging, entitlement behavior and all launch acceptance tests remain implementation work. Some primary legal pages could not be fully retrieved; those gaps are identified instead of being treated as verified law.
+No live Census dataset has been ingested or reconciled. Local contract, recovery, browser and static-output checks are now implemented; see the implementation status for specific evidence and limitations. Actual provider logging, production security enforcement, comprehensive accessibility, payment and cross-region hosting tests remain outstanding. Some primary legal pages could not be fully retrieved; those gaps are identified instead of being treated as verified law.
 
 ## Decisions still needed
 

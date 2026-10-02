@@ -1,0 +1,18 @@
+---
+import Profile from '../components/Profile.astro';
+import { release, countries } from '../lib/data';
+export function getStaticPaths() {
+  return (['imports', 'exports'] as const).flatMap((flow) => [
+    ...release.products.map((p) => ({
+      params: { profile: `products/hs/${p.edition}/${p.code}/${flow}` },
+      props: { kind: 'product' as const, id: p.code, flow },
+    })),
+    ...countries.map((p) => ({
+      params: { profile: `countries/${p.id}/${flow}` },
+      props: { kind: 'country' as const, id: p.id, flow },
+    })),
+  ]);
+}
+---
+
+<Profile {...Astro.props} />

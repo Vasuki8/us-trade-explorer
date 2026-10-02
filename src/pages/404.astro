@@ -1,0 +1,21 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { href } from '../lib/data';
+---
+
+<Layout
+  title="Page not found"
+  description="This page is unavailable. Find a product, country or the current data release."
+>
+  <div class="empty-state page-intro">
+    <p class="eyebrow">404 / PAGE NOT FOUND</p>
+    <h1>Let’s find the right view.</h1>
+    <p>
+      This URL is not part of the available release. A missing page does not
+      mean that trade is zero.
+    </p>
+    <a class="button" href={href('search/')}>
+      Find a product →
+    </a>
+  </div>
+</Layout>

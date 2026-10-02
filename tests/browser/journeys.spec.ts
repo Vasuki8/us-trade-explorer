@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 const previewOrigin = 'http://127.0.0.1:4321';
 const sitePath = (path: string) =>
@@ -42,6 +43,77 @@ const sample = JSON.parse(
     'utf8',
   ),
 );
+test('release downloads bind public JSON to sample metadata', async ({
+  page,
+}) => {
+  const releaseId = 'sample-2026-07-v1';
+  const dataPath = sitePath(`/data/${releaseId}.json`);
+  const metadataPath = sitePath(`/data/${releaseId}.manifest.json`);
+  await page.goto(sitePath(`/releases/${releaseId}/`));
+  await expect(
+    page.getByText(/invented figures, not official US trade statistics/),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/No official reconciliation is claimed/),
+  ).toBeVisible();
+  const metadataLink = page.locator(`a[href="${metadataPath}"]`);
+  await expect(metadataLink).toBeVisible();
+  await expect(metadataLink).toContainText(/metadata/i);
+  await expect(page.locator(`a[href="${dataPath}"]`)).toBeVisible();
+
+  const [dataResponse, metadataResponse] = await Promise.all([
+    page.request.get(dataPath),
+    page.request.get(metadataPath),
+  ]);
+  expect(dataResponse.status()).toBe(200);
+  expect(metadataResponse.status()).toBe(200);
+  expect(dataResponse.headers()['content-type']).toContain('application/json');
+  expect(metadataResponse.headers()['content-type']).toContain(
+    'application/json',
+  );
+  const bytes = await dataResponse.body();
+  const json = bytes.toString('utf8');
+  const metadataText = await metadataResponse.text();
+  expect(JSON.parse(json)).toEqual(sample);
+  expect(json).toBe(JSON.stringify(sample));
+  expect(JSON.parse(metadataText)).toEqual({
+    schemaVersion: 1,
+    artifact: 'public-trade-release',
+    mode: 'sample',
+    source: 'synthetic',
+    releaseId,
+    releaseSchemaVersion: 1,
+    contentHash: createHash('sha256').update(bytes).digest('hex'),
+    contentBytes: bytes.byteLength,
+    basis: sample.basis,
+    scope: sample.scope,
+    coverage: {
+      kind: 'selected-synthetic-fixture',
+      productCodes: ['09', '84', '85', '87'],
+      partnerIds: ['world', 'canada', 'mexico', 'china', 'india', 'germany'],
+      periods: sample.periods,
+      flows: ['imports', 'exports'],
+      worldControlScope: 'included-synthetic-chapters',
+    },
+    classification: {
+      system: 'HS',
+      edition: 'HS2022',
+      level: 'HS2',
+      claim: 'synthetic-label-only',
+    },
+    provenance: {
+      claim: 'synthetic-illustration-only',
+      officialReleaseDate: null,
+      officialRevisionDate: null,
+      ingestedAt: sample.ingestedAt,
+      revisionDetectedAt: null,
+    },
+  });
+  expect(`${json}\n${metadataText}`).not.toMatch(
+    /CENSUS_API_KEY|GH_TOKEN|sourceQuery|sourceHash|candidateId|scanId|receiptId|rawHash|publicationBlockers|leafInventoryApproved|apiVintageVerified|publicationReady|canary/i,
+  );
+});
+
 test('overview fits the viewport and search leads to a substantive product profile', async ({
   page,
 }, info) => {

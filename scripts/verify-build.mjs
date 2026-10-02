@@ -1,6 +1,12 @@
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';
+import {
+  loadPublicRelease,
+  validatePublicManifest,
+  MAX_PUBLIC_MANIFEST_BYTES,
+  MAX_PUBLIC_RELEASE_BYTES,
+} from '../packages/contracts/public-release.ts';
 const root = resolve('dist'),
   base = process.env.BASE_PATH || '/';
 function files(dir) {
@@ -13,6 +19,40 @@ const all = files(root),
 function check(ok, msg) {
   if (!ok) throw new Error(msg);
 }
+function readBounded(path, limit) {
+  check(statSync(path).size <= limit, 'Public metadata exceeds byte limit');
+  return readFileSync(path);
+}
+const pinnedManifest = validatePublicManifest(
+  JSON.parse(
+    new TextDecoder('utf-8', { fatal: true }).decode(
+      readBounded(
+        resolve('releases/sample-2026-07-v1.manifest.json'),
+        MAX_PUBLIC_MANIFEST_BYTES,
+      ),
+    ),
+  ),
+);
+const generatedMetadataBytes = readBounded(
+  join(root, 'data', `${pinnedManifest.releaseId}.manifest.json`),
+  MAX_PUBLIC_MANIFEST_BYTES,
+);
+// Check raw bytes: JSON parsing alone can discard duplicate private fields.
+check(
+  generatedMetadataBytes.equals(
+    Buffer.from(JSON.stringify(pinnedManifest), 'utf8'),
+  ),
+  'Public metadata is not canonical pinned JSON',
+);
+await loadPublicRelease(pinnedManifest, (contentHash) => {
+  check(contentHash === pinnedManifest.contentHash, 'Unexpected public hash');
+  const path = join(root, 'data', `${pinnedManifest.releaseId}.json`);
+  check(
+    statSync(path).size <= MAX_PUBLIC_RELEASE_BYTES,
+    'Public JSON too large',
+  );
+  return readFileSync(path);
+});
 let scriptBytes = 0;
 for (const path of all) {
   const bytes = readFileSync(path),
@@ -71,5 +111,5 @@ check(
   'Sample sitemap must be empty',
 );
 console.log(
-  `Verified ${html.length} HTML pages, internal links, sample noindex, secret patterns and asset budgets (${scriptBytes} bytes gzipped JS).`,
+  `Verified pinned public JSON/metadata, ${html.length} HTML pages, internal links, sample noindex, secret patterns and asset budgets (${scriptBytes} bytes gzipped JS).`,
 );

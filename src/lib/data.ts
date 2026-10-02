@@ -1,13 +1,32 @@
 import sample from '../../tests/fixtures/sample-release.json';
+import manifest from '../../releases/sample-2026-07-v1.manifest.json';
 import {
-  validateRelease,
+  encodePublicRelease,
+  loadPublicRelease,
+  validatePublicManifest,
+} from '../../packages/contracts/public-release';
+import {
   valueAt,
   sum,
   change,
   previousYear,
   type Flow,
 } from '../../packages/contracts/trade';
-export const release = validateRelease(sample);
+const sampleBytes = encodePublicRelease(sample);
+export const publicManifest = validatePublicManifest(manifest);
+export const release = await loadPublicRelease(
+  publicManifest,
+  (contentHash) => {
+    if (contentHash !== publicManifest.contentHash) {
+      throw new Error('Unsupported public sample content hash');
+    }
+    return sampleBytes;
+  },
+);
+// Immutable text preserves the exact validated UTF-8 encoding for the endpoint.
+export const publicReleaseJSON = new TextDecoder('utf-8', {
+  fatal: true,
+}).decode(sampleBytes);
 export const latest = release.periods.at(-1)!;
 export const countries = release.partners.filter((p) => p.kind === 'country');
 export const href = (path: string) =>

@@ -66,6 +66,8 @@ The [offline coverage diagnostic](docs/partner-coverage-diagnostics.md) generate
 
 Local contract, recovery, browser and static-output checks are implemented; see the [implementation status](docs/implementation-status.md) and [handoff](docs/handoff.md) for specific evidence and limits. Actual provider logging, production security enforcement, comprehensive accessibility, payment and cross-region hosting tests remain outstanding. Some primary legal pages could not be fully retrieved; those gaps are identified instead of being treated as verified law.
 
+Product search accepts exact chapter codes such as `09` and `HS 09`. A detailed query such as `090111` explains the HS2-only preview boundary and offers broader chapter `09` coverage by explicit choice. The suggestion does not validate the detailed code or represent its trade. Broad name searches retain every match; absent/malformed queries provide clear recovery, and bounded query state survives reload/back/forward. The [handoff](docs/handoff.md) distinguishes local tests from review/CI/integration receipts.
+
 ## Decisions still needed
 
 Supply the operator's legal identity and contact information, domain, actual budget and launch-country order. Confirm provider contracts, retention capabilities and India payment onboarding. Obtain the scoped legal/accounting reviews in the matrix before activating the affected features. Repository visibility stays private unless deliberately changed.

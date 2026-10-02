@@ -1,5 +1,11 @@
 # Development handoff
 
+## Product-search guidance increment (2 October 2026)
+
+Current bounded work starts on `feat/product-search-guidance` from receipt/main `95cf557af49d3795778fd9a6c467add60d406d2b`, following merged runtime PR #21. It implements the existing [search exceptional flow](design/02-experience-and-seo.md): detailed code queries explain HS2-only coverage and offer an available parent chapter by explicit choice, without claiming detailed-product analytics or classification validity. Exact/prefixed chapter queries, ambiguous descriptions, bounded URL state and recovery remain part of the search journey. The linked development worktree is clean at the starting commit; **54 baseline Node tests passed without skips**. The primary checkout's pre-existing local handoff edit and ignored private evidence are preserved. No new provider, source, publication or subscription scope is authorized; synthetic/noindex/production-blocked behavior and AWS deferral remain. Implementation, verification, independent review and CI/integration receipts will follow each completed task.
+
+Completed read-only scope assessment: the committed substring matcher accepts `09` but returns no matches for `HS 09` or detailed 4/6/8/10-digit codes beginning with `09`; `machinery` already returns both 84 and 85. The change must preserve broad matches and leading zeroes, disclose that syntactic code recognition cannot validate a customs classification, and require a click before opening broader chapter coverage. A separate navigation issue was identified: country-profile exploration links omit product scope and therefore default to chapter 09. Explicit product-set semantics require a later bounded increment; this search task does not resolve that issue. No private evidence, network or source data was accessed by the assessor.
+
 Updated **2 October 2026**. This is a working handoff for a maintainer without the conversation history. Exact receipts below record merged implementation, verified private acquisition/recovery and the remaining public-release gates.
 
 ## Purpose and confirmed decisions

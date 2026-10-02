@@ -156,7 +156,9 @@ def fetch_candidate(flow,period,key,*,product='09',partner='1220'):
     # Census recommends YEAR/MONTH and smaller queries to reduce timeouts.
     dimensions=aggregate_dimensions(flow)
     query={
-        'get':','.join([f'{prefix}_COMMODITY',f'{prefix}_COMMODITY_SDESC','CTY_CODE','CTY_NAME',value,'COMM_LVL',*dimensions]),
+        # Filter columns are returned by Census; requesting them again in get
+        # duplicates the response header. Keep get and predicates disjoint.
+        'get':','.join([f'{prefix}_COMMODITY_SDESC','CTY_NAME',value]),
         'YEAR':period[:4],'MONTH':period[5:],'COMM_LVL':'HS2',
         f'{prefix}_COMMODITY':product,'CTY_CODE':partner,**dimensions,
     }

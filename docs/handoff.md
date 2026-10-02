@@ -1,6 +1,6 @@
 # Development handoff
 
-Updated **2 October 2026**. This is a working handoff for a maintainer without the conversation history. Exact receipts below describe completed work; the separate development section describes work that is still in progress.
+Updated **2 October 2026**. This is a working handoff for a maintainer without the conversation history. Exact receipts below distinguish the verified main baseline from the reviewed, unmerged development increment.
 
 ## Purpose and confirmed decisions
 
@@ -89,11 +89,15 @@ If artifacts expire, preserve and verify any existing local copy offline. Otherw
 
 Branch **`feat/census-raw-archive`** starts at main `3b0f42d8704f4424c15aa2351cbb2a2593b48281`. The [implementation plan](superpowers/plans/2026-10-02-census-raw-archive.md) adds a separately named archived-batch protocol around the existing normalized contract. Implemented evidence is exact content-addressed raw response bytes, independently reparsed against candidate scope/hash/rows, a verified archive receipt, and bounded trusted-main artifact restore. Legacy normalized batches and control reports stay compatible. The [archive guide](census-archive.md) describes commands, bounds, migration and interruption recovery.
 
-Local verification on 2 October 2026 passed: **131 Python tests** (one directory-symlink test skipped because this Windows machine lacks the privilege), **9 Node tests**, Astro check with zero errors/warnings, and a 30-page build with internal-link, sample/noindex, secret-pattern and asset checks. The Linux CI run must exercise the skipped symlink test and repeat both browser base paths. Independent whole-branch review, PR creation and CI are pending at this recorded stage.
+The increment is in [PR #13](https://github.com/Vasuki8/us-trade-explorer/pull/13). Implementation/review head is **`6775535c66144e435b008bafbe8949cda5263e19`**, reviewed against main `3b0f42d8704f4424c15aa2351cbb2a2593b48281`. One fresh independent whole-branch review found **no critical, important or minor findings** and independently reran the complete Python suite. Later documentation receipts do not change the reviewed runtime implementation; Git history and the PR identify their commits. Specific PR #13 merge permission has not been granted.
+
+Local verification on 2 October 2026 passed: **131 Python tests** (one directory-symlink test skipped because this Windows machine lacks the privilege), **9 Node tests**, Astro check with zero errors/warnings, and a 30-page build with internal-link, sample/noindex, secret-pattern and asset checks. [Implementation Checks run 37034031089](https://github.com/Vasuki8/us-trade-explorer/actions/runs/37034031089) passed **all 131 Python tests with no skip**, including the directory-symlink regression, plus 9 Node tests, Astro checks, both configured builds, **16 browser journeys at each base path**, and production-publication rejection. Before merging, verify the latest PR head's checks also pass; the implementation receipt alone does not cover a later changed head.
 
 Recovery regressions reproduced and fixed two interruption cases: a valid orphan appearing after an earlier complete receipt, and a leftover regular `.pending-*` write. The former is independently checked and can be incorporated offline; strict verification still requires exact retained inventory. Temporaries remain locally and never count as evidence. Missing/corrupt raw evidence for a normalized candidate still fails before networking.
 
-Authenticated archived acquisition and recovery can be exercised only after the new code is reviewed and approved for main. Do not imply that the PR #12 live evidence already includes raw statistical bytes. There is no new live archival receipt or approved merge yet.
+Review scope decisions: authenticated archive acquisition/recovery remain a post-merge test; full inventory, vintage, classification and public projection remain publication gates; controlled local evidence and seven-day private artifacts are development storage rather than independent durable backups. Refresh history must stay within fixed bounds, and stale locks require an operator to confirm the process stopped. Hostile concurrent filesystem replacement and independently hard DNS deadlines are not new guarantees. These limits are accepted for this private increment; removing them requires explicit engineering and operational verification, and an incorrect assumption could lose recovery evidence or misstate completeness.
+
+Authenticated archived acquisition and recovery can be exercised only after the new code is approved for main. Do not imply that the PR #12 live evidence already includes raw statistical bytes. There is no new live archival receipt or approved merge yet.
 
 ## Reliable local commands
 
@@ -116,7 +120,7 @@ Sandboxed Windows temporary-directory access and subprocess spawning have previo
 
 ## Next publication and launch gates
 
-1. Finish exact raw statistical capture, safe reuse/restore and failure tests; verify, independently review, push and create the new PR. Update this handoff with its actual state, obtain specific merge permission, then run authenticated archived acquisition and recovery on trusted main.
+1. Verify the latest PR #13 head checks, obtain specific merge permission, then run authenticated archived acquisition and recovery on trusted main. Capture market and world plans separately, restore successful archived runs without refresh, independently compare the exact files/receipts and record the resulting run IDs. Preserve evidence before artifact expiry. The workflow is not proven live until those runs and independent comparisons pass.
 2. Design a bounded full-leaf scan and approve per-flow/per-period partner and commodity inventories, including special statistical buckets, US territories and non-overlapping aggregate rules. Reporting-code lists or selected markets are not a complete inventory.
 3. Establish compatible dimensions and revision vintage, exact full-world reconciliation with documented rules and classification comparability. A `LAST_UPDATE` label, matched month or unchanged code alone is insufficient evidence.
 4. Build an explicit public DTO/release projection and loader with provenance, validation receipts and missing states. Keep private evidence out of public output, preserve the last valid release on failed updates, and add meaningful production-boundary tests before changing sample/noindex/canonical/sitemap behavior.

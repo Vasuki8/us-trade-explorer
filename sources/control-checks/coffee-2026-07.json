@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "basis": "census-monthly-goods-nsa-usd-v1",
+  "period": "2026-07",
+  "product": "09",
+  "partners": [
+    {"code": "1220", "name": "Canada"},
+    {"code": "2010", "name": "Mexico"},
+    {"code": "5330", "name": "India"},
+    {"code": "5700", "name": "China"}
+  ],
+  "inventorySourceURL": "https://www.census.gov/foreign-trade/schedules/c/countrycodes.html",
+  "reviewedOn": "2026-10-02"
+}

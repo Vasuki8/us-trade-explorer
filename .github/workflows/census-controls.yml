@@ -1,0 +1,54 @@
+name: Verify private Census controls
+on:
+  workflow_dispatch:
+    inputs:
+      market_run:
+        description: 'Completed main market-batch run ID with an unexpired artifact'
+        required: true
+        type: string
+      world_run:
+        description: 'Completed main world-control batch run ID with an unexpired artifact'
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: census-control-report
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: census-ingestion
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.14'
+      - name: Restore verified inputs and produce a private subset report
+        env:
+          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          REQUEST_MARKET_RUN: ${{ inputs.market_run }}
+          REQUEST_WORLD_RUN: ${{ inputs.world_run }}
+        run: |
+          if [[ ! "$REQUEST_MARKET_RUN" =~ ^[1-9][0-9]{0,19}$ || ! "$REQUEST_WORLD_RUN" =~ ^[1-9][0-9]{0,19}$ ]]; then
+            echo 'Invalid input batch run ID'
+            exit 1
+          fi
+          python -m pipeline.controls --market-run "$REQUEST_MARKET_RUN" --world-run "$REQUEST_WORLD_RUN" --output pipeline/output/controls
+      - name: Preserve the completed private report and its verified source evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: census-controls-${{ github.run_id }}
+          path: |
+            pipeline/output/controls/
+            !pipeline/output/controls/**/.pending-*
+            !pipeline/output/controls/**/batch.lock
+          if-no-files-found: error
+          retention-days: 7
+      # No public build, deployment, active release or publication approval.

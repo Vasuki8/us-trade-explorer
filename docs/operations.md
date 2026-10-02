@@ -48,6 +48,8 @@ This first connector is **candidate-only**. Its handling of default Census dimen
 
 ## Release promotion remains a separate gate
 
+Private [market/world control reports](census-controls.md) now attach verified initial-announcement evidence and exact selected-market checks. They retain the full-coverage, revision-vintage, raw-archive and classification blockers and cannot activate public data. The [batch record](census-batches.md) contains the successful live market acquisition/recovery receipts.
+
 The public fixture cannot be switched to official mode with an environment variable. Before introducing an official release loader:
 
 - Establish the complete HS2 chapter and partner inventories for each period, including aggregate/special codes. Preserve classification vintages; do not infer missing observations as zero.

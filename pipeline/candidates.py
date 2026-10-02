@@ -72,6 +72,8 @@ def validate_candidate(value, slot):
     require(value['scope'] == {'commodityLevel': 'HS2', 'product': product, 'partner': partner, 'coverage': 'unverified'}, 'Evidence scope mismatch')
     prefix, variable = ('I', 'GEN_VAL_MO') if flow == 'imports' else ('E', 'ALL_VAL_MO')
     expected_query = {'get': f'{prefix}_COMMODITY_SDESC,CTY_NAME,{variable}', 'YEAR': period[:4], 'MONTH': period[5:], 'COMM_LVL': 'HS2', f'{prefix}_COMMODITY': product, 'CTY_CODE': partner, **aggregate_dimensions(flow)}
+    if partner == '-':
+        expected_query['SUMMARY_LVL'] = 'DET'
     require(value['sourceQuery'] == expected_query, 'Evidence query mismatch')
     require(value['officialReleaseDate'] is None and value['officialRevisionDate'] is None)
     require(value['publicationBlockers'] == BLOCKERS, 'Missing publication blockers')

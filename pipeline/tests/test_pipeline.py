@@ -10,7 +10,7 @@ from pipeline.census import parse_rows, fetch_candidate, SourceError, fetch_byte
 from pipeline.store import ReleaseStore
 
 HEADER = ['I_COMMODITY','I_COMMODITY_SDESC','CTY_CODE','CTY_NAME','GEN_VAL_MO','time','COMM_LVL','CTY_SUBCODE','DISTRICT','RP']
-DATA = [HEADER, ['09','Coffee, tea','1220','Canada','123456','2026-07','HS2','0','00','00']]
+DATA = [HEADER, ['09','Coffee, tea','1220','Canada','123456','2026-07','HS2','-','-','-']]
 
 class CensusTests(unittest.TestCase):
     def test_encoded_reflected_key_never_enters_evidence(self):
@@ -32,7 +32,8 @@ class CensusTests(unittest.TestCase):
                 return response
             connection.getresponse.side_effect=headers;response.read1.side_effect=blocked_read
             start=time.monotonic()
-            with patch('pipeline.census.RESPONSE_SECONDS',.03,create=True),patch('pipeline.census.http.client.HTTPSConnection',return_value=connection),self.assertRaises(SourceError):fetch_bytes('https://api.census.gov/data/timeseries/intltrade/imports/hs')
+            with patch('pipeline.census.RESPONSE_SECONDS',.03,create=True),patch('pipeline.census.http.client.HTTPSConnection',return_value=connection),self.assertRaises(SourceError) as error:fetch_bytes('https://api.census.gov/data/timeseries/intltrade/imports/hs')
+            self.assertEqual(error.exception.category,phase+'_timeout')
             self.assertLess(time.monotonic()-start,.4)
     def test_redirect_oversize_and_non_json_bodies_are_rejected_before_read(self):
         for status,headers in [(302,{'Location':'https://evil.test'}),(200,{'Content-Type':'application/json','Content-Length':str(11*1024*1024)}),(200,{'Content-Type':'text/html'})]:

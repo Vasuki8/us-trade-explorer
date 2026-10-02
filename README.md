@@ -60,6 +60,8 @@ Authenticated private Census acquisition has passed for July 2026, HS2 chapter 0
 
 The [private partner-discovery increment](docs/census-partners.md) is reviewed, merged and live-verified for the same month/chapter: 138 import observations and 122 export observations, with exact raw evidence, immutable receipts and byte-identical Actions recovery. Numeric codes remain unreviewed observations until a period-specific additive inventory is approved. The [handoff](docs/handoff.md) records review, integration, authenticated runs, evidence identities and expiry as each task completes.
 
+The [public release boundary](docs/public-release-boundary.md) now connects the fixed synthetic fixture to a public-only frozen projection and checksum-pinned loader. JSON, CSV and a new sample metadata download share that validated release; local checks cover actual HTTP download integrity at root and project paths. The [July coverage review](docs/census-coverage-review.md) records exploratory exact arithmetic and unresolved inventory/vintage/classification gates. Official publication remains unsupported; integration/review/CI receipts are maintained in the handoff.
+
 Local contract, recovery, browser and static-output checks are implemented; see the [implementation status](docs/implementation-status.md) and [handoff](docs/handoff.md) for specific evidence and limits. Actual provider logging, production security enforcement, comprehensive accessibility, payment and cross-region hosting tests remain outstanding. Some primary legal pages could not be fully retrieved; those gaps are identified instead of being treated as verified law.
 
 ## Decisions still needed

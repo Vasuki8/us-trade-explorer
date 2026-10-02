@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "basis": "census-monthly-goods-nsa-usd-v1",
+  "partitions": [
+    {"flow": "imports", "period": "2026-07", "product": "09", "partner": "1220"},
+    {"flow": "exports", "period": "2026-07", "product": "09", "partner": "1220"},
+    {"flow": "imports", "period": "2026-07", "product": "09", "partner": "2010"},
+    {"flow": "exports", "period": "2026-07", "product": "09", "partner": "2010"},
+    {"flow": "imports", "period": "2026-07", "product": "09", "partner": "5330"},
+    {"flow": "exports", "period": "2026-07", "product": "09", "partner": "5330"},
+    {"flow": "imports", "period": "2026-07", "product": "09", "partner": "5700"},
+    {"flow": "exports", "period": "2026-07", "product": "09", "partner": "5700"}
+  ]
+}

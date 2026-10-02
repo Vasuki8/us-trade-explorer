@@ -1,5 +1,7 @@
 # Census acquisition development — 2 October 2026
 
+Current status: PR #10 was merged as `4b7c0a2c10b2819484a5dcc51c383a8bbeaa53e7`. The corrected singleton [imports probe](https://github.com/Vasuki8/us-trade-explorer/actions/runs/36967466271) and [exports probe](https://github.com/Vasuki8/us-trade-explorer/actions/runs/36967536133) passed for July 2026 / chapter 09 / Canada; both private artifact digests and candidate metadata were verified. These establish compatibility only for the tested selections. The earlier investigation below remains historical evidence. The next [private batch increment](census-batches.md) adds explicit inventories and resumable candidate bundles; broader coverage and public reconciliation remain separate gates.
+
 ## Evidence and scope
 
 The first main-branch acquisition, [run 36957552437](https://github.com/Vasuki8/us-trade-explorer/actions/runs/36957552437), failed after three bounded attempts. Its generic error did not retain the transport stage or HTTP status. It uploaded no candidate and changed no public data. We cannot establish its exact cause or whether Census accepted the key from that log.

@@ -131,12 +131,13 @@ class BatchTests(unittest.TestCase):
     def test_crash_after_object_write_recovers_without_duplicate_or_overwrite(self):
         original = batch.atomic_write
         def interrupted(path, data):
-            if path.name == 'progress.json' and b'"candidateId"' in data:
+            if path.name == 'progress.json' and any(entry['state'] == 'successful' for entry in json.loads(data)['entries']):
                 raise OSError('Simulated crash before success journal')
             original(path, data)
         with patch('pipeline.census.fetch_bytes', side_effect=source_response), patch('pipeline.batch.atomic_write', side_effect=interrupted), self.assertRaises(SourceError):
             batch.run_batch(PLAN, self.root, KEY)
         objects = {p.name: p.read_bytes() for p in (self.root / 'objects').glob('*.json')}
+        self.assertEqual(len(objects), 1, 'The interruption must happen after a candidate is persisted')
         self.complete()
         for name, raw in objects.items():
             self.assertEqual((self.root / 'objects' / name).read_bytes(), raw)

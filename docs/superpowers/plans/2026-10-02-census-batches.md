@@ -67,7 +67,7 @@ Files: `.github/workflows/census-batch.yml`, `sources/batches/coffee-markets-202
 - [x] Add main-only manual workflow, pinned Actions, 20-minute cap, eight-slot plan, optional prior-run resume, explicit private output and failure-evidence upload.
 - [x] Document commands, refresh/resume behavior, artifact expiry, recovery, source interpretation and unresolved global reconciliation/classification gates.
 - [ ] Run Python suite, `npm run verify`, diff checks and GitHub Checks on the PR; frontend browser journeys remain required by existing CI.
-- [ ] Obtain independent whole-branch review; address material findings with regression tests.
+- [x] Obtain independent whole-branch review; address material findings with regression tests.
 - [ ] Create and attach a concrete PR; request merge approval only after review and CI pass. Authenticated batch execution waits for merged trusted main.
 
 ## Official evidence
@@ -77,3 +77,5 @@ The selected partner codes (Canada 1220, Mexico 2010, India 5330, China 5700) ar
 ## Local verification
 
 65 Python tests passed, including the real batch CLI with an eight-slot fabricated source. 9 Node contract tests passed; Astro reported zero errors/warnings/hints; the 30-page build passed links, sample noindex, secret-pattern and size checks. The batch tests failed before implementation. Additional regression tests demonstrated that missing ingestion credentials must block restore and that JSON-escaped GitHub token reflections must never persist; both passed after correction. No authenticated batch run is claimed. Native Windows test execution required ordinary sandbox escalation for temporary-directory access. Runtime bookkeeping remains in ignored `.local/`.
+
+Independent whole-branch review found no runtime defects. It found that the crash test interrupted the initial pending journal rather than the post-object success write. A nonempty-object assertion reproduced the gap, then the injection was corrected to the successful journal boundary; recovery preserved the already-persisted bytes. Live Actions archive interoperability, source-vintage reconciliation and provider settings remain explicitly unverified until the corresponding systems run. Those are later gates, not inferred local passes.

@@ -31,6 +31,10 @@ if (root) {
     query = parseQuery(new URLSearchParams(location.search), release);
     selected = [];
     status.textContent = '';
+    const fallback =
+      document.querySelector<HTMLInputElement>('#share-fallback')!;
+    fallback.hidden = true;
+    fallback.value = '';
     for (const name of ['product', 'flow', 'period'] as const)
       (form.elements.namedItem(name) as HTMLSelectElement).value = query[name];
     form

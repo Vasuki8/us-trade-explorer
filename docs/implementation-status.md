@@ -21,7 +21,11 @@ The frontend resides at repository root `src/` rather than `apps/web/` to keep t
 
 ## Verification evidence
 
-Verified locally: 7 Node contract tests, 11 Python source/store/reconciliation tests, and 12 desktop/mobile Playwright journeys. Astro checks reported zero errors, warnings or hints. Both root and `/trade/` builds verified 30 HTML pages and their internal links; compressed JavaScript totaled 4,405 bytes. Browser tests include escaped hostile source text, download failure, failed data loading, missing baselines, invalid URLs, actual HTTP 404, no-JavaScript profiles and compatibility with the proposed CSP. The dependency installation audit reported zero known vulnerabilities at the time of installation; that result is not a complete security audit.
+Before final review, 7 Node contract tests, 11 Python source/store/reconciliation tests, and 12 desktop/mobile Playwright journeys passed locally. Astro checks reported zero errors, warnings or hints. Both root and `/trade/` builds verified 30 HTML pages and their internal links. Browser tests include escaped hostile source text, download failure, failed data loading, missing baselines, invalid URLs, actual HTTP 404, no-JavaScript profiles and compatibility with the proposed CSP. The dependency installation and production dependency audits reported zero known vulnerabilities at the time of checking; that result is not a complete security audit. The [licence inventory](dependency-licences.md) records the lockfile's declared licences, including copyleft transitive build dependencies.
+
+An independent whole-branch review found encoded credential reflection and incomplete response deadline enforcement, plus percentage rounding, large chart ticks and stale clipboard fallback issues. Each received a failing regression test before correction. The source reader now rejects keys after JSON decoding and uses an absolute socket watchdog through both response headers and detached bodies. Displayed percentage ratios round once using integer arithmetic; chart ticks accept the full declared value range; changing filters clears obsolete share links. Final post-review totals are recorded below after the complete suite.
+
+Final local result: **9 Node tests + 13 Python tests + 14 browser tests = 36 passing tests**. Astro reported zero errors, warnings or hints; the build verified 30 HTML pages, internal links, noindex, artifact secret patterns and 4,441 bytes of compressed JavaScript. A production-mode build was deliberately attempted and correctly rejected. Root and subpath output checks passed. All five review findings were addressed; no review findings were deferred. Remote GitHub Actions and real Census acquisition have not run at the time of this local receipt.
 
 Preview screenshots are generated under ignored `.local/` by browser tests. The app's interactive browser connection timed out; isolated headless Chrome was used for browser testing and screenshot inspection instead. Desktop and mobile screenshots were inspected; no horizontal page overflow was observed at the tested sizes. This is not a full screen-reader or WCAG conformance audit.
 
@@ -35,3 +39,14 @@ Preview screenshots are generated under ignored `.local/` by browser tests. The 
 - Accounts, subscriptions, private workspaces, alerts and payment integration (design only).
 
 The local store's atomic filesystem tests do not prove atomic cloud activation. The proposed CSP can be tested in a local browser, but host enforcement requires real deployment checks. Production publication remains blocked to keep these distinctions explicit.
+
+## Implementation decisions and review scope
+
+- Used a manual sibling worktree because the app's native tool targeted a non-repository parent. Cost: this checkout is not a managed app attachment and must be retained for local work.
+- Kept a labelled synthetic preview until live reconciliation is available. Cost: it is not an official-data launch.
+- Started with standard-library Python and JSON. Cost: bulk Parquet/history storage remains future work.
+- Kept the single Astro app at repository root. Cost: introduce a workspace layout when a backend is added.
+- Used a Windows-native temporary execution ledger instead of Unix workflow helpers. No product behavior depends on it.
+- Used isolated headless Chrome after the in-app browser timed out. Cost: the in-app interactive preview itself remains unverified.
+- Treated the three functional review findings as material because wrong displayed comparisons, contract-valid build failures and stale shared views violate the public analytics journey; fixed them in the same regression-tested pass as the two acquisition findings.
+- Deferred judging live data semantics, provider enforcement/restoration/terms, backend billing, actual spreadsheet application imports and full accessibility conformance because those systems/evidence are not present. Each remains a named launch or expansion gate; no compliance or production-readiness claim is made.

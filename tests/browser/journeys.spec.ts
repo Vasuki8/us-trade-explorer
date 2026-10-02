@@ -40,6 +40,24 @@ test('overview fits the viewport and search leads to a substantive product profi
   ).toBeVisible();
   expect(errors).toEqual([]);
 });
+test('clipboard fallback cannot share a previous filter selection', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    navigator.clipboard.writeText = async () => {
+      throw new Error('denied');
+    };
+  });
+  await page.goto('/compare/?partners=canada');
+  await page.getByRole('button', { name: 'Copy link' }).click();
+  await expect(
+    page.getByRole('textbox', { name: 'Shareable link' }),
+  ).toHaveValue(/partners=canada/);
+  await page.getByLabel('India', { exact: true }).check();
+  await page.getByRole('button', { name: 'Apply filters' }).click();
+  await expect(page.locator('#share-fallback')).toBeHidden();
+  await expect(page.locator('#share-fallback')).toHaveValue('');
+});
 test('the proposed strict CSP permits filtering without inline scripts', async ({
   page,
 }) => {

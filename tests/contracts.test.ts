@@ -8,6 +8,8 @@ import {
   csvCell,
   parseQuery,
   queryString,
+  pct,
+  chartTick,
   type Release,
 } from '../packages/contracts/trade.ts';
 
@@ -18,6 +20,13 @@ const sample = () =>
       'utf8',
     ),
   ) as Release;
+test('percentages round the exact ratio once', () => {
+  assert.equal(pct(change('101151', '100000').percent), '+1.2%');
+  assert.equal(pct(change('98849', '100000').percent), '-1.2%');
+});
+test('large chart ticks remain formattable within the release contract range', () => {
+  assert.doesNotThrow(() => chartTick(1.18e21));
+});
 test('rejects duplicate rows instead of doubling a trade total', () => {
   const r = sample();
   r.observations.push(r.observations[0]);

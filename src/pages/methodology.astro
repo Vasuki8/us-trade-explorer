@@ -42,10 +42,11 @@ import { href } from '../lib/data';
     <h2>Changes and comparisons</h2>
     <p>
       Year-over-year change is (current / previous-year value − 1) × 100. Dollar
-      changes use exact integer arithmetic. Displayed percentages are truncated
-      to two decimal places before display rounding; CSV values preserve integer
-      dollars. A zero baseline has no defined percentage growth. Missing values
-      remain unavailable.
+      changes use exact integer arithmetic. Displayed percentages are rounded
+      directly from the exact ratio to one decimal place, with half values
+      rounded away from zero; CSV values preserve integer dollars. A zero
+      baseline has no defined percentage growth. Missing values remain
+      unavailable.
     </p>
     <p>
       Market shares require a source-consistent world denominator. We never use

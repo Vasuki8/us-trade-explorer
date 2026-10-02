@@ -6,6 +6,7 @@ import json
 import os
 import re
 import socket
+import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -14,6 +15,7 @@ from urllib.parse import urlencode, urlsplit
 HOST = 'api.census.gov'
 MAX_BYTES = 10 * 1024 * 1024
 MAX_ROWS = 100_000
+RESPONSE_SECONDS = 30
 PATHS = {flow:f'/data/timeseries/intltrade/{flow}/hs' for flow in ('imports','exports')}
 
 class SourceError(Exception):
@@ -31,10 +33,25 @@ def fetch_bytes(url):
     if parsed.scheme!='https' or parsed.netloc!=HOST or parsed.path not in PATHS.values() or parsed.fragment:
         raise SourceError('Source is not allowlisted')
     connection=http.client.HTTPSConnection(HOST,timeout=5)
-    deadline=time.monotonic()+30
+    deadline=time.monotonic()+RESPONSE_SECONDS
+    expired=threading.Event()
+    watchdog=None
+    response=None
     try:
         connection.connect()
-        connection.sock.settimeout(max(.1,deadline-time.monotonic()))
+        transport=connection.sock
+        remaining=deadline-time.monotonic()
+        if remaining<=0:raise RetryableSourceError('Source request timed out')
+        # Keep the socket reference: getresponse() may detach it for Connection: close.
+        # Shutdown interrupts header/body reads even if a peer keeps dripping bytes.
+        def abort_response():
+            expired.set()
+            try:transport.shutdown(socket.SHUT_RDWR)
+            except OSError:pass
+        watchdog=threading.Timer(remaining,abort_response)
+        watchdog.daemon=True
+        watchdog.start()
+        transport.settimeout(remaining)
         connection.request('GET',parsed.path+'?'+parsed.query,headers={'Accept':'application/json','Accept-Encoding':'identity','User-Agent':'US-Trade-Explorer/0.1'})
         response=connection.getresponse()
         if response.status in (429,500,502,503,504):raise RetryableSourceError('Source temporarily unavailable')
@@ -48,17 +65,22 @@ def fetch_bytes(url):
         while True:
             remaining=deadline-time.monotonic()
             if remaining<=0:raise RetryableSourceError('Source request timed out')
-            if connection.sock:connection.sock.settimeout(remaining)
+            transport.settimeout(remaining)
             chunk=response.read1(min(65536,MAX_BYTES+1-length))
             if not chunk:break
             chunks.append(chunk);length+=len(chunk)
             if length>MAX_BYTES:raise SourceError('Response exceeds size limit')
+        if expired.is_set() or time.monotonic()>=deadline:raise RetryableSourceError('Source request timed out')
         return b''.join(chunks)
     except SourceError:
         raise
     except (OSError,http.client.HTTPException,socket.timeout):
         raise RetryableSourceError('Source connection failed') from None
     finally:
+        if watchdog is not None:
+            watchdog.cancel()
+            watchdog.join()
+        if response is not None:response.close()
         connection.close()
 
 def parse_rows(data,flow,period):
@@ -102,6 +124,7 @@ def fetch_candidate(flow,period,key):
             try:data=json.loads(raw)
             except (ValueError,UnicodeError):raise SourceError('Invalid JSON response') from None
             rows=parse_rows(data,flow,period)
+            if key in json.dumps(rows,ensure_ascii=False):raise SourceError('Response rejected by evidence safety check')
             return {'schemaVersion':1,'state':'candidate','source':'https://'+HOST+PATHS[flow],'sourceHash':hashlib.sha256(raw).hexdigest(),'flow':flow,'period':period,'officialReleaseDate':None,'officialRevisionDate':None,'ingestedAt':datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),'rows':rows,'publicationBlockers':['Live dimensions and coverage not yet reconciled','Official publication evidence not yet attached']}
         except (RetryableSourceError,OSError):
             if attempt==2:raise SourceError('Source acquisition failed after three attempts') from None

@@ -1,5 +1,5 @@
 ---
-import { money } from '../../packages/contracts/trade';
+import { money, chartTick } from '../../packages/contracts/trade';
 interface Props {
   points: { period: string; value: string | null }[];
   label: string;
@@ -34,7 +34,7 @@ if (segment) segments.push(segment);
           stroke-dasharray="3 5"
         />
         <text x="0" y={y(max * t) + 4} fill="#667983" font-size="12">
-          {money(Math.round(max * t).toString())}
+          {chartTick(max * t)}
         </text>
       </g>
     ))}

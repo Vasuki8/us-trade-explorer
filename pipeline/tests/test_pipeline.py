@@ -1,6 +1,9 @@
 import json
 import tempfile
 import unittest
+import threading
+import time
+import http.client
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from pipeline.census import parse_rows, fetch_candidate, SourceError, fetch_bytes, validate_period
@@ -10,6 +13,27 @@ HEADER = ['I_COMMODITY','I_COMMODITY_SDESC','CTY_CODE','CTY_NAME','GEN_VAL_MO','
 DATA = [HEADER, ['09','Coffee, tea','1220','Canada','123456','2026-07','HS2','0','00','00']]
 
 class CensusTests(unittest.TestCase):
+    def test_encoded_reflected_key_never_enters_evidence(self):
+        bad=json.loads(json.dumps(DATA));bad[1][1]='canary-private-secret'
+        raw=json.dumps(bad).replace('canary-private-secret',r'canary-private-secre\u0074').encode()
+        self.assertNotIn(b'canary-private-secret',raw)
+        with patch('pipeline.census.fetch_bytes',return_value=raw),self.assertRaises(SourceError):fetch_candidate('imports','2026-07','canary-private-secret')
+    def test_absolute_deadline_interrupts_headers_and_detached_body(self):
+        for phase in ['headers','body']:
+            stopped=threading.Event();transport=MagicMock();transport.shutdown.side_effect=lambda how:stopped.set()
+            connection=MagicMock();connection.sock=transport
+            response=MagicMock();response.status=200;response.getheader.side_effect=lambda key,default=None:{'Content-Type':'application/json'}.get(key,default)
+            def blocked_read(*args):
+                if not stopped.wait(.5):raise AssertionError('Absolute response deadline was not enforced')
+                raise http.client.RemoteDisconnected('deadline')
+            def headers():
+                if phase=='headers':return blocked_read()
+                connection.sock=None
+                return response
+            connection.getresponse.side_effect=headers;response.read1.side_effect=blocked_read
+            start=time.monotonic()
+            with patch('pipeline.census.RESPONSE_SECONDS',.03,create=True),patch('pipeline.census.http.client.HTTPSConnection',return_value=connection),self.assertRaises(SourceError):fetch_bytes('https://api.census.gov/data/timeseries/intltrade/imports/hs')
+            self.assertLess(time.monotonic()-start,.4)
     def test_redirect_oversize_and_non_json_bodies_are_rejected_before_read(self):
         for status,headers in [(302,{'Location':'https://evil.test'}),(200,{'Content-Type':'application/json','Content-Length':str(11*1024*1024)}),(200,{'Content-Type':'text/html'})]:
             response=MagicMock();response.status=status;response.getheader.side_effect=lambda key,default=None:headers.get(key,default)

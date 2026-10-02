@@ -239,7 +239,13 @@ export function change(current: string | null, previous: string | null) {
     delta = a - b;
   return {
     delta: delta.toString(),
-    percent: b === 0n ? null : Number((delta * 10000n) / b) / 100,
+    // Round the exact ratio once to a tenth of a percentage point, half away from zero.
+    percent:
+      b === 0n
+        ? null
+        : ((delta < 0n ? -1 : 1) *
+            Number(((delta < 0n ? -delta : delta) * 1000n + b / 2n) / b)) /
+          10,
   };
 }
 export function money(value: string | null, compact = true): string {
@@ -255,6 +261,10 @@ export function pct(value: number | null) {
   return value === null
     ? 'Not defined'
     : `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
+}
+export function chartTick(value: number): string {
+  // Axis geometry is approximate; observation tables and downloads remain exact.
+  return money(BigInt(Math.round(value)).toString());
 }
 export function previousYear(period: string) {
   return `${Number(period.slice(0, 4)) - 1}${period.slice(4)}`;

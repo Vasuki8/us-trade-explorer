@@ -42,8 +42,9 @@ def timestamp(value):
         raise SourceError('Invalid evidence timestamp') from None
 
 
-def decode(raw, secret=None):
-    require(type(raw) is bytes and len(raw) <= MAX_FILE_BYTES, 'Oversized private evidence')
+def decode(raw, secret=None, *, maximum=MAX_FILE_BYTES):
+    require(type(maximum) is int and 0 < maximum <= 2 * 1024 * 1024, 'Invalid private evidence bound')
+    require(type(raw) is bytes and len(raw) <= maximum, 'Oversized private evidence')
     def pairs(entries):
         result = {}
         for key, value in entries:

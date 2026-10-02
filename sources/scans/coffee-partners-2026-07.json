@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "basis": "census-monthly-goods-nsa-usd-v1",
+  "period": "2026-07",
+  "product": "09",
+  "summaryLevel": "DET",
+  "flows": ["exports", "imports"]
+}

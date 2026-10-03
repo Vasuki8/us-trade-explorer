@@ -25,7 +25,7 @@
 - [x] Add `pipeline/provenance.py` builder, validator and bounded CLI; observe RED then GREEN without altering existing evidence.
 - [x] Replay preserved local imports/exports and announcement evidence with sockets, credential lookups and subprocesses prohibited, printing only bounded identities/counts/gates.
 - [x] Update provenance documentation, handoff and status; run complete Python/Node/Astro/build/production checks, inspect diff and commit.
-- [ ] Obtain independent immutable review, pass exact-final-head CI, merge under standing authorization, inspect merged-main and preview/deployment results, preserve the owner's exact edit during synchronization and record final receipts.
+- [x] Obtain independent immutable review, pass exact-final-head CI, merge under standing authorization, inspect merged-main and preview/deployment results and record final receipts. Prepare safe owner-edit synchronization; this documentation-only receipt PR's own final sync/integration results remain in its PR history.
 
 ## Execution ledger
 
@@ -36,3 +36,7 @@
 - TDD: 18 initial tests RED (missing module), then GREEN. Four additional boundary tests pass; focused22 tests have one existing Windows symlink capability limitation. A public-loader regression separately rejects the new private receipt state, including a tampered approval flag, before any payload read.
 - Actual offline replay: four retained fresh/recovery snapshots, both flows; source inputs unchanged, fresh/recovery companion identities equal, receipts2,844/2,851 bytes, all gates false. Sockets, credential lookups, subprocesses and publication download routines were prohibited. Private outputs remain ignored.
 - Full local268 Python (four Windows capability skips),105 Node, clean50-file Astro checks, unchanged30-page sample build/8,254-byte gzipped JS and expected production rejection pass. Changed documentation: six Markdown files,124 relative links and balanced fences. No workflows/dependencies/source approvals/provider settings/public pin changed.
+- Immutable review `646408e` found no critical/important/minor findings; independently22 focused Python (one Windows capability skip) and23 public-release Node tests passed.
+- Final: Ruling: original network authenticity and exact official vintage are outside a local consistency receipt — retain false authenticity attestation, null revision generation and all publication blocks; cost if wrong: this receipt alone cannot justify official publication.
+- Final: Ruling: the offline reviewer did not rerun remote CI, retained real-evidence replay or deployments — root independently inspected exact-head/main job logs, replayed preserved bytes under prohibited network/credential/subprocess access and checked actual hosting failure; cost if wrong: retained real replay has one executor rather than duplicate independent execution.
+- PR #34 exact-head Checks37092915393/job111116861421 passed before merge397c9f4. Merged-main Checks37093042038/job111117244512 passed268 Python without Linux skips,105 Node,62 browser checks per path and clean builds/production rejection. Sample preview37093042017 passed with deploy skipped; legacy Pages37093042025 failed unchanged Astro/YAML and the configured URL was HTTP404. No deferred minor or new acquisition. Exact artifact/digest/expiry identities are in the handoff.

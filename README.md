@@ -58,6 +58,8 @@ The seven public sections are overview, product search, product profiles, countr
 
 ## What has been verified
 
+The [single-period research assembler](docs/single-period-research.md) now combines the selected-country report with exact reviewed import/export chapter references. It supports the bounded July values/world shares while retaining explicit historical, fine-code and quantity restrictions. The exact export chapter bytes have been captured. The next step is a public-only projection and official-release validation; the website still uses the pinned sample until publication requirements pass.
+
 The [selected-country report](docs/selected-partners.md) now validates retained July chapter-09 observations for Canada, Mexico, India and China and calculates their shares of the same-response world control. Missing values and partial coverage remain explicit; no complete-world concentration or public-data approval follows. See the [handoff](docs/handoff.md) for current verification and the next classification prerequisite.
 
 Official source documentation, current API authentication requirements, major hosting terms and selected jurisdiction requirements were checked on 1 October 2026. The repository was confirmed empty before these documents were added. Important findings include Census API authentication and attribution requirements, India’s phased DPDP commencement, CERT-In logging/reporting requirements, the 2025 Mexico subscription amendments, and Stripe's invite-only onboarding in India. Each substantive finding is linked in the relevant document.

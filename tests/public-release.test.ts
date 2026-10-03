@@ -225,7 +225,7 @@ test('projection rejects official labels, private evidence and claimed official 
     );
 });
 
-test('private provenance and selected-country reports cannot enter the public loader', async () => {
+test('private evidence and single-period research cannot enter the public loader', async () => {
   const receipt = {
     schemaVersion: 1,
     state: 'private-acquisition-snapshot',
@@ -245,11 +245,23 @@ test('private provenance and selected-country reports cannot enter the public lo
     rows: [{ code: '1220', value: 'fabricated-private-canary' }],
     publicationReady: false,
   };
+  const research = {
+    schemaVersion: 1,
+    state: 'private-single-period-research',
+    selectedTrade: selected,
+    classification: {
+      system: 'HTSUS',
+      reviewedUse: 'single-period-chapter-values',
+    },
+    publicationReady: false,
+  };
   for (const input of [
     receipt,
     selected,
+    research,
     { ...receipt, publicationReady: true },
     { ...selected, publicationReady: true },
+    { ...research, publicationReady: true },
   ]) {
     assert.throws(() => project(input));
     assert.throws(() => validateManifest(input));

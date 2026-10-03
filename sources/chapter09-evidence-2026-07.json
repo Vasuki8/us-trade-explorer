@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "state": "reviewed-chapter-reference-evidence",
+  "reviewedOn": "2026-10-03",
+  "scope": {
+    "reportingPeriod": "2026-07",
+    "chapter": "09",
+    "level": "HS2",
+    "flows": [
+      "imports",
+      "exports"
+    ]
+  },
+  "reviewedUse": "single-period-chapter-values",
+  "exportIndexUseAfterLabel": "2026-07-01",
+  "documents": [
+    {
+      "file": "hts-2026-rev11-chapter09.pdf",
+      "sourceURL": "https://hts.usitc.gov/reststop/file?release=2026HTSRev11&filename=Chapter%209",
+      "retrievedAt": "2026-10-03T01:27:56Z",
+      "httpStatus": 200,
+      "contentType": "application/octet-stream",
+      "bytes": 1270970,
+      "sha256": "8c7258c10d2777553b0a49365bc76dd557284c9e52bcc046e84d91bf5b7130d9",
+      "officialDateLabels": [],
+      "effectiveFromVerified": null,
+      "flow": "imports",
+      "pages": 8,
+      "role": "chapter-reference"
+    },
+    {
+      "file": "schedule-b-2026-index.html",
+      "sourceURL": "https://www.census.gov/foreign-trade/schedules/b/2026/index.html",
+      "retrievedAt": "2026-10-03T10:09:54.248564+00:00",
+      "bytes": 80106,
+      "sha256": "df8354e83ea8d6450562876a8c7616fc3a250ad63e8ebe8b1426a88882cd9d65",
+      "httpStatus": 200,
+      "contentType": "text/html; charset=utf-8",
+      "flow": "exports",
+      "pages": null,
+      "effectiveFromVerified": null,
+      "role": "edition-index"
+    },
+    {
+      "file": "schedule-b-2026-chapter09.pdf",
+      "sourceURL": "https://www.census.gov/foreign-trade/schedules/b/2026/c09.pdf",
+      "retrievedAt": "2026-10-03T10:09:54.239279+00:00",
+      "bytes": 94394,
+      "sha256": "665700637c011f32bf697a5885653abea2ba8b53ae2372209aecab67f4d19f58",
+      "httpStatus": 200,
+      "contentType": "application/pdf",
+      "flow": "exports",
+      "pages": 4,
+      "effectiveFromVerified": null,
+      "role": "chapter-reference"
+    },
+    {
+      "file": "hts-2026-rev12-chapter09.pdf",
+      "sourceURL": "https://hts.usitc.gov/reststop/file?release=2026HTSRev12&filename=Chapter%209",
+      "retrievedAt": "2026-10-03T10:09:55.595401+00:00",
+      "bytes": 1270974,
+      "sha256": "ebf4ac20cd6b91b424130376f114a291bdbdcdd1e36e6b73af65023bb0244322",
+      "httpStatus": 200,
+      "contentType": "application/octet-stream",
+      "flow": "imports",
+      "pages": 8,
+      "effectiveFromVerified": null,
+      "role": "chapter-reference"
+    },
+    {
+      "file": "hts-2026-rev13-chapter09.pdf",
+      "sourceURL": "https://hts.usitc.gov/reststop/file?release=2026HTSRev13&filename=Chapter%209",
+      "retrievedAt": "2026-10-03T10:09:55.143287+00:00",
+      "bytes": 1260048,
+      "sha256": "ad13503380b73d476bf1b8f70ae2bf2bc15897343cfbbd97f58dbb1e5dba3987",
+      "httpStatus": 200,
+      "contentType": "application/octet-stream",
+      "flow": "imports",
+      "pages": 7,
+      "effectiveFromVerified": null,
+      "role": "chapter-reference"
+    },
+    {
+      "file": "hts-2026-rev14-chapter09.pdf",
+      "sourceURL": "https://hts.usitc.gov/reststop/file?release=2026HTSRev14&filename=Chapter%209",
+      "retrievedAt": "2026-10-03T10:09:54.999242+00:00",
+      "bytes": 1260052,
+      "sha256": "83fc63ceb2f340cdf88bfc0132a8786c8ae796c751e47a5b43a877f5f37bb7df",
+      "httpStatus": 200,
+      "contentType": "application/octet-stream",
+      "flow": "imports",
+      "pages": 7,
+      "effectiveFromVerified": null,
+      "role": "chapter-reference"
+    }
+  ],
+  "historicalComparabilityEstablished": false,
+  "apiClassificationVintageIdentified": false,
+  "publicationReady": false
+}

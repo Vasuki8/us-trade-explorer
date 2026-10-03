@@ -1,20 +1,22 @@
 # Phased delivery and acceptance plan
 
-This is the requested preimplementation roadmap. It is not a claim that the listed features or controls exist. Build estimates below are planning ranges for one experienced engineer and exclude provider approval and legal/accounting turnaround.
+This is a roadmap, not a claim that the listed features or controls exist. The [permanent instructions](../../AGENTS.md) §31 and [2 October decision](../decisions/2026-10-02-operating-model.md) set the current order: official ingestion, coverage/validation, definitions/provenance and verified data replacement before feature expansion. The agent owns technical delivery; the owner decides material business consequences. Older build estimates below are planning ranges, not deadlines or grounds to skip validation.
 
 ## Phase 0 — Decisions and launch eligibility
 
-Deliver the six design artifacts, identify the Gujarat operator, select a domain and hosting plan, appoint privacy/incident/grievance contacts, obtain a Census key and establish the release/source licence register. Confirm the actual monthly budget, exact European launch countries, log scope/retention and payment availability. Preserve the user's global target-market objective while sequencing country-specific activation where review is incomplete.
+Maintain the six design artifacts, source/licence register, safe existing Census credential boundary and documented operating model. Do not block reversible data engineering on unchosen paid providers. Before public launch, resolve the Gujarat operator's identity/contacts, authorized domain/host, actual budget, exact European launch countries and applicable log scope/retention. Payment availability is a later-phase question. Preserve global target-market intent while sequencing country-specific activation where review is incomplete.
 
-Exit: recorded architecture decision, operator identity, hosting/logging agreement, source scope, privacy inventory and country/feature launch matrix. No claim that a cookie-free site is exempt from privacy law. No fake production data while awaiting a source key.
+Development prerequisites: recorded direction, safe source access and scope, privacy/source inventory and known blockers. Operator identity, hosting/logging agreements and country/feature reviews remain launch gates rather than permission to provision services now. No claim that a cookie-free site is exempt from privacy law. No fake production data while awaiting source evidence.
 
 ## Phase 1 — Reproducible data foundation
+
+Current milestone: July 2026 / HS2 09 archived acquisition/discovery/diagnostics exist; next resolve period-effective partner inventory, applicable import/export classification and official revision-vintage evidence before generalizing or building a publication producer. The [coverage review](../census-coverage-review.md) lists outstanding approval evidence. Exact residuals alone are insufficient.
 
 Estimated implementation effort: 3–5 working days after source access.
 
 - Versioned schemas/source allowlist, fixtures, locked Python dependencies and isolated Census connector.
 - Initial HS2/partner/month partitions for a 60-month window; historic bootstrap in bounded manual shards.
-- Immutable raw/Parquet archive, release manifest, metrics and provenance.
+- Immutable raw and appropriate analytical objects, release manifest, metrics and provenance; introduce Parquet/DuckDB when justified rather than installing infrastructure for its own sake.
 - Ingestion/validation CI jobs with least privilege, timeouts, retries and no production promotion from pull requests.
 - Release calendar, freshness state and recovery commands.
 
@@ -32,27 +34,27 @@ Estimated effort: 5–8 working days after the data contract stabilizes.
 
 Exit: direct-entry journeys work without visiting home; default profiles remain useful with JavaScript disabled; changes match fixtures and selected live records; keyboard/screen-reader checks and representative mobile layout pass; URL state round-trips; unsafe text is inert and exported text is safe. No authentication, billing or alert delivery in this phase.
 
-## Phase 3 — Commercial public launch
+## Phase 3 — Verified public launch
 
 Estimated effort: 2–4 working days plus external reviews.
 
 - Provision the chosen host through reviewed infrastructure code and short-lived deployment credentials.
 - Enable security headers, selected access/security logs, India archive, independent freshness monitoring, cost alerts and backups.
 - Publish notices only after comparing them with real network requests and provider settings.
-- Offer direct sponsorship placements, with an ad policy and written creative/content rights. No programmatic tags by default.
+- Grow useful organic research first; advertising is not a launch prerequisite. Any later sponsorship, analytics or network integration needs explicit business/privacy approval and verified operating practices.
 - Complete launch-country legal reviews required even for public traffic, especially targeted EU/UK/China processing and India duties.
 
 Exit: one deliberately failed update leaves the prior release usable; a backup restores within the target; production HTTPS, canonical, 404 and header checks pass; logs reach the intended destination and expire correctly; data is fresh or accurately marked stale; privacy contacts work. Record exclusions/limitations in the launch receipt.
 
-## Phase 4 — Audience and data-depth expansion
+## Phase 4 — Audience, data depth and local research
 
-Measure aggregate readership, search demand and sponsor interest using the least collection necessary. Increase HS4 coverage only after timing and payload tests. Improve curated comparison pages and source explanations. Establish editorial correction handling. A reviewed ad network or analytics tool is a separate privacy/security change with consent and transfer tests, not a marketing-only toggle.
+Expand overview/product/country analysis in AGENTS.md priority order: comparable changes and contributions, coverage-qualified concentration, validated quantities and historical warnings. Increase HS depth only after classification, data-volume and payload tests. Improve curated comparisons and source explanations; maintain editorial corrections. Prefer user-requested browser-local saved products/countries/baskets/views without accounts solely for saving, preventing category/descendant double counting and providing clear/export behavior. Any aggregate readership/analytics or later advertising collection requires its actual privacy/business assessment and authorization; do not create a vendor integration to measure demand automatically.
 
-Exit: measured utility and cost justify expansion; no uncontrolled indexable filter explosion; sponsor revenue is reported as actual revenue rather than a forecast.
+Exit: useful analysis and justified costs, no uncontrolled indexable filter explosion, safe reusable local research and accurate coverage. Ads are optional later work; any revenue must be reported as actual rather than forecast.
 
 ## Phase 5 — Accounts and private workspaces
 
-Implement managed identity, sessions, workspace API, PostgreSQL tenant model, saved queries/watchlists, private storage, export/deletion, email preference handling and audited administration. Keep public pages on the static architecture. Select processor/identity/email providers only after India availability, contracts, transfer, retention and country checks.
+Only after the product phase and explicit account/provider approval justify it, implement secure identity/sessions, server-authorized workspace API and tenant records, cross-device saved queries/watchlists, private storage, export/deletion and audited administration. Choose a fitting small application store then; D1 may fit metadata, while PostgreSQL/queues need demonstrated requirements. Keep public pages static and first-phase saving browser-local. Processor/identity/email services require business approval and India availability, contract, transfer, retention and country checks before activation.
 
 Exit: cross-user read/write/delete/export tests fail safely; session/CSRF/rate-limit checks pass; account deletion and backup expiry are verified; private content cannot enter a static build, sitemap, source map, public bucket or CDN cache. Workspace value is proven before charging consumers.
 

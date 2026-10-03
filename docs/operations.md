@@ -4,7 +4,7 @@ This increment is a working sample website and tested acquisition/release founda
 
 ## Local development
 
-For the current GitHub-first development phase, see [GitHub development](github-development.md). The AWS contract below is a future deployment plan; no AWS account is needed to build or test the preview.
+For the current GitHub-first development phase, see [GitHub development](github-development.md), [permanent instructions](../AGENTS.md) and the [operating-model decision](decisions/2026-10-02-operating-model.md). The agent performs routine setup/tests/recovery; these commands are maintainer instructions, not work to hand back to the product owner. No cloud account is needed to build/test the preview.
 
 Requirements: Node 24 LTS and Python 3.12 or newer (tested on Python 3.14). Python pipeline code uses only the standard library.
 
@@ -60,7 +60,11 @@ The public fixture cannot be switched to official mode with an environment varia
 
 `pipeline/store.py` is a local model of immutable content plus atomic activation. The caller must pass a trusted validator. Tests prove identical payloads are deduplicated, validation failures preserve the active pointer, interrupted writes do not partially activate, and rollback verifies checksums. It is not an S3/CDN transaction implementation. An interrupted process can leave `activation.lock`; confirm no writer is running and inspect the active object before manually removing that lock. Never automatically steal a lock from a possibly live writer.
 
-## AWS deployment contract (not provisioned)
+## Preferred future hosting and previous AWS contract
+
+The owner now prefers Workers + Static Assets/R2, optional D1 for smaller metadata and analytical objects/Parquet where appropriate. No Cloudflare account/service, runtime adapter or migration is implemented. Provider-supported identity, actual HTTP/security headers, logs/retention/locations, source terms, cost, backup/rollback and notices need fresh verification before authorized provisioning. Preserve the existing static URL and internally consistent release contract. Do not promise India residency or apply historical Pages limits to Workers.
+
+The AWS instructions below are retained as the **superseded 1 October candidate**, not the current deployment mandate. Existing CloudFront configuration/test fixtures remain unchanged. Recheck this alternative only if justified and authorized; neither these commands nor this instruction update provision resources.
 
 Use private S3 REST origins with Block Public Access, bucket versioning, encryption and CloudFront Origin Access Control. Do not expose the bucket website endpoint. A short-lived GitHub OIDC role should write only candidate release prefixes; production activation should be a separate trusted step. Public and private future storage use separate permissions and origins.
 

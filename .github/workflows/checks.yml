@@ -31,6 +31,8 @@ jobs:
       - run: npm run check
       - run: npm run build
       - run: npx playwright install --with-deps chromium
+      - name: Exercise local review with fabricated data only
+        run: npm run test:research-browser
       - run: npx playwright test
       - name: Verify configured base path
         run: npm run build

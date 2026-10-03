@@ -36,5 +36,5 @@
 - [x] Implement the reader/comparison. Preserve each scoped row and coded-row ancestry; compare semantic fields, excluding absolute positions in other chapters.
 - [x] Run focused tests, then full pipeline suite. Replay on five locally captured official editions without sockets or credential access.
 - [x] Record exact artifact identities, July edition/date discrepancies, verified metadata differences and unresolved statistical comparability/partner/vintage gates. Update durable handoff and next task.
-- [ ] Review diff, run relevant documentation/build checks, commit and request independent immutable branch review. Fix evidenced findings and pass final-head CI.
-- [ ] Merge under standing authorization; inspect merged-main checks/private preview and safely synchronize the primary while retaining the owner's edit. Record final integration receipts in PR history without a recursive documentation PR.
+- [x] Review diff, run relevant documentation/build checks, commit and request independent immutable branch review. Fix evidenced findings with reproduced RED/GREEN tests and independent scoped correction review.
+- [ ] Pass exact final-head CI and merge under standing authorization; inspect merged-main checks/private preview and safely synchronize the primary while retaining the owner's edit. Record final integration receipts in PR history without a recursive documentation PR; this pending integration entry is historical once those receipts pass.

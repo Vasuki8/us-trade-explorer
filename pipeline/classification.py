@@ -29,11 +29,14 @@ def _decode(raw, expected_sha256):
             result[key] = value
         return result
 
-    def constant(_):
-        raise SourceError('Invalid HTS JSON number')
+    def number(_):
+        # Reviewed HTS fields encode codes/indents/rates as text. Reject numeric
+        # literals too: parse_constant alone misses overflow such as 1e999.
+        raise SourceError('Unsupported HTS JSON number')
 
     try:
-        result = json.loads(raw, object_pairs_hook=pairs, parse_constant=constant)
+        result = json.loads(raw, object_pairs_hook=pairs, parse_constant=number,
+                            parse_int=number, parse_float=number)
     except (ValueError, UnicodeError, RecursionError):
         raise SourceError('Invalid HTS JSON encoding') from None
     require(type(result) is list and 0 < len(result) <= MAX_ROWS, 'Invalid HTS source row count')
@@ -53,6 +56,10 @@ def _row(value, source_row):
     indent = value['indent']
     require(type(indent) is str and re.fullmatch(r'(?:[0-9]|1[0-2])', indent), 'Invalid HTS indentation')
     _text(value['description'], 4000, 'Invalid HTS description')
+    for field in ('general', 'special', 'other', 'quotaQuantity', 'additionalDuties', 'addiitionalDuties'):
+        text = value[field]
+        require(text is None or type(text) is str and len(text) <= 4000
+                and all(ord(c) >= 32 and ord(c) != 127 for c in text), 'Invalid HTS duty-field representation')
     require(value['superior'] in (None, 'true') and type(value['superior']) in (str, type(None)),
             'Invalid HTS hierarchy marker')
     units = value['units']
@@ -160,11 +167,29 @@ def compare_hts_chapters(before, after, before_sha256, after_sha256, chapter='09
             fields.append('footnotes')
         return [{field: row[field] for field in fields} for row in snapshot['rows']]
 
+    # Unnamed nodes have no stable code identity. Report their ordered sequence
+    # separately; an ordinal comparison is not a split/merge or concordance.
+    unnamed_before = [row for row in projection(a, True) if row['code'] is None]
+    unnamed_after = [row for row in projection(b, True) if row['code'] is None]
+    unnamed_changes = []
+    for index in range(max(len(unnamed_before), len(unnamed_after))):
+        prior = unnamed_before[index] if index < len(unnamed_before) else None
+        current = unnamed_after[index] if index < len(unnamed_after) else None
+        if prior == current:
+            continue
+        fields = ([field for field in prior if prior[field] != current[field]]
+                  if prior is not None and current is not None else ['presence'])
+        unnamed_changes.append({'index': index, 'fields': fields,
+                                'before': {field: prior[field] for field in fields}
+                                if prior is not None and current is not None else prior,
+                                'after': {field: current[field] for field in fields}
+                                if prior is not None and current is not None else current})
+
     return {'schemaVersion': 1, 'state': 'classification-comparison-only', 'flow': 'imports',
             'classification': 'HTSUS', 'chapter': chapter,
             'beforeHash': before_sha256, 'afterHash': after_sha256,
             'added': sorted(new.keys() - old.keys()), 'removed': sorted(old.keys() - new.keys()),
-            'changed': changed,
+            'changed': changed, 'unnumberedChanges': unnamed_changes,
             'orderEqual': [r['code'] for r in a['codedRows']] == [r['code'] for r in b['codedRows']],
             'structureEqual': projection(a, False) == projection(b, False),
             'metadataEqual': projection(a, True) == projection(b, True),

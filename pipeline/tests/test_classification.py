@@ -98,6 +98,30 @@ class ClassificationTests(unittest.TestCase):
         self.assertEqual(result['changed'][0]['code'], '09011100')
         self.assertEqual(result['changed'][0]['fields'], ['footnotes'])
 
+    def test_unnumbered_parent_footnote_has_actionable_before_after_report(self):
+        before, after = fixture(), fixture()
+        note = [{'columns': ['description'], 'value': 'Review this parent note.', 'type': 'footnote'}]
+        after[4]['footnotes'] = note
+        result = compare(before, after)
+        self.assertTrue(result['structureEqual'])
+        self.assertFalse(result['metadataEqual'])
+        self.assertEqual(result['changed'], [])
+        change = result['unnumberedChanges'][0]
+        self.assertEqual(change['index'], 1)
+        self.assertEqual(change['fields'], ['footnotes'])
+        self.assertEqual(change['before'], {'footnotes': None})
+        self.assertEqual(change['after'], {'footnotes': note})
+
+    def test_rejects_json_numeric_overflow_and_unsupported_numeric_fields(self):
+        data = fixture()
+        data[5]['general'] = 1.5
+        raw, _ = encoded(data)
+        for number in (b'1e999', b'-1e999', b'1.5', b'7'):
+            invalid = raw.replace(b'"general":1.5', b'"general":' + number)
+            with self.subTest(number=number):
+                with self.assertRaises(SourceError):
+                    extract_hts_chapter(invalid, hashlib.sha256(invalid).hexdigest())
+
     def test_detects_order_changes_but_ignores_absolute_offsets_in_other_chapters(self):
         before, after = fixture(), fixture()
         after.insert(0, row('0701', 0, 'Unrelated preceding chapter'))
@@ -137,7 +161,8 @@ class ClassificationTests(unittest.TestCase):
                    (5, 'description', 'a' * 4001), (5, 'unknown', 'new field'),
                    (5, 'htsno', '0901.111'), (5, 'footnotes', ['bad']),
                    (5, 'footnotes', [{'columns': ['general'], 'value': 'x', 'type': 'bad'}]),
-                   (5, 'superior', True), (3, 'htsno', '0902.11.00')]
+                   (5, 'superior', True), (5, 'general', True), (5, 'quotaQuantity', []),
+                   (5, 'other', 'bad\nrate'), (3, 'htsno', '0902.11.00')]
         for index, field, value in changes:
             data = fixture()
             data[index][field] = value

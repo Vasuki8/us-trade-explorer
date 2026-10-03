@@ -225,7 +225,7 @@ test('projection rejects official labels, private evidence and claimed official 
     );
 });
 
-test('private acquisition snapshot claims cannot enter the public loader', async () => {
+test('private provenance and selected-country reports cannot enter the public loader', async () => {
   const receipt = {
     schemaVersion: 1,
     state: 'private-acquisition-snapshot',
@@ -238,7 +238,19 @@ test('private acquisition snapshot claims cannot enter the public loader', async
     publicationReady: false,
   };
   let reads = 0;
-  for (const input of [receipt, { ...receipt, publicationReady: true }]) {
+  const selected = {
+    schemaVersion: 1,
+    state: 'private-selected-partner-report',
+    provenance: receipt,
+    rows: [{ code: '1220', value: 'fabricated-private-canary' }],
+    publicationReady: false,
+  };
+  for (const input of [
+    receipt,
+    selected,
+    { ...receipt, publicationReady: true },
+    { ...selected, publicationReady: true },
+  ]) {
     assert.throws(() => project(input));
     assert.throws(() => validateManifest(input));
     await assert.rejects(() =>

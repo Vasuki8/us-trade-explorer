@@ -1,0 +1,38 @@
+# Selected-country coverage and shares
+
+The offline `pipeline.selected_partners` report calculates July 2026 / HS2 chapter 09 values and shares for **Canada 1220, Mexico 2010, India 5330 and China 5700** in each flow separately. This is a bounded selected-country research result, not a complete partner inventory or public release. Reports and source files stay in ignored local storage; the website still uses its pinned synthetic sample.
+
+## Evidence and statistical decision
+
+The [Census statistical-program guide](https://www.census.gov/foreign-trade/guide/sec2.html) identifies Schedule C as the country classification used to publish imports and exports. Its country section distinguishes import origin from export destination. The [current Schedule C table](https://www.census.gov/foreign-trade/schedules/c/countrycodes.html) confirms the four code/name mappings. These undated pages were checked on 2 October local / 3 October UTC 2026; they alone do not prove historical effective intervals.
+
+The implementation requires all four retained July **2026 HTS Revisions 11–14 Statistical Annexes**, matching exact sizes and SHA-256 identities in the existing [classification registry](../sources/hts-evidence-2026-07.json) and [later-July registry](../sources/partner-evidence-2026-07.json). For example, [Revision 11](https://hts.usitc.gov/reststop/file?release=2026HTSRev11&filename=Statistical%20Annexes) PDF page 2 says Schedule C covers both flows. PDF page 3 identifies Canada and Mexico; page 6 identifies India and China. These selected designations and inclusion notes agree in all four retained editions. Mexico's note includes Cozumel and Revillagigedo; India's includes Andaman, Nicobar and Laccadive. Hong Kong, Macao and Taiwan have separate designations and are not silently folded into China.
+
+**Narrow engineering decision:** these four distinct named country designations support a selected-set subtotal and same-response world shares in the captured July chapter-09 observations. This uses the documented geographic classification and reviewed selected rows, not the assumption that every numeric DET code is an additive country. It does not certify July-effective membership of every possible partner, assign unresolved territories or special statistical buckets, approve a complete inventory, establish classification continuity, or identify the official API revision generation. `effectiveFromVerified` remains null. Pin verification binds the reviewed documents; the software does not automatically interpret PDF geography or attest original network authenticity.
+
+All other observed codes remain explicitly **not assessed**, including their unresolved inclusion/overlap questions documented in the [coverage review](census-coverage-review.md). They are not classified as outside US trade or assumed zero. This increment does not modify the earlier operator worksheet or approve it automatically. Expanding the selected set requires a reviewed code and source change; callers cannot supply an arbitrary inventory or approval flag.
+
+## Calculation and failure rules
+
+- Each row retains the raw source name, reviewed display name, status and exact integer USD value. Import general/customs and total-export/FAS definitions, source query, reporting period, acquisition metadata and unknown official dates come from a freshly rebuilt [provenance receipt](acquisition-provenance.md).
+- A country's share uses the world `-` row from the **same validated response**, never the selected-set subtotal. Percentages use exact integer arithmetic and half-up rounding to two decimal places; component percentages need not add exactly after rounding.
+- A missing selected row is `unobserved` with a null value and explanation. Other observed selected rows may still have individual shares. `observedSelectedUSD` is explicitly a partial sum; `selectedTotalUSD` and its share are null unless all four rows are present. An explicit reported zero counts as observed.
+- Missing world control leaves all shares null. Reported world zero has a distinct zero-denominator explanation. A selected observed subtotal above world fails validation, including when a selected row is absent. This inequality check is not full-world reconciliation.
+- A four-country result cannot identify the globally largest partner/top three or HHI. Concentration remains unavailable and `globalCoverageComplete` remains false, even if the selected subtotal happens to equal world.
+- Incomplete/failed archives, changed source bytes, mismatched annexes and rehashed invented report fields fail closed. Successful output is atomic; failed retries preserve previous output. No credentials, network requests or third-party services are needed.
+
+## Local use
+
+Retain the four exact pinned annex files under an ignored directory named `2026HTSRev11.pdf` through `2026HTSRev14.pdf`. The command verifies bytes and does not download files. The retained scan must already be complete and valid.
+
+```powershell
+python -m pipeline.selected_partners --plan sources/scans/coffee-partners-2026-07.json --flow imports --snapshot .local/partner-evidence/IMPORT_RUN --annex-dir .local/selected-annexes --output .local/selected-partners/imports.json
+```
+
+Use `--flow exports` with its own snapshot for exports. Outputs must be JSON beneath the repository's `.local`, outside the input archive and distinct from all input files. Symlinks/junctions and unsafe paths are rejected by the shared path guards. Console messages contain no trade values or source payloads. The public loader rejects this private report state, including a tampered publication flag. No public producer consumes it.
+
+## Verification and next step
+
+Fourteen focused tests cover calculations, missing/zero distinctions, insufficient coverage, evidence pins, both trade definitions, exact rounding, tampering, offline operation and CLI preservation/output boundaries. Initial tests failed before implementation. The production pins are also checked against the retained registry metadata. Real offline replay of imports/exports and their recovery copies validates four reports; each selects four observed countries, leaving 133 import and 117 export codes unassessed. Recovery reports match fresh reports, and input bytes remain unchanged. Network, credential lookups and subprocesses were prohibited during replay; raw values remain local.
+
+Next resolve the **single-period chapter classification contract** for these selected observations: record import/export edition scope and explicit historical-comparison restrictions, then use these bounded reports in a separate official-data producer proposal. A complete-world inventory is required for complete rankings/concentration, but should not become an invented prerequisite for every accurately labelled selected-country fact. New private acquisition and any public launch still require the unresolved private execution/storage and source/hosting/notice decisions in the [handoff](handoff.md).

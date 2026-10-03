@@ -6,6 +6,8 @@ Design baseline: 1 October 2026. Operating model updated: 2 October 2026. The wo
 
 ## Run the preview
 
+The [unpublished research candidate](docs/public-research-candidate.md) now has a paired-flow Python producer and independent TypeScript contract. It prepares local review data from validated retained evidence; the site still uses only synthetic sample data.
+
 ```sh
 npm ci --ignore-scripts
 npm run dev

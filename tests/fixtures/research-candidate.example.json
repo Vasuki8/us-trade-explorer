@@ -1,0 +1,242 @@
+{
+  "fixtureType": "fabricated-for-contract-tests-not-official-data",
+  "bundle": {
+    "data": {
+      "analysisPolicy": {
+        "countryValues": "selected-countries-same-flow-and-period-only",
+        "countryWorldShares": "requires-observed-positive-world-control",
+        "fineCodeJoins": "not-supported",
+        "globalRankingsAndConcentration": "not-supported",
+        "historicalGrowth": "not-supported",
+        "quantityMetrics": "not-supported"
+      },
+      "artifact": "public-research-candidate-data",
+      "coverage": {
+        "globalCoverageComplete": false,
+        "kind": "selected-four-country-subset"
+      },
+      "flows": [
+        {
+          "classification": {
+            "apiClassificationVintage": "not-identified",
+            "historicalComparability": "not-established",
+            "provisionEffectiveFromVerified": null,
+            "referenceURLs": [
+              "https://hts.usitc.gov/reststop/file?release=2026HTSRev11&filename=Chapter%209",
+              "https://hts.usitc.gov/reststop/file?release=2026HTSRev12&filename=Chapter%209",
+              "https://hts.usitc.gov/reststop/file?release=2026HTSRev13&filename=Chapter%209",
+              "https://hts.usitc.gov/reststop/file?release=2026HTSRev14&filename=Chapter%209"
+            ],
+            "system": "HTSUS"
+          },
+          "countries": [
+            {
+              "code": "1220",
+              "geographicNote": null,
+              "name": "Canada",
+              "shareOfWorldPercent": "10.00",
+              "shareUnavailableReason": null,
+              "status": "reported",
+              "value": "10"
+            },
+            {
+              "code": "2010",
+              "geographicNote": "Includes Isla de Cozumel and Islas Revillagigedo.",
+              "name": "Mexico",
+              "shareOfWorldPercent": "20.00",
+              "shareUnavailableReason": null,
+              "status": "reported",
+              "value": "20"
+            },
+            {
+              "code": "5330",
+              "geographicNote": "Includes the Andaman, Nicobar, and Laccadive Islands.",
+              "name": "India",
+              "shareOfWorldPercent": "0.00",
+              "shareUnavailableReason": null,
+              "status": "reported_zero",
+              "value": "0"
+            },
+            {
+              "code": "5700",
+              "geographicNote": "Hong Kong, Macao and Taiwan have separate Schedule C designations.",
+              "name": "China",
+              "shareOfWorldPercent": "30.00",
+              "shareUnavailableReason": null,
+              "status": "reported",
+              "value": "30"
+            }
+          ],
+          "coverage": {
+            "allSelectedObserved": true,
+            "missingSelectedCodes": []
+          },
+          "flow": "imports",
+          "source": {
+            "agency": "US Census Bureau",
+            "datasetURL": "https://api.census.gov/data/timeseries/intltrade/imports/hs"
+          },
+          "statisticalBasis": {
+            "commodityClassification": "HTS",
+            "commodityLevel": "HS2",
+            "measure": "GEN_VAL_MO",
+            "periodKind": "month",
+            "priceBasis": "nominal",
+            "reporter": "US",
+            "seasonalAdjustment": "not-seasonally-adjusted",
+            "tradeBasis": "general-imports",
+            "unit": "USD",
+            "valuation": "customs-value"
+          },
+          "times": {
+            "officialReleaseDate": null,
+            "officialRevisionDate": null,
+            "publishedAt": null,
+            "retrievedAt": "2026-10-02T01:02:03Z",
+            "revisionDetectedAt": null
+          },
+          "totals": {
+            "observedSelectedUSD": "60",
+            "selectedShareOfWorldPercent": "60.00",
+            "selectedTotalUSD": "60"
+          },
+          "world": {
+            "status": "reported",
+            "value": "100"
+          }
+        },
+        {
+          "classification": {
+            "apiClassificationVintage": "not-identified",
+            "historicalComparability": "not-established",
+            "provisionEffectiveFromVerified": null,
+            "referenceURLs": [
+              "https://www.census.gov/foreign-trade/schedules/b/2026/index.html",
+              "https://www.census.gov/foreign-trade/schedules/b/2026/c09.pdf"
+            ],
+            "system": "Schedule B"
+          },
+          "countries": [
+            {
+              "code": "1220",
+              "geographicNote": null,
+              "name": "Canada",
+              "shareOfWorldPercent": "10.00",
+              "shareUnavailableReason": null,
+              "status": "reported",
+              "value": "10"
+            },
+            {
+              "code": "2010",
+              "geographicNote": "Includes Isla de Cozumel and Islas Revillagigedo.",
+              "name": "Mexico",
+              "shareOfWorldPercent": "20.00",
+              "shareUnavailableReason": null,
+              "status": "reported",
+              "value": "20"
+            },
+            {
+              "code": "5330",
+              "geographicNote": "Includes the Andaman, Nicobar, and Laccadive Islands.",
+              "name": "India",
+              "shareOfWorldPercent": "0.00",
+              "shareUnavailableReason": null,
+              "status": "reported_zero",
+              "value": "0"
+            },
+            {
+              "code": "5700",
+              "geographicNote": "Hong Kong, Macao and Taiwan have separate Schedule C designations.",
+              "name": "China",
+              "shareOfWorldPercent": "30.00",
+              "shareUnavailableReason": null,
+              "status": "reported",
+              "value": "30"
+            }
+          ],
+          "coverage": {
+            "allSelectedObserved": true,
+            "missingSelectedCodes": []
+          },
+          "flow": "exports",
+          "source": {
+            "agency": "US Census Bureau",
+            "datasetURL": "https://api.census.gov/data/timeseries/intltrade/exports/hs"
+          },
+          "statisticalBasis": {
+            "commodityClassification": "Schedule B",
+            "commodityLevel": "HS2",
+            "measure": "ALL_VAL_MO",
+            "periodKind": "month",
+            "priceBasis": "nominal",
+            "reporter": "US",
+            "seasonalAdjustment": "not-seasonally-adjusted",
+            "tradeBasis": "total-exports-domestic-plus-reexports",
+            "unit": "USD",
+            "valuation": "FAS-value"
+          },
+          "times": {
+            "officialReleaseDate": null,
+            "officialRevisionDate": null,
+            "publishedAt": null,
+            "retrievedAt": "2026-10-02T01:02:03Z",
+            "revisionDetectedAt": null
+          },
+          "totals": {
+            "observedSelectedUSD": "60",
+            "selectedShareOfWorldPercent": "60.00",
+            "selectedTotalUSD": "60"
+          },
+          "world": {
+            "status": "reported",
+            "value": "100"
+          }
+        }
+      ],
+      "geography": {
+        "claim": "selected-schedule-c-designations-only",
+        "effectiveFromVerified": null,
+        "referenceURLs": [
+          "https://hts.usitc.gov/reststop/file?release=2026HTSRev11&filename=Statistical%20Annexes",
+          "https://hts.usitc.gov/reststop/file?release=2026HTSRev12&filename=Statistical%20Annexes",
+          "https://hts.usitc.gov/reststop/file?release=2026HTSRev13&filename=Statistical%20Annexes",
+          "https://hts.usitc.gov/reststop/file?release=2026HTSRev14&filename=Statistical%20Annexes"
+        ],
+        "system": "Schedule C"
+      },
+      "publicationState": "unpublished-review",
+      "schemaVersion": 2,
+      "scope": {
+        "period": "2026-07",
+        "periodKind": "month",
+        "product": {
+          "code": "09",
+          "level": "HS2",
+          "name": "Coffee, tea, mat\u00e9 and spices"
+        },
+        "reporter": "US"
+      },
+      "source": "census"
+    },
+    "manifest": {
+      "artifact": "public-research-candidate",
+      "contentBytes": 5054,
+      "contentHash": "9b6aa741f2f704b7dfbdb74f7554457b9d1f293fd86ed1832c5627f92762c567",
+      "countryCodes": [
+        "1220",
+        "2010",
+        "5330",
+        "5700"
+      ],
+      "flows": [
+        "imports",
+        "exports"
+      ],
+      "period": "2026-07",
+      "productCode": "09",
+      "publicationState": "unpublished-review",
+      "schemaVersion": 2,
+      "source": "census"
+    }
+  }
+}

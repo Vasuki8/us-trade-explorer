@@ -55,6 +55,8 @@ An engineering proposal is to distinguish an independently validated official ac
 
 Direct GitHub verification found the repository **public**, superseding the old private-development assumption. [Private-evidence workflow safeguards](private-evidence-visibility.md) therefore take priority over new acquisition. Existing artifact access cannot be described as private, and newly dispatched Census evidence jobs are blocked in public/unknown contexts. Owner visibility intent and a future access-controlled evidence execution/storage path remain unresolved. Inventory, vintage, comparability and publication approval remain false.
 
+The [retained acquisition provenance companion](acquisition-provenance.md) now implements the first bounded part of the snapshot proposal: offline, complete active archive consistency, explicit statistical definitions and collection/attempt metadata, optional nested announcement proof and null official API generation. It changes no existing diagnostic/scan/restore/public contract or false approval gate. Its receipt describes observed membership, not an approved additive inventory or historical-comparison contract. The next bounded implementation is a scoped evidence-backed coverage decision contract; new private acquisition remains blocked by unresolved private execution/storage.
+
 ## Evidence required before official publication
 
 1. **Period-effective inventory:** review every included/excluded/unresolved code per flow, period and commodity scope. Retain official effective-date documentation or Census clarification covering membership, territories, special statistical buckets and non-overlapping treatment. The July response establishes observed membership only; current Schedule C does not establish all possible members.

@@ -225,6 +225,32 @@ test('projection rejects official labels, private evidence and claimed official 
     );
 });
 
+test('private acquisition snapshot claims cannot enter the public loader', async () => {
+  const receipt = {
+    schemaVersion: 1,
+    state: 'private-acquisition-snapshot',
+    claim: 'verified-acquisition-snapshot-only',
+    validation: {
+      archiveConsistencyVerified: true,
+      sourceAuthenticityAttested: false,
+    },
+    source: { query: { privateEvidence: 'fabricated-private-canary' } },
+    publicationReady: false,
+  };
+  let reads = 0;
+  for (const input of [receipt, { ...receipt, publicationReady: true }]) {
+    assert.throws(() => project(input));
+    assert.throws(() => validateManifest(input));
+    await assert.rejects(() =>
+      load(input, () => {
+        reads++;
+        throw new Error('Private payload must never be read');
+      }),
+    );
+  }
+  assert.equal(reads, 0);
+});
+
 test('array limits reject before copying nested assembly records', () => {
   for (const [field, limit] of [
     ['products', 99],

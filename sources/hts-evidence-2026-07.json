@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "state": "source-document-review-only",
+  "reviewedOn": "2026-10-02",
+  "scope": {
+    "flow": "imports",
+    "chapter": "09",
+    "reportingPeriodUnderReview": "2026-07"
+  },
+  "indexSources": [
+    "https://www.usitc.gov/harmonized_tariff_information/hts/archive/list",
+    "https://www.usitc.gov/harmonized_tariff_information/hts/archive/list?page=1",
+    "https://www.usitc.gov/harmonized_tariff_information/announcement_archive"
+  ],
+  "documents": [
+    {
+      "file": "hts-2026-rev11.json",
+      "sourceURL": "https://www.usitc.gov/sites/default/files/tata/hts/hts_2026_revision_11_json.json",
+      "retrievedAt": "2026-10-03T01:27:50Z",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "bytes": 13528404,
+      "sha256": "bf6e76f0fdb3909ac8fd080b50a46d4affad050cfafa8a20579f7714f83ab441",
+      "officialDateLabels": [
+        {
+          "role": "archive-label",
+          "date": "2026-07-01"
+        }
+      ],
+      "effectiveFromVerified": null
+    },
+    {
+      "file": "hts-2026-rev12.json",
+      "sourceURL": "https://www.usitc.gov/sites/default/files/tata/hts/hts_2026_revision_12_json.json",
+      "retrievedAt": "2026-10-03T01:27:51Z",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "bytes": 13535498,
+      "sha256": "c2df18de026f8ba78178a10dff5033b153c7a48fd66b5f218f529c1369fa0c72",
+      "officialDateLabels": [
+        {
+          "role": "archive-label",
+          "date": "2026-07-21"
+        }
+      ],
+      "effectiveFromVerified": null
+    },
+    {
+      "file": "hts-2026-rev13.json",
+      "sourceURL": "https://www.usitc.gov/sites/default/files/tata/hts/hts_2026_revision_13_json.json",
+      "retrievedAt": "2026-10-03T01:27:52Z",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "bytes": 12623527,
+      "sha256": "3b4057c56e3bfaa48285b5371f771007840ea007c5094772f04c4754b6e3c6a5",
+      "officialDateLabels": [
+        {
+          "role": "archive-label",
+          "date": "2026-07-29"
+        },
+        {
+          "role": "announcement-publication",
+          "date": "2026-07-28"
+        }
+      ],
+      "effectiveFromVerified": null
+    },
+    {
+      "file": "hts-2026-rev14.json",
+      "sourceURL": "https://www.usitc.gov/sites/default/files/tata/hts/hts_2026_revision_14_json.json",
+      "retrievedAt": "2026-10-03T01:27:54Z",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "bytes": 12630562,
+      "sha256": "a99da87129ebfd71352b9a747b2a36045a45f7f838ce8d4b9b02e157b78392ef",
+      "officialDateLabels": [
+        {
+          "role": "archive-label",
+          "date": "2026-07-31"
+        }
+      ],
+      "effectiveFromVerified": null
+    },
+    {
+      "file": "hts-2025-rev16.json",
+      "sourceURL": "https://www.usitc.gov/sites/default/files/tata/hts/hts_2025_revision_16_json.json",
+      "retrievedAt": "2026-10-03T01:27:55Z",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "bytes": 13750683,
+      "sha256": "69a3ddee24ff58342dbfcc74cc9eb2be8c405cf6fff72eb5407bdea66c2c503e",
+      "officialDateLabels": [
+        {
+          "role": "archive-label",
+          "date": "2025-07-01"
+        }
+      ],
+      "effectiveFromVerified": null
+    },
+    {
+      "file": "hts-2026-rev11-annexes.pdf",
+      "sourceURL": "https://hts.usitc.gov/reststop/file?release=2026HTSRev11&filename=Statistical%20Annexes",
+      "retrievedAt": "2026-10-03T01:27:56Z",
+      "httpStatus": 200,
+      "contentType": "application/octet-stream",
+      "bytes": 2517819,
+      "sha256": "9e0ef8c30a1afe7673e97ee7cad72f4a6340577fd94d0be66b8aa0f44e7c789d",
+      "officialDateLabels": [],
+      "effectiveFromVerified": null
+    },
+    {
+      "file": "hts-2026-rev11-chapter09.pdf",
+      "sourceURL": "https://hts.usitc.gov/reststop/file?release=2026HTSRev11&filename=Chapter%209",
+      "retrievedAt": "2026-10-03T01:27:56Z",
+      "httpStatus": 200,
+      "contentType": "application/octet-stream",
+      "bytes": 1270970,
+      "sha256": "8c7258c10d2777553b0a49365bc76dd557284c9e52bcc046e84d91bf5b7130d9",
+      "officialDateLabels": [],
+      "effectiveFromVerified": null
+    },
+    {
+      "file": "hts-july2026-changes.pdf",
+      "sourceURL": "https://www.usitc.gov/tariff_affairs/documents/list_of_committee_changes_for_july_1_2026-final.pdf",
+      "retrievedAt": "2026-10-03T01:27:56Z",
+      "httpStatus": 200,
+      "contentType": "application/pdf",
+      "bytes": 1302380,
+      "sha256": "6cb6a677eaaecd228216cc399afc2d1cf539a17a71366ae31dab7c02759b7510",
+      "officialDateLabels": [],
+      "effectiveFromVerified": null
+    }
+  ],
+  "classificationComparabilityApproved": false,
+  "partnerInventoryApproved": false,
+  "apiVintageVerified": false,
+  "publicationReady": false
+}

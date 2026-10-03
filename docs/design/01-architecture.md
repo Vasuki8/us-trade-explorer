@@ -1,13 +1,14 @@
 # Architecture
 
-This design keeps request-time computing out of the public analytics path. A visitor receives a complete page and release-pinned data without using a Census credential or waiting for an upstream API.
+This design keeps request-time computing out of the public analytics path. A visitor receives a complete page and release-pinned data without using a Census credential or waiting for an upstream API. The [2 October operating-model decision](../decisions/2026-10-02-operating-model.md) and [permanent instructions](../../AGENTS.md) supersede the earlier AWS provider preference. The diagram describes intended future boundaries, not deployed services; actual implementation remains private GitHub, Astro and standard-library Python.
 
 ## Options and decision
 
 | Option | Benefits | Costs and constraints | Decision |
 |---|---|---|---|
-| Astro + GitHub Actions + private S3 + CloudFront | Static portability; regional archives; short-lived AWS CI credentials; explicit headers, logs and rollback | More IAM/CDN setup; metered traffic and logging; global CDN is not India-only processing | Recommended after Gujarat business confirmation |
-| Astro + Actions + Cloudflare Pages/R2 | Very little site operation; immutable deployments and managed rollback | Confirm access to sufficient logs and India archive; provider retention not ours to promise; quotas | Good alternative if logging and contract review pass |
+| Astro + GitHub Actions + Workers + Static Assets/R2 | Retain static/precomputed application and use object storage for larger history; optional D1 for smaller metadata | Validate actual plan, cost, credentials, logs/retention, location and deployment behavior before provisioning | Owner's preferred future direction; not deployed |
+| Astro + GitHub Actions + private S3 + CloudFront | Previously researched static portability, regional archives and explicit host controls | More IAM/CDN setup and metered traffic/logging; global CDN is not India-only processing | Previous candidate; preference superseded on 2 October |
+| Astro + Actions + Cloudflare Pages/R2 | Earlier static-host candidate | Pages research/quotas below do not establish Workers + Static Assets capabilities | Previous alternative, not the new preferred service |
 | Server-rendered app + database from day one | Flexible queries and easier later accounts | More availability, patching, backups and privacy work before public demand is known | Defer until paid features justify it |
 
 GitHub Pages is not the commercial host. Its terms expressly restrict online business/commercial SaaS uses. [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)
@@ -27,24 +28,26 @@ flowchart TB
     Fetch[Isolated ingestion job - Census key only]
     Validate[Offline schema and reconciliation job]
     Build[Metrics and Astro build - no ingestion secrets]
-    Publish[Trusted deployment job - restricted short-lived IAM role]
+    Publish[Trusted deployment job - least privilege provider identity]
     Manifest[Reviewed manifests and deployment receipts]
   end
-  subgraph PRIVATE[Boundary C - private storage in India]
-    Raw[(Immutable raw responses and provenance)]
-    Normal[(Versioned Parquet datasets)]
+  subgraph PRIVATE[Boundary C - private storage - locations to verify]
+    Raw[(R2 or approved private objects - raw evidence)]
+    Normal[(Versioned analytical objects - Parquet where appropriate)]
+    Meta[(Optional D1 - smaller metadata only)]
     Backup[(Independent recovery copies)]
     Logs[(Restricted security logs)]
   end
   subgraph PUBLIC[Boundary D - explicitly public output]
-    Origin[(Private S3 public-output origin - CDN access only)]
-    CDN[HTTPS CDN, routing and security headers]
+    Origin[(Workers + Static Assets - approved public build)]
+    CDN[HTTPS delivery, routing and verified security headers]
     Visitor[Visitors and search engines]
+    Local[(Planned browser-local saved research)]
   end
   subgraph FUTURE[Boundary E - future private application]
     API[Authenticated API and authorization]
-    DB[(Users, workspaces, billing state)]
-    Queue[Alert and report workers]
+    DB[(Small application records - store chosen when justified)]
+    Queue[Bounded alert and report jobs when justified]
     Files[(Private generated reports)]
     PSP[Hosted payment processor]
   end
@@ -55,8 +58,11 @@ flowchart TB
   Fetch --> Raw --> Validate
   Validate -->|passes only| Normal
   Normal --> Build --> Publish
+  Repo -. reviewed metadata .-> Meta
+  Meta -. optional lookup input .-> Build
   Repo --> Build
   Publish --> Origin --> CDN --> Visitor
+  Visitor --> Local
   Publish --> Manifest
   Raw --> Backup
   Normal --> Backup
@@ -70,14 +76,14 @@ flowchart TB
   Normal -. validated public facts only .-> Queue
 ```
 
-The private origin bucket contains material intentionally available to everyone through the CDN. Its private ACL is an origin protection, not a subscription paywall. Raw archives, logs, workspaces and paid reports live in separate buckets with separate permissions and no public CDN route.
+Static assets contain material intentionally available to everyone. A private object-origin ACL is origin protection, not a subscription paywall. Raw archives, logs, future cloud workspaces and paid reports require separate permissions and no public delivery route. Browser-local saved research is a planned public convenience, not account authorization or confidential cloud storage. No diagram node authorizes provisioning.
 
 | Component | Responsibility and contract |
 |---|---|
 | GitHub repository | Reviewed code, source allowlist, schema versions, methodology, lockfiles, CI definitions, small release/deployment records; authoritative desired configuration |
 | Ingestor | Acquire approved source partitions; record provenance and bytes; never execute source content |
 | Validator | Strict parsing, completeness, uniqueness, referential integrity and statistical reconciliation; emits pass/fail report |
-| DuckDB processing | Local batch SQL over Parquet; calculate comparable metrics without a permanent database server |
+| Python and appropriate analytical tooling | Precompute comparable facts; introduce DuckDB/Parquet when justified, without requiring a permanent database server |
 | Astro builder | Substantive HTML, tables, metadata, sitemap, search index and small release-pinned JSON/CSV |
 | Publisher | Verify approved build digest, upload immutable output, verify preview and change active deployment only on success |
 | CDN | HTTPS, bounded caching, clean URL handling, headers, 404s and abuse controls; no trade calculations |
@@ -101,6 +107,12 @@ CDN propagation is not a globally simultaneous transaction: different edges may 
 
 ## Hosting design and portability
 
+Preferred future evaluation: Workers + Static Assets for approved public HTML/assets and compact summaries; R2 for larger raw/source/processed/history objects; optional D1 for smaller relational metadata. Keep detailed facts in analytical objects rather than automatically importing them into D1. Browser-local storage/IndexedDB serves initial saved research. These services are not provisioned and new accounts/privacy-affecting integrations require approval. Verify current official service documentation, terms, quotas, actual security headers/HTTP behavior, credential scope, logging, processing locations, backups/rollback and costs before a deployment decision. Do not apply Pages quotas to Workers or promise an India-resident R2 archive.
+
+### Previous AWS candidate
+
+The following provider-specific configuration and pricing research is retained from **1 October 2026** as a superseded candidate, not a requirement to provision AWS or a current quotation. Recheck it if that alternative becomes justified.
+
 Recommended AWS layout: Mumbai (`ap-south-1`) private raw, normalized and public-output buckets; separate restricted logging bucket; recovery copy in a different account or separately controlled backup destination. S3 public access is blocked. CloudFront Origin Access Control permits access only to intended public output. CloudFront and DNS/TLS remain global services; do not describe this as all data remaining in India. [AWS origin access control](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html)
 
 A small CloudFront viewer-request function maps allowed clean paths to `/builds/{build_id}/site/.../index.html`. Explicit immutable data/asset paths bypass that rewrite. The build ID is deployed configuration, not a visitor-controlled value. Reject malformed paths and unsupported methods. A real unknown path yields a 404 page with HTTP 404, never an SPA-style 200. Handle private-S3 missing-object 403 carefully: only the public behavior maps expected missing objects to 404; origin outages and real permission errors must alert, not silently become missing content.
@@ -111,7 +123,7 @@ AWS's customer agreement supports customer applications and governs content, sec
 
 Portability contract: `SITE_ORIGIN`, `BASE_PATH`, `ASSET_ORIGIN`, `PUBLIC_DATA_ORIGIN`, `DEPLOY_PROVIDER`, and `APP_ORIGIN` are configuration. Only trusted build configuration creates canonical URLs; never use the request Host header. Generate links through one URL helper. Test both `/` and `/trade/` builds. Export ordinary HTML/CSS/JS, Parquet, JSON and CSV; keep CDN rules in a thin adapter and infrastructure as code in GitHub. No public URLs contain bucket names or provider account IDs.
 
-The Cloudflare alternative currently has 20,000 files on Free, 25 MiB per asset, 500 builds/month, 20-minute build timeout and header/redirect rule limits. Large history belongs in object storage. Pages headers apply to static responses; a future function must set its own headers. Log availability/retention and residency need a separate check. [Pages limits](https://developers.cloudflare.com/pages/platform/limits/), [headers](https://developers.cloudflare.com/pages/configuration/headers/), [terms](https://www.cloudflare.com/terms/)
+The earlier **Cloudflare Pages** research, dated 1 October 2026, recorded 20,000 files on Free, 25 MiB per asset, 500 builds/month, 20-minute build timeout and header/redirect rule limits. These are historical Pages findings, not Workers + Static Assets limits or current plan promises. Large history belongs in object storage. Actual static/worker response headers, log availability/retention and residency need fresh checks before selection. [Pages limits](https://developers.cloudflare.com/pages/platform/limits/), [headers](https://developers.cloudflare.com/pages/configuration/headers/), [terms](https://www.cloudflare.com/terms/)
 
 ## Storage, caching and recovery
 
@@ -128,9 +140,11 @@ The Cloudflare alternative currently has 20,000 files on Free, 25 MiB per asset,
 
 Recovery objective: restore a prior complete release within one hour of operator response; lose no accepted release. These are targets, not measured SLAs. Rollback republishes the previous routing configuration and verifies its data hashes. Corrupted releases are marked withdrawn, with an explanatory correction record; do not quietly rewrite their bytes. Snapshot pages can return 410 for deliberately withdrawn content while explaining the correction.
 
-Freshness monitoring checks official scheduled dates and expected periods, the deployed manifest, deployment status and log delivery. If the source has a release but the site has not published it within 24 hours, show a warning and alert the operator. At 72 hours escalate. An announced source delay is a different state from pipeline failure. A page shows its data period and official publication date even with JavaScript disabled. A small independently scheduled AWS check covers missed GitHub schedules; GitHub schedules can be delayed or dropped. [GitHub scheduling behavior](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)
+Freshness monitoring checks official scheduled dates and expected periods, the deployed manifest, deployment status and log delivery. If the source has a release but the site has not published it within 24 hours, show a warning and alert the operator. At 72 hours escalate. An announced source delay is a different state from pipeline failure. A page shows its data period and official publication date even with JavaScript disabled. An independently scheduled check at an approved provider should cover missed GitHub schedules; no monitoring service exists yet. GitHub schedules can be delayed or dropped. [GitHub scheduling behavior](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)
 
 ## Budget and limits
+
+The envelope below is the **earlier AWS-oriented planning assumption**, retained for comparison. It is not an approved budget, a current provider quote or a Cloudflare cost estimate. The new operating model prefers very low fixed cost; explain meaningful ongoing costs and alternatives before obtaining business authorization. Measure actual dataset, request, bandwidth, retention and plan requirements before selecting services.
 
 Assume 100,000 visits/month, 50 GB transfer, 1–2 million requests, 20 GB deduplicated archive, up to 5 GB compressed logs and under 1,000 Linux CI minutes. Set a provisional **US$25–50/month** envelope: approximately $5–30 CDN/request costs, $2–8 storage/logs/backups, $1–3 domain amortization/DNS, $0–5 CI and monitoring, plus contingency. These ranges are estimates, not quotations; actual region mix, plan credits, retained logs and taxes determine the bill. Archive growth and legal services are separate budgeting decisions.
 
@@ -140,6 +154,6 @@ Metered AWS budgets are notifications, not guaranteed hard spending caps. Limit 
 
 ## Future backend boundary
 
-Add one server application, managed PostgreSQL, a managed OIDC identity provider, a durable queue and private report storage. Prefer services with an India region where practicable, while reviewing all cross-border processing. Keep `/products/` and `/countries/` on the static host and put the private application at a configurable `app` origin. Use a provider-neutral billing adapter; Stripe is only a candidate because India onboarding is currently invite-only. [Stripe India status](https://support.stripe.com/questions/stripe-accounts-are-invite-only-in-india)
+Begin saved research locally in the browser without accounts solely for saving. Add cloud identity, secure sessions, server-side workspace authorization/entitlements and private reports only when the product phase and explicit approval justify them. Select the smallest appropriate application store then; D1 may fit smaller metadata, while PostgreSQL or queues require evidence of need rather than being mandatory. Keep `/products/` and `/countries/` public and isolate a future private application at a configurable origin. Review cross-border processing and actual regional/logging capabilities for every chosen service. A provider-neutral hosted-payment adapter is later work; the earlier Stripe India assessment is dated research requiring fresh onboarding/contract checks. [Stripe India status](https://support.stripe.com/questions/stripe-accounts-are-invite-only-in-india)
 
 MVP foundations are stable entity IDs, versioned schemas, public/private build separation, an independent app-origin configuration, structured feature descriptions and source provenance. Do not deploy unused auth, payment webhooks, account tables, queues or a pretend paid tier. Their designs and security acceptance gates are retained in the other documents.

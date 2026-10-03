@@ -1,6 +1,6 @@
 # GitHub development first
 
-User decision, 1 October 2026: keep development in GitHub and move to AWS after development is complete. The existing UI is approved. AWS provisioning, billing and commercial deployment are deferred.
+Current owner direction, **2 October 2026**: keep development in private GitHub, prioritize validated official data and prefer future Cloudflare Workers + Static Assets/R2, with optional D1 only for smaller metadata. This supersedes the **1 October AWS-after-development preference**. The existing UI remains approved; no provider/account, spending or commercial deployment is activated. See [permanent instructions](../AGENTS.md) and the [operating-model decision](decisions/2026-10-02-operating-model.md).
 
 GitHub remains the source of truth for code, CI, reviewed changes, source contracts and small manifests. Actions handles testing, sample builds and private Census candidate artifacts. Large historical data and credentials stay out of Git history.
 
@@ -10,7 +10,7 @@ The `GitHub development preview` workflow builds from `main`, checks the public 
 
 Current provider result: the Pages setup API returned HTTP 422, “Your current plan does not support GitHub Pages for this repository.” No Pages site was created and no plan or repository visibility was changed. Development continues with local previews and private Actions artifacts. The Pages deployment variable remains unset.
 
-The intended project URL is `https://vasuki8.github.io/us-trade-explorer/`; it is not a confirmed live URL until deployment and HTTP checks succeed. The origin and `/us-trade-explorer/` path are passed to the same portable build used for AWS later. A downloadable artifact uses this same path: serve its extracted files under `/us-trade-explorer/` when viewing locally.
+The intended project URL is `https://vasuki8.github.io/us-trade-explorer/`; it is not a confirmed live URL until deployment and HTTP checks succeed. The origin and `/us-trade-explorer/` path use the portable build; a future approved host must verify the same URL/HTTP contract. A downloadable artifact uses this same path: serve its extracted files under `/us-trade-explorer/` when viewing locally.
 
 The preview stays clearly labelled, synthetic and noindex. It has no advertising, sign-up, checkout, payment collection, analytics scripts or paid features. GitHub's terms prohibit using Pages as free hosting to run an online business or commercial SaaS. This is a development demonstration of the project; migrate hosting before operating the commercial service. Reassess terms if the preview's purpose changes. [Pages limits and terms](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)
 
@@ -18,7 +18,7 @@ Pages for a private repository requires an eligible paid GitHub plan. Keep the r
 
 ## Hosting limitations and privacy
 
-GitHub Pages supplies managed HTTPS but does not expose the configurable response-header and log-export controls planned for CloudFront. The build uses a meta CSP as a browser safeguard; meta CSP cannot enforce `frame-ancestors`, HSTS or Permissions-Policy. Those production requirements remain AWS launch checks. Generated static 404 behavior and project-path links must be checked after deployment.
+The previously researched GitHub Pages candidate lacks the configurable response-header and log-export controls required by the production design. The build uses a meta CSP as a browser safeguard; meta CSP cannot enforce `frame-ancestors`, HSTS or Permissions-Policy. Verify those controls against actual responses/configuration on the eventual approved host, including Workers/static/error/download behavior if Cloudflare is selected. Generated static 404 behavior and project-path links need live deployment checks. Provider capability/legal research is dated and must be refreshed before changed use.
 
 GitHub says Pages logs visitors' IP addresses for security, including signed-out visitors. Hosting therefore still processes personal/network information; no promise of zero data collection is made. Do not invent retention periods, India log residency or deletion control over GitHub's provider logs. The preview privacy page identifies this provider behavior. [GitHub Pages data collection](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages#data-collection)
 
@@ -34,6 +34,6 @@ Initial acquisition result: [run 36957552437](https://github.com/Vasuki8/us-trad
 
 The new browser regression failed before the CSP was added, then passed with the meta policy. Nine contract tests, thirteen ingestion/store tests, the Astro type check and all sixteen desktop/mobile browser journeys passed locally. All sixteen browser journeys also passed under `/us-trade-explorer/`, including search, filtering, safe CSV download and a real local HTTP 404. Both builds verified 30 HTML pages and their internal links. This proves local behavior, not enforcement on a deployed GitHub Pages site.
 
-## AWS transition
+## Future authorized hosting transition
 
-After development: use the same static output, set the real domain/base path, configure private S3 plus CloudFront, replace temporary preview notices with verified operating notices, apply and test host security/logging controls, and then enable appropriate public indexing. Accounts and paid workspaces still require the documented server-side backend and authorization before launch.
+After official-data prerequisites and business launch gates pass, evaluate the same static output on Workers + Static Assets and larger objects on R2; optional D1 is for smaller metadata, not the complete analytical fact table. Recheck actual plans/terms, source reuse, credentials, processing locations, logs/retention, headers, route/404 behavior, cost and independent backup/rollback. Provision only after required authorization; no migration code is implemented here. Replace temporary notices with verified practices and enable indexing only for substantive official pages after acceptance. Basic local saved research does not require accounts. Later cloud/paid workspaces require the server-side authorization and subscription boundary before launch; AWS remains a historical alternative.

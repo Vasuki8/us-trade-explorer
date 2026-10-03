@@ -1,5 +1,7 @@
 # Experience and SEO
 
+Current sequencing follows the [operating-model decision](../decisions/2026-10-02-operating-model.md): verified official facts before feature expansion, browser-local saved research before accounts, organic utility/traffic before optional authorized advertising. These are planned experiences, not claims of deployed saving/subscriber features.
+
 The interface is a light analytical workspace: white surfaces, dark navy text, blue actions, fine grey rules and compact charts. Use tabular numerals, a system font, 16px body text, visible keyboard focus and generous click targets. Avoid decorative imagery and oversized marketing panels. Imports and exports use consistent labels and distinguishable line styles; colour alone never conveys meaning or direction.
 
 ## Public journey
@@ -18,6 +20,8 @@ flowchart LR
   Compare --> Sources[Inspect source, basis and revision]
   Read --> Sources
   Sources --> Export[Copy link or download selected table]
+  Read --> LocalSave[Save product, country, basket or view locally - planned]
+  LocalSave --> Profile
   Export --> Profile
   Select --> Missing[Explain missing or suppressed data]
   Missing --> Alternative[Choose available period or broader category]
@@ -62,7 +66,7 @@ Trade value              Change from same month last year
 Leading partner countries [sortable table, total and coverage]
 What changed [measured statements, revision badges]
 Source and limitations [endpoint, variables, release, definitions]
-[Advertisement — independently labelled, below useful content]
+[Optional later approved advertisement — labelled below useful content]
 Related products and next actions
 ```
 
@@ -114,15 +118,17 @@ Use unique titles such as “US coffee, tea and spice imports — HS 09 | US Tra
 
 ## Advertising and commercial design
 
-Launch with fixed sponsorship slots, clearly marked Advertisement, after the analytical content begins. Host reviewed sponsor images locally; reject executable markup and tracking pixels. Sponsor links use `rel="sponsored noopener noreferrer"`. No ad may imitate a Download button, interrupt filters, shift a chart or influence data ordering. State sponsor independence and record permitted use of each creative. Sell placement periods rather than promising individual-level targeting or unmeasured impressions. Revenue is uncertain until audience and sponsor demand are measured.
+First grow useful official-data research and organic traffic. Advertising is optional later work requiring explicit business/privacy approval. If direct sponsorship is introduced, use clearly marked Advertisement slots after analytical content begins, host reviewed sponsor images locally and reject executable markup/tracking pixels. Sponsor links use `rel="sponsored noopener noreferrer"`. No ad may imitate a Download button, interrupt filters, shift a chart or influence data ordering. State sponsor independence and record permitted creative rights. Sell placement periods rather than promising individual targeting or unmeasured impressions. Revenue remains uncertain until demand exists.
 
 For later ad networks, identify all request recipients and SDK behaviors before choosing a consent platform. Contextual or “non-personalized” ads may still store/read identifiers and need consent. Provide equally usable accept/reject choices where required, withdrawal and applicable sale/share opt-outs; do not load tags before the relevant decision. Useful public pages remain available after rejection. Consent receipts are private operational records, never build assets.
 
 ## Subscriber journey
 
+Basic saved products/countries, baskets and reusable views should initially remain browser-local without sign-up or checkout. Explain device/origin persistence and clearing/export options when implemented; never silently upload those records. Prevent broad-category/descendant basket double counting. The following journey is for later approved cloud/private/paid capabilities, not a prerequisite for basic saving.
+
 ```mermaid
 flowchart TD
-  Discover[Discover Save, Watch or Advanced report] --> Offer[Feature limits, price, currency, taxes, renewal and cancellation]
+  Discover[Discover cloud workspace, delivered alert or advanced paid report] --> Offer[Feature limits, price, currency, taxes, renewal and cancellation]
   Offer --> Account[Create account and verify email]
   Account --> Market{Supported country and eligible customer?}
   Market -->|No| Public[Explain availability; keep public profiles usable]

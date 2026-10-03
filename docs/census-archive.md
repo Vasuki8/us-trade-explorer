@@ -54,7 +54,7 @@ A failed refresh retains previous complete objects and pointers for recovery. Cu
 
 Local writer locks prevent competing archival writers. Remove a stale lock only after confirming its process has stopped; do not automatically steal it. Regular `.pending-*` atomic-write temporaries are retained locally but excluded from evidence inventory and artifacts; symlinks and unknown actual evidence paths still fail validation. Valid later raw evidence can be incorporated by regenerating a receipt offline, but strict verification refuses a receipt that omits retained responses. Temporary files and locks are excluded from artifacts. Bounded socket reads and watchdogs protect headers/body; OS DNS resolution still relies on the outer job cap for recovery.
 
-Private Actions artifacts expire after seven days and are not durable backups. Preserve verified evidence before expiry in controlled private storage. Runtime raw files stay under ignored `pipeline/output/` or `.local/`, outside Git history. Long-lived historical storage, independent backup restoration and AWS provisioning remain deferred. Secrets, key-bearing request URLs and upstream error text must never be retained as evidence.
+Private Actions artifacts expire after seven days and are not durable backups. Preserve verified evidence before expiry in controlled private storage. Runtime raw files stay under ignored `pipeline/output/` or `.local/`, outside Git history. Long-lived historical storage, independent backup restoration and cloud provisioning remain separately authorized future work. Secrets, key-bearing request URLs and upstream error text must never be retained as evidence.
 
 ## Verification state
 

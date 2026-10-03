@@ -1,6 +1,6 @@
 # US Trade Explorer
 
-Design baseline: 1 October 2026. Status updated: 2 October 2026. The working public preview uses synthetic data; authenticated private Census acquisition, recovery and selected-market/world checks have passed. No production website, accounts, advertisements or payment integration has been deployed. Start with the [development handoff](docs/handoff.md) for current commits, verification receipts, operating boundaries and next steps.
+Design baseline: 1 October 2026. Operating model updated: 2 October 2026. The working public preview uses synthetic data; authenticated private Census acquisition, recovery and selected-market/world checks have passed. No production website, accounts, advertisements or payment integration has been deployed. Agents must read the permanent [model instructions](AGENTS.md), [operating-model decision](docs/decisions/2026-10-02-operating-model.md) and [development handoff](docs/handoff.md) for current responsibility, priorities, verification receipts and boundaries. The agent owns routine engineering; the owner makes product/business decisions.
 
 ## Run the preview
 
@@ -25,13 +25,13 @@ Build a fast public reference for US merchandise imports and exports. Visitors s
 
 ## Recommendation
 
-**Current development decision:** develop and test in GitHub, using a temporary sample preview where Pages eligibility permits. AWS is deferred until development is complete. See [GitHub development and preview setup](docs/github-development.md) for the build workflow, hosting limitations and transition plan. The architecture below remains the commercial launch target.
+**Current development decision:** develop and test in the private GitHub repository using local previews and private build artifacts. No commercial host is active. The preferred future direction is Cloudflare Workers + Static Assets and R2, superseding the earlier AWS launch target; provider selection/activation still requires plan, cost, terms, privacy and security review. See [GitHub development](docs/github-development.md) and the [operating-model decision](docs/decisions/2026-10-02-operating-model.md).
 
-Use Astro static pages and small TypeScript interactions, with a Python/DuckDB ingestion pipeline in bounded GitHub Actions jobs. Store immutable raw and normalized releases in private object storage; publish only validated aggregates, compact datasets and HTML. Use GitHub for code, specifications, source registries, schemas, reviewed release manifests and deployment receipts, not the historical data warehouse.
+Retain Astro static pages and small TypeScript interactions, with Python ingestion in bounded GitHub Actions jobs. Introduce DuckDB or other analytical tooling and Parquet only when justified by data volume/processing requirements; the current pipeline uses the standard library. Store larger immutable raw and normalized releases in private object storage; publish only validated aggregates, compact datasets and HTML. Use GitHub for code, specifications, source registries, schemas, reviewed release manifests and deployment receipts, not the historical data warehouse.
 
-For this India-based business, prefer private AWS S3 buckets in Mumbai behind CloudFront, using pay-as-you-go configuration, short-lived CI identity, configurable security headers and an explicit security-log archive in India. This adds some infrastructure setup but makes logging, private storage and future backend boundaries explicit. An alternative Cloudflare Pages deployment is simpler, subject to resolving log access and retention requirements. GitHub Pages is unsuitable for the planned commercial service under its [published restrictions](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits).
+Evaluate Workers + Static Assets for the public application, R2 for larger history/source/processed objects and D1 only for smaller lookup/application metadata where it fits. Do not automatically put the full trade fact table in an application SQL database. No Cloudflare resources or processing/logging/residency guarantees exist yet; verify the actual service/plan and operating flows before provisioning. The earlier AWS design remains a historical alternative. GitHub Pages remains a development-only candidate under the previously reviewed [published restrictions](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits); recheck terms before any changed use.
 
-Start with direct sponsorship placements served from our own static assets. Avoid third-party ad scripts and visitor analytics at launch. This is an advertising-supported model with fewer processors and less consent complexity; it does not eliminate hosting logs, privacy duties or sponsor contracting. Programmatic advertising is a later gated integration.
+First establish validated official coverage, useful public analysis and organic traffic. Advertising, including direct sponsorship, may follow later with explicit business/privacy approval; it is not a launch prerequisite. No ad, analytics, email, account or payment integration is authorized by this operating-model update. Hosting logs still require an accurate inventory and applicable privacy/security review.
 
 ## Design deliverables
 
@@ -50,7 +50,9 @@ The diagrams are Mermaid source so they stay editable and reviewable in GitHub. 
 
 English interface; US reporter; monthly goods trade; nominal USD; Census basis; no seasonally adjusted claims. Start with all available HS2 chapters and trading partners for a selected 60-month window. Add HS4 only after measuring data volume and build costs. No HS6/HS10 coverage promise, customs classification advice, company-level shipment intelligence, services trade, live prices or tariff calculator. Country profiles describe each country's trade **with the US**, not its total worldwide trade.
 
-The seven public sections are overview, product search, product profiles, country profiles, comparisons, recent changes, and sources/methodology. Future paid features are saved workspaces, watchlists, alerts, advanced comparisons and reports; none requires making ordinary public profiles private.
+The seven public sections are overview, product search, product profiles, country profiles, comparisons, recent changes, and sources/methodology. Expand supported analytics according to the permanent instructions after data prerequisites pass. Initial saved products/countries, named baskets and reusable views should use browser-local storage where appropriate; basic saving must not require accounts. Prevent overlapping HS basket double counting. Later paid/cloud capabilities include cross-device workspaces, watchlists, alerts, advanced comparisons and reports; ordinary public profiles remain useful and free.
+
+**Current priority:** official ingestion, coverage/validation, definitions/provenance and replacement of demonstration data take precedence over further feature expansion. Next resolve July 2026 / HS2 09 period-effective partner, classification and revision-vintage evidence described in the [coverage review](docs/census-coverage-review.md). Do not treat acquisition success or scenario residuals as official publication approval.
 
 ## What has been verified
 

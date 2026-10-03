@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "state": "source-document-review-only",
+  "reviewedOn": "2026-10-02",
+  "scope": {
+    "flows": [
+      "imports",
+      "exports"
+    ],
+    "chapter": "09",
+    "reportingPeriodUnderReview": "2026-07"
+  },
+  "indexSources": [
+    "https://www.usitc.gov/harmonized_tariff_information/hts/archive/list",
+    "https://www.census.gov/foreign-trade/statistics/corrections/index.html"
+  ],
+  "documents": [
+    {
+      "file": "hts-2026-rev12-annexes.pdf",
+      "sourceURL": "https://hts.usitc.gov/reststop/file?release=2026HTSRev12&filename=Statistical%20Annexes",
+      "retrievedAt": "2026-10-03T02:26:56.254109+00:00",
+      "captureTimeBasis": "https-response-capture",
+      "httpStatus": 200,
+      "contentType": "application/octet-stream",
+      "bytes": 2517845,
+      "sha256": "1f6c299c8d7a9418aba2d42e1eaffabb9cb562f84711025d82e2e137356f22e8",
+      "pages": 26,
+      "officialDateLabels": [
+        {
+          "role": "archive-label",
+          "date": "2026-07-21"
+        }
+      ],
+      "effectiveFromVerified": null
+    },
+    {
+      "file": "hts-2026-rev13-annexes.pdf",
+      "sourceURL": "https://hts.usitc.gov/reststop/file?release=2026HTSRev13&filename=Statistical%20Annexes",
+      "retrievedAt": "2026-10-03T02:26:57.219615+00:00",
+      "captureTimeBasis": "https-response-capture",
+      "httpStatus": 200,
+      "contentType": "application/octet-stream",
+      "bytes": 2517851,
+      "sha256": "eb8b42c03dfd430148e00bc729ee448c02f656d87f6020a45f40cad5d19fac7d",
+      "pages": 26,
+      "officialDateLabels": [
+        {
+          "role": "archive-label",
+          "date": "2026-07-29"
+        }
+      ],
+      "effectiveFromVerified": null
+    },
+    {
+      "file": "hts-2026-rev14-annexes.pdf",
+      "sourceURL": "https://hts.usitc.gov/reststop/file?release=2026HTSRev14&filename=Statistical%20Annexes",
+      "retrievedAt": "2026-10-03T02:26:58.550385+00:00",
+      "captureTimeBasis": "https-response-capture",
+      "httpStatus": 200,
+      "contentType": "application/octet-stream",
+      "bytes": 2517852,
+      "sha256": "592f4bac7c5c8d4724ae2bf84f10c2694d498afcdf65654027225f81eab99194",
+      "pages": 26,
+      "officialDateLabels": [
+        {
+          "role": "archive-label",
+          "date": "2026-07-31"
+        }
+      ],
+      "effectiveFromVerified": null
+    },
+    {
+      "file": "Corrections_to_2025_Data.xlsx",
+      "sourceURL": "https://www.census.gov/foreign-trade/statistics/corrections/Corrections_to_2025_Data.xlsx",
+      "retrievedAt": "2026-10-03T02:27:53.8676039Z",
+      "captureTimeBasis": "local-persistence-immediately-after-https-download",
+      "bytes": 85748,
+      "sha256": "0287f99f925b3bea65bc0954a483c125876128d95deb4a1246ce4014f3031083",
+      "officialDateLabels": [
+        {
+          "role": "corrections-index-document-label",
+          "date": "2026-10-01"
+        }
+      ],
+      "observationRevisionDateVerified": null
+    },
+    {
+      "file": "Corrections_to_2026_Data.xlsx",
+      "sourceURL": "https://www.census.gov/foreign-trade/statistics/corrections/Corrections_to_2026_Data.xlsx",
+      "retrievedAt": "2026-10-03T02:27:53.6892514Z",
+      "captureTimeBasis": "local-persistence-immediately-after-https-download",
+      "bytes": 28516,
+      "sha256": "1bb86dd6faee55dac0f32d4c2adac88103a5c0db6101a90dfe6720ae0bec4126",
+      "officialDateLabels": [
+        {
+          "role": "corrections-index-document-label",
+          "date": "2026-10-01"
+        }
+      ],
+      "observationRevisionDateVerified": null
+    }
+  ],
+  "partnerInventoryApproved": false,
+  "classificationComparabilityApproved": false,
+  "apiVintageVerified": false,
+  "publicationReady": false
+}

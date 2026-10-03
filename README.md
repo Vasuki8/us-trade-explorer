@@ -6,7 +6,7 @@ Design baseline: 1 October 2026. Operating model updated: 2 October 2026. The wo
 
 ## Run the preview
 
-The [local research review](docs/local-research-review.md) provides unpublished chapter/country/source screens from a validated candidate, bound only to this computer. It is separate from the public sample preview and requires no external service.
+The [local research review](docs/local-research-review.md) provides unpublished chapter/country/source screens, context-rich CSV downloads and printable summaries from a validated candidate, bound only to this computer. It is separate from the public sample preview and requires no external service.
 
 The [unpublished research candidate](docs/public-research-candidate.md) now has a paired-flow Python producer and independent TypeScript contract. It prepares local review data from validated retained evidence; the site still uses only synthetic sample data.
 

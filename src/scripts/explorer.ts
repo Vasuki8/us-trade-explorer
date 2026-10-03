@@ -1,7 +1,7 @@
 import {
   parseQuery,
   queryString,
-  change,
+  previousYear,
   money,
   pct,
   csv,
@@ -13,6 +13,7 @@ import {
 import manifest from '../../releases/sample-2026-07-v1.manifest.json';
 import { fetchPublicRelease } from '../lib/public-fetch';
 import { explorerView } from '../lib/explorer-view';
+import { changeView } from '../lib/change-view';
 const root = document.querySelector<HTMLElement>('#explorer');
 if (root) {
   const form = document.querySelector<HTMLFormElement>('#filters')!,
@@ -88,14 +89,20 @@ if (root) {
       th.scope = 'row';
       th.textContent = release.partners.find((p) => p.id === row.partner)!.name;
       tr.append(th);
-      for (const text of [
-        money(row.value, false),
-        pct(change(row.value, row.previous).percent),
-        row.statusLabel,
-      ]) {
-        const td = tr.insertCell();
-        td.textContent = text;
+      tr.insertCell().textContent = money(row.value, false);
+      const diff = changeView(row.value, row.previous, {
+        priorYearIncluded: release.periods.includes(previousYear(query.period)),
+        scope: allChapters ? 'included-chapters' : 'observation',
+      });
+      const changeCell = tr.insertCell();
+      changeCell.textContent = pct(diff.percent);
+      if (diff.reason) {
+        const reason = document.createElement('span');
+        reason.className = 'change-reason';
+        reason.textContent = diff.reason;
+        changeCell.append(reason);
       }
+      tr.insertCell().textContent = row.statusLabel;
     }
     document.querySelector('#result-table')!.replaceChildren(table);
   }

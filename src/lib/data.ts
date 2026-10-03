@@ -8,10 +8,10 @@ import {
 import {
   valueAt,
   sum,
-  change,
   previousYear,
   type Flow,
 } from '../../packages/contracts/trade';
+import { changeView } from './change-view';
 const sampleBytes = encodePublicRelease(sample);
 export const publicManifest = validatePublicManifest(manifest);
 export const release = await loadPublicRelease(
@@ -72,5 +72,11 @@ export function profileRows(
           value: valueAt(release, p.code, id, flow, period),
           previous: valueAt(release, p.code, id, flow, previousYear(period)),
         }))
-  ).map((r) => ({ ...r, change: change(r.value, r.previous) }));
+  ).map((r) => ({
+    ...r,
+    change: changeView(r.value, r.previous, {
+      priorYearIncluded: release.periods.includes(previousYear(period)),
+      scope: 'observation',
+    }),
+  }));
 }

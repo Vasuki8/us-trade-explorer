@@ -6,7 +6,11 @@ interface Props {
     code: string;
     url: string;
     value: string | null;
-    change: { delta: string | null; percent: number | null };
+    change: {
+      delta: string | null;
+      percent: number | null;
+      reason: string | null;
+    };
   }[];
   subject: string;
   caption: string;
@@ -56,6 +60,9 @@ const { rows, subject, caption } = Astro.props;
             >
               {pct(row.change.percent)}
             </span>
+            {row.change.reason && (
+              <span class="change-reason">{row.change.reason}</span>
+            )}
           </td>
           <td class="numeric muted">{money(row.change.delta)}</td>
         </tr>

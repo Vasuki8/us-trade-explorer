@@ -24,8 +24,8 @@
 - [x] Gate all five Census jobs by manual event, main and strict serialized private boolean; clarify preview-artifact label.
 - [x] Observe regression GREEN, verify guard truth tables, unchanged private dispatch route, action pins, permissions and no new public data.
 - [x] Record current repository visibility, preserved evidence/access limitations and source-research advances in coverage/handoff/status. Prepare an unsent factual Census clarification draft only where primary documents leave material questions.
-- [ ] Run applicable Python/Node/Astro/build/production checks; fix introduced failures, review diff, commit and obtain independent immutable review.
-- [ ] Pass exact-head CI, merge under standing authorization, inspect main/deployment evidence, safely synchronize owner edit and record final receipts in repository/PR history.
+- [x] Run applicable Python/Node/Astro/build/production checks; fix introduced failures, review diff, commit and obtain independent immutable review.
+- [x] Pass exact-head CI, merge under standing authorization, inspect main/deployment/live skipped-job evidence and record runtime receipts. Prepare safe owner-edit synchronization; this documentation-only receipt PR's own final integration/sync receipts remain in its PR history without recursion.
 
 ## Execution ledger
 
@@ -35,3 +35,4 @@
 - Ruling: prioritize visibility safeguards before new private ingestion because actual repository state overrides the old private-development plan; cost if wrong is that existing private-evidence jobs are skipped until private storage is restored or redesigned.
 - Regression RED observed 12 failing workflow tests under the existing branch-only conditions and inaccurate private-preview label. GREEN: all12 pass after five job guards and label correction. Full local246 Python (three existing Windows capability skips),104 Node, clean Astro/static build and expected production rejection pass; required Linux CI supplies the hosted runner/browser evidence.
 - Existing dependency advisory GHSA-ch52-4w7c-c8xp has no published patched version and was already present in the lock; scoped remote-image cache applicability is documented. No unsafe forced downgrade or claim of full security scan.
+- Immutable review at074bf7f found no material findings; PR32 exact-head Checks37090781897 and merged-main353d9ca/Checks37090941880 passed246Python/noLinuxskips,104Node,62browserperpath, cleanbuilds/guard. Five live public dispatch jobs were skipped with zero artifacts; exact receipts are in handoff. Sample preview37090941917 passed/deployskipped, legacyPages37090941686 failed on unchangedAstro/YAML, siteHTTP404. No runtime correction, deferred reviewer minor or source gate relaxation.

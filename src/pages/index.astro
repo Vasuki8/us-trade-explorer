@@ -15,22 +15,33 @@ import {
 } from '../lib/data';
 import {
   money,
-  change,
   pct,
   valueAt,
   previousYear,
 } from '../../packages/contracts/trade';
+import { changeView } from '../lib/change-view';
 const imports = total('world', 'imports'),
   exports = total('world', 'exports'),
-  growth = change(imports, total('world', 'imports', previousYear(latest)));
+  growth = changeView(
+    imports,
+    total('world', 'imports', previousYear(latest)),
+    {
+      priorYearIncluded: release.periods.includes(previousYear(latest)),
+      scope: 'included-chapters',
+    },
+  );
 const rows = release.products.map((p) => ({
   name: p.name,
   code: p.code,
   url: productUrl(p.code),
   value: valueAt(release, p.code, 'world', 'imports', latest),
-  change: change(
+  change: changeView(
     valueAt(release, p.code, 'world', 'imports', latest),
     valueAt(release, p.code, 'world', 'imports', previousYear(latest)),
+    {
+      priorYearIncluded: release.periods.includes(previousYear(latest)),
+      scope: 'observation',
+    },
   ),
 }));
 ---
@@ -104,9 +115,17 @@ const rows = release.products.map((p) => ({
       <p>GENERAL IMPORTS</p>
       <strong>{money(imports)}</strong>
       <span>
-        <b class="positive">{pct(growth.percent)}</b> compared with a year
-        earlier
+        <b
+          class:list={{
+            positive: (growth.percent ?? 0) > 0,
+            negative: (growth.percent ?? 0) < 0,
+          }}
+        >
+          {pct(growth.percent)}
+        </b>{' '}
+        compared with a year earlier
       </span>
+      {growth.reason && <span class="change-reason">{growth.reason}</span>}
       <small>Customs value · selected chapters only</small>
     </article>
     <article class="stat">

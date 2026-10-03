@@ -15,13 +15,13 @@ import {
 } from '../lib/data';
 import {
   money,
-  change,
   pct,
   valueAt,
   previousYear,
   BASIS,
   type Flow,
 } from '../../packages/contracts/trade';
+import { changeView } from '../lib/change-view';
 interface Props {
   kind: 'product' | 'country';
   id: string;
@@ -37,7 +37,10 @@ const getValue = (period: string) =>
     ? valueAt(release, id, 'world', flow, period)
     : total(id, flow, period);
 const value = getValue(latest),
-  diff = change(value, getValue(previousYear(latest)));
+  diff = changeView(value, getValue(previousYear(latest)), {
+    priorYearIncluded: release.periods.includes(previousYear(latest)),
+    scope: kind === 'country' ? 'included-chapters' : 'observation',
+  });
 const url = (f: Flow) =>
   kind === 'product' ? productUrl(id, f) : countryUrl(id, f);
 const filters = new URLSearchParams({
@@ -112,6 +115,7 @@ const filters = new URLSearchParams({
     <article class="stat">
       <p>YEAR OVER YEAR</p>
       <strong>{pct(diff.percent)}</strong>
+      {diff.reason && <span class="change-reason">{diff.reason}</span>}
       <span>Compared with {month(previousYear(latest))}</span>
     </article>
     <article class="stat">

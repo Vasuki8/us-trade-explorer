@@ -2,16 +2,21 @@
 import Layout from '../layouts/Layout.astro';
 import DataTable from '../components/DataTable.astro';
 import { release, latest, month, productUrl } from '../lib/data';
-import { valueAt, change, previousYear } from '../../packages/contracts/trade';
+import { valueAt, previousYear } from '../../packages/contracts/trade';
+import { changeView } from '../lib/change-view';
 const rows = release.products
   .map((p) => ({
     name: p.name,
     code: p.code,
     url: productUrl(p.code),
     value: valueAt(release, p.code, 'world', 'imports', latest),
-    change: change(
+    change: changeView(
       valueAt(release, p.code, 'world', 'imports', latest),
       valueAt(release, p.code, 'world', 'imports', previousYear(latest)),
+      {
+        priorYearIncluded: release.periods.includes(previousYear(latest)),
+        scope: 'observation',
+      },
     ),
   }))
   .sort(

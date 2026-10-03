@@ -10,9 +10,11 @@
     "dev": "astro dev --host 127.0.0.1",
     "build": "astro build && node scripts/verify-build.mjs",
     "preview": "astro preview --host 127.0.0.1",
+    "review:research": "node tools/research-review/server.ts",
     "check": "astro check",
     "test": "node --test --test-isolation=none tests/*.test.ts",
     "test:pipeline": "python -m unittest discover -s pipeline/tests -v",
+    "test:research-browser": "playwright test --config playwright.research.config.ts",
     "verify": "npm run test && npm run check && npm run build"
   },
   "dependencies": {

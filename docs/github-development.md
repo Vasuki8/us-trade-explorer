@@ -1,5 +1,7 @@
 # GitHub development first
 
+**Actual-state update, 2 October local / 3 October UTC:** GitHub independently confirms a public repository; the agent did not change visibility. [Private-evidence safeguards](private-evidence-visibility.md) now require manual private-main context for all five Census workflows. Existing artifacts cannot be promised private in a public repository. Pages API currently reports HTTP 200, legacy/errored configuration, and the configured site returns HTTP 404; the Astro deployment-enable variable is absent. The old private-plan HTTP 422 result below is historical, not the current hosting limitation. No host setting changed. Current owner visibility intent/private evidence path remains unresolved.
+
 Current owner direction, **2 October 2026**: keep development in private GitHub, prioritize validated official data and prefer future Cloudflare Workers + Static Assets/R2, with optional D1 only for smaller metadata. This supersedes the **1 October AWS-after-development preference**. The existing UI remains approved; no provider/account, spending or commercial deployment is activated. See [permanent instructions](../AGENTS.md) and the [operating-model decision](decisions/2026-10-02-operating-model.md).
 
 GitHub remains the source of truth for code, CI, reviewed changes, source contracts and small manifests. Actions handles testing, sample builds and private Census candidate artifacts. Large historical data and credentials stay out of Git history.

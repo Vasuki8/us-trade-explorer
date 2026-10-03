@@ -2,6 +2,8 @@
 
 Design baseline: 1 October 2026. Operating model updated: 2 October 2026. The working public preview uses synthetic data; authenticated private Census acquisition, recovery and selected-market/world checks have passed. No production website, accounts, advertisements or payment integration has been deployed. Agents must read the permanent [model instructions](AGENTS.md), [operating-model decision](docs/decisions/2026-10-02-operating-model.md) and [development handoff](docs/handoff.md) for current responsibility, priorities, verification receipts and boundaries. The agent owns routine engineering; the owner makes product/business decisions.
 
+**Actual repository state verified 2 October local / 3 October UTC:** this repository is now public; the agent made no visibility change. Private Census evidence workflows are blocked unless manually dispatched on private main. Existing artifact access follows repository read access. Pages currently reports legacy/errored configuration and its URL returns HTTP 404; no hosted result is claimed. The [visibility record](docs/private-evidence-visibility.md) supersedes private-development assumptions in the dated planning context below. Owner visibility intent and a safe private-evidence path remain unresolved.
+
 ## Run the preview
 
 ```sh
@@ -20,7 +22,7 @@ Build a fast public reference for US merchandise imports and exports. Visitors s
 - Operator location: Gujarat, India. Legal entity, address, registrations and responsible contacts remain to be supplied.
 - Target markets: United States, Canada, Mexico, China, India and Europe, including the United Kingdom. Exact European countries remain unresolved; EU/EEA and UK requirements are assessed separately.
 - Future subscriptions: businesses and consumers.
-- Existing asset: this private GitHub repository. Domain, hosting, advertising, analytics, email and payment accounts are unselected.
+- Existing asset: this GitHub repository (now verified public). Domain, commercial hosting, advertising, analytics, email and payment accounts are unselected.
 - Provisional infrastructure budget: US$25–50/month before taxes and professional services. This is a planning assumption, not a spending authorization or price guarantee.
 
 ## Recommendation

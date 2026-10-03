@@ -223,3 +223,265 @@ test('escaping covers markup and attributes while values retain exact integer pr
     /\$1,010,000,000,000,000,000,000/,
   );
 });
+
+test('profile export actions retain the selected flow and explain local retry', () => {
+  for (const path of ['/products/09', '/countries/india']) {
+    const result = renderReview(data(), path + '?flow=exports', 'fixture');
+    assert.match(
+      result.html,
+      new RegExp(`href="${path}\\.csv\\?flow=exports"[^>]*>Download CSV</a>`),
+    );
+    assert.match(
+      result.html,
+      new RegExp(
+        `href="${path}/print\\?flow=exports"[^>]*>Printable summary</a>`,
+      ),
+    );
+    assert.match(result.html, /download.*(?:fail|does not start)/i);
+    assert.match(result.html, /retry/i);
+    assert.doesNotMatch(
+      result.html,
+      /download (?:complete|succeeded|successful)/i,
+    );
+  }
+  assert.doesNotMatch(
+    renderReview(data(), '/sources', 'fixture').html,
+    /Download CSV|Printable summary/,
+  );
+});
+
+test('exact profile CSV routes return downloads only after flow validation', () => {
+  for (const path of [
+    '/products/09',
+    '/countries/canada',
+    '/countries/mexico',
+    '/countries/india',
+    '/countries/china',
+  ]) {
+    const result = renderReview(data(), path + '.csv?flow=exports', 'fixture');
+    assert.equal(result.status, 200, path);
+    assert.equal(result.html, '');
+    assert.ok(result.download);
+    assert.match(result.download.filename, /^[a-z0-9-]+\.csv$/);
+    assert.match(result.download.csv, /ALL_VAL_MO/);
+    assert.doesNotMatch(result.download.csv, /GEN_VAL_MO/);
+  }
+  for (const suffix of ['.csv', '/print']) {
+    for (const query of [
+      'flow=balance',
+      'flow=imports&flow=exports',
+      'period=2026-08',
+      'flow=imports?x=private',
+      'flow=imports&x=private',
+    ]) {
+      const result = renderReview(
+        data(),
+        '/countries/india' + suffix + '?' + query,
+        'fixture',
+      );
+      assert.equal(result.status, 400, query);
+      assert.equal(result.download, undefined);
+      assert.match(result.html, /Reset view/);
+      assert.doesNotMatch(result.html, /private/);
+    }
+  }
+  for (const path of [
+    '/products/0901.csv',
+    '/countries/atlantis.csv',
+    '/sources.csv',
+    '/sources/print',
+    '/products/09/print.csv',
+    '/products/09.csv/print',
+    '/countries/india/print/',
+    '/products/09.csv/',
+    '/countries/India.csv',
+    '/products/%30%39.csv',
+  ]) {
+    const result = renderReview(data(), path + '?flow=exports', 'fixture');
+    assert.equal(result.status, 404, path);
+    assert.equal(result.download, undefined);
+  }
+});
+
+test('printable chapter summary carries values and definitions without another page', () => {
+  const result = renderReview(
+    data(),
+    '/products/09/print?flow=exports',
+    'fixture',
+  );
+  assert.equal(result.status, 200);
+  assert.equal(result.download, undefined);
+  for (const text of [
+    'Printable summary',
+    'Coffee, tea, maté and spices',
+    'July 2026',
+    'US merchandise trade',
+    'Exports',
+    'World chapter value',
+    '$100',
+    'Four-country subtotal',
+    '$60',
+    'Canada',
+    '$10',
+    'Mexico',
+    '$20',
+    'India',
+    '$0',
+    'China',
+    '$30',
+    'Reported zero',
+    'Total exports (domestic exports + re-exports)',
+    'FAS value',
+    'ALL_VAL_MO',
+    'Not seasonally adjusted',
+    'Nominal',
+    'US dollars',
+    'Missing values are not zero',
+    'Official release date',
+    'Official revision date',
+    'Revision detection time',
+    'Unknown',
+    '2026-10-02T01:02:03Z',
+    'Not published',
+    'API classification vintage',
+    'not identified',
+    'Historical comparability',
+    'not established',
+    'Schedule B',
+    'Schedule C',
+    'Hong Kong, Macao and Taiwan',
+    'Andaman, Nicobar, and Laccadive',
+    'Isla de Cozumel',
+    'Year-over-year change',
+    'country-level concentration',
+    'browser',
+    'Save as PDF',
+    'Unpublished local review',
+    'Fabricated test data',
+  ]) {
+    assert.ok(result.html.includes(text), text);
+  }
+  for (const url of [
+    'https://api.census.gov/data/timeseries/intltrade/exports/hs',
+    'https://www.census.gov/foreign-trade/guide/sec2.html',
+    ...data().flows[1].classification.referenceURLs,
+    ...data().geography.referenceURLs,
+  ]) {
+    assert.ok(
+      result.html.includes('>' + escapeHTML(url) + '</a>'),
+      'Visible URL: ' + url,
+    );
+  }
+  assert.match(
+    result.html,
+    /href="\/products\/09\?flow=exports"[^>]*>Back to profile/,
+  );
+  assert.match(result.html, /<table>/);
+  assert.doesNotMatch(
+    result.html,
+    /<script|<form|GEN_VAL_MO|General imports|Customs value/,
+  );
+});
+
+test('printable country summary excludes unrelated values and explains its geography', () => {
+  const result = renderReview(
+    data(),
+    '/countries/india/print?flow=imports',
+    'candidate',
+  );
+  assert.equal(result.status, 200);
+  for (const text of [
+    'US trade with India',
+    'US imports from India',
+    'General imports',
+    'Customs value',
+    'GEN_VAL_MO',
+    '$0',
+    '0.00%',
+    'Reported zero',
+    'not total US trade with this country',
+    'Includes the Andaman, Nicobar, and Laccadive Islands.',
+    'Schedule C 5330',
+    'Retained Census candidate',
+    'publication not approved',
+  ]) {
+    assert.ok(result.html.includes(text), text);
+  }
+  assert.match(
+    result.html,
+    /href="\/countries\/india\?flow=imports"[^>]*>Back to profile/,
+  );
+  assert.doesNotMatch(
+    result.html,
+    /\$10(?:<|\b)|\$20(?:<|\b)|\$30(?:<|\b)|\$60(?:<|\b)|ALL_VAL_MO|FAS value|Fabricated test data/,
+  );
+});
+
+test('printable summaries retain missing observations and share denominator reasons', () => {
+  const missing = structuredClone(fixture),
+    f = missing.flows[0];
+  Object.assign(f.countries[2], {
+    status: 'unobserved',
+    value: null,
+    shareOfWorldPercent: null,
+    shareUnavailableReason: 'partner-not-observed',
+  });
+  Object.assign(f.coverage, {
+    allSelectedObserved: false,
+    missingSelectedCodes: ['5330'],
+  });
+  Object.assign(f.totals, {
+    selectedTotalUSD: null,
+    selectedShareOfWorldPercent: null,
+  });
+  const candidate = validateResearchCandidate(missing);
+  const country = renderReview(
+    candidate,
+    '/countries/india/print',
+    'fixture',
+  ).html;
+  assert.match(country, /Not observed/);
+  assert.match(country, /country observation is missing/);
+  assert.match(country, /Incomplete selected coverage/);
+  assert.doesNotMatch(
+    country.match(/<table>[\s\S]*?<\/table>/)![0],
+    /\$0|0\.00%|Reported zero/,
+  );
+  const product = renderReview(candidate, '/products/09/print', 'fixture').html;
+  assert.match(product, /Observed selected values/);
+  assert.match(product, /partial sum excludes missing observations/);
+  for (const zero of [false, true]) {
+    const raw = structuredClone(fixture),
+      flow = raw.flows[0];
+    flow.world = {
+      status: zero ? 'reported_zero' : 'unobserved',
+      value: zero ? '0' : null,
+    };
+    for (const row of flow.countries) {
+      if (zero) Object.assign(row, { status: 'reported_zero', value: '0' });
+      Object.assign(row, {
+        shareOfWorldPercent: null,
+        shareUnavailableReason: zero
+          ? 'zero-world-denominator'
+          : 'world-not-observed',
+      });
+    }
+    if (zero)
+      Object.assign(flow.totals, {
+        observedSelectedUSD: '0',
+        selectedTotalUSD: '0',
+      });
+    flow.totals.selectedShareOfWorldPercent = null;
+    const html = renderReview(
+      validateResearchCandidate(raw),
+      '/products/09/print',
+      'fixture',
+    ).html;
+    assert.ok(
+      html.includes(
+        zero ? 'world control is zero' : 'world control was not observed',
+      ),
+    );
+    assert.doesNotMatch(html, /0\.00%/);
+  }
+});

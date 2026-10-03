@@ -36,6 +36,84 @@ const canonical = (value: any): string => {
   );
 };
 const validBytes = canonical(fixture.bundle);
+
+test('CSV attachments preserve context and HEAD metadata without bypassing request controls', async () => {
+  const server = await startReviewServer({ fixture: true, port: 0 });
+  try {
+    const path = '/products/09.csv?flow=exports';
+    const csv = await http(server, path);
+    assert.equal(csv.status, 200);
+    assert.equal(csv.headers['content-type'], 'text/csv; charset=utf-8');
+    assert.match(
+      csv.headers['content-disposition']!,
+      /^attachment; filename="[a-z0-9._-]+\.csv"$/,
+    );
+    assert.match(csv.headers['content-disposition']!, /exports/);
+    assert.match(csv.body, /fabricated/i);
+    assert.match(csv.body, /unpublished/i);
+    assert.match(csv.body, /ALL_VAL_MO/);
+    assert.equal(
+      Number(csv.headers['content-length']),
+      Buffer.byteLength(csv.body),
+    );
+    assert.equal(csv.headers['cache-control'], 'no-store');
+    assert.equal(csv.headers['x-content-type-options'], 'nosniff');
+    assert.match(
+      String(csv.headers['content-security-policy']),
+      /default-src 'none'/,
+    );
+    const head = await http(server, path, {}, 'HEAD');
+    assert.equal(head.status, 200);
+    assert.equal(head.body, '');
+    assert.equal(head.headers['content-length'], csv.headers['content-length']);
+    assert.equal(
+      head.headers['content-disposition'],
+      csv.headers['content-disposition'],
+    );
+    for (const headers of [
+      { Host: 'evil.example' },
+      { Origin: 'https://evil.example' },
+      { 'Sec-Fetch-Site': 'cross-site' },
+    ]) {
+      const denied = await http(server, path, headers);
+      assert.equal(denied.status, 403);
+      assert.equal(denied.headers['content-disposition'], undefined);
+      assert.doesNotMatch(denied.body, /ALL_VAL_MO/);
+    }
+    assert.equal((await http(server, path, {}, 'POST')).status, 405);
+  } finally {
+    await close(server);
+  }
+});
+
+test('failed download routes return recoverable errors without attachment headers', async () => {
+  const server = await startReviewServer({ fixture: true, port: 0 });
+  try {
+    for (const [path, status] of [
+      ['/products/09.csv?flow=imports&flow=exports', 400],
+      ['/countries/india.csv?flow=other', 400],
+      ['/products/09.csv?filename=secret.csv', 400],
+      ['/products/10.csv', 404],
+      ['/sources.csv', 404],
+      ['/.local/public-candidate/fresh.json.csv', 404],
+      ['/countries/india/print.csv', 404],
+    ] as const) {
+      const response = await http(server, path);
+      assert.equal(response.status, status, path);
+      assert.equal(response.headers['content-disposition'], undefined);
+      assert.match(response.headers['content-type']!, /^text\/html/);
+      assert.match(response.body, /Reset view/);
+    }
+    const print = await http(server, '/countries/india/print?flow=exports');
+    assert.equal(print.status, 200);
+    assert.equal(print.headers['content-disposition'], undefined);
+    assert.match(print.body, /summary/i);
+    assert.match(print.body, /unpublished/i);
+    assert.doesNotMatch(print.body, /<script\b/);
+  } finally {
+    await close(server);
+  }
+});
 const portOf = (server: Server) => {
   const address = server.address();
   assert(address && typeof address === 'object');

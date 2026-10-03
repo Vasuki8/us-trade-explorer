@@ -1,4 +1,5 @@
 import { test as base, expect, type Page } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
 const origin = 'http://127.0.0.1:4323';
 const productName = 'Coffee, tea, maté and spices';
@@ -250,7 +251,7 @@ test('country and source flow controls preserve the current review page', async 
   }
 });
 
-test('review responses are private, noindex and have no script or download surface', async ({
+test('review responses remain private and noindex with no script or raw data surface', async ({
   page,
 }) => {
   const response = await page.goto('/products/09?flow=imports');
@@ -285,6 +286,213 @@ test('review responses are private, noindex and have no script or download surfa
     await expect(page).toHaveURL(/\/products\/09\?flow=imports$/);
   }
 });
+
+// A real browser attachment is parsed independently; numeric strings are never
+// converted through Number, and quoted commas/newlines remain field content.
+function parseCSV(csv: string): Record<string, string>[] {
+  csv = csv.replace(/^\uFEFF/, '');
+  const records: string[][] = [];
+  let row: string[] = [],
+    field = '',
+    quoted = false;
+  for (let index = 0; index < csv.length; index++) {
+    const char = csv[index];
+    if (char === '"') {
+      if (quoted && csv[index + 1] === '"') {
+        field += '"';
+        index++;
+      } else quoted = !quoted;
+    } else if (char === ',' && !quoted) {
+      row.push(field);
+      field = '';
+    } else if ((char === '\r' || char === '\n') && !quoted) {
+      if (char === '\r' && csv[index + 1] === '\n') index++;
+      row.push(field);
+      records.push(row);
+      row = [];
+      field = '';
+    } else field += char;
+  }
+  expect(quoted).toBe(false);
+  if (field || row.length) records.push([...row, field]);
+  const headers = records.shift()!;
+  expect(new Set(headers).size).toBe(headers.length);
+  return records.map((record) => {
+    expect(record.length).toBe(headers.length);
+    return Object.fromEntries(
+      headers.map((header, index) => [header, record[index]]),
+    );
+  });
+}
+
+for (const flow of flows) {
+  test(`actual ${flow} CSV downloads retain fixture context and bounded country scope`, async ({
+    page,
+  }) => {
+    for (const path of ['/products/09', '/countries/india']) {
+      await page.goto(`${path}?flow=${flow}`);
+      const link = page.getByRole('link', {
+        name: 'Download CSV',
+        exact: true,
+      });
+      await expect(link).toHaveAttribute('href', `${path}.csv?flow=${flow}`);
+      await expect(page.locator('body')).toContainText(
+        /download.*(?:fail|does not start)/i,
+      );
+      const pending = page.waitForEvent('download');
+      await link.click();
+      const download = await pending;
+      expect(await download.failure()).toBeNull();
+      expect(download.suggestedFilename()).toMatch(
+        new RegExp(`${flow}.*\\.csv$`),
+      );
+      const file = await download.path();
+      expect(file).not.toBeNull();
+      const rows = parseCSV(await readFile(file!, 'utf8'));
+      expect(rows.length).toBe(path.includes('countries') ? 2 : 6);
+      for (const row of rows) {
+        expect(row.flow).toBe(flow);
+        expect(row.source_measure).toBe(
+          flow === 'imports' ? 'GEN_VAL_MO' : 'ALL_VAL_MO',
+        );
+        expect(row.reporting_period).toBe('2026-07');
+        expect(row.publication_state).toBe('unpublished-review');
+        expect(row.data_mode).toMatch(/fixture|fabricated/);
+      }
+      const countryRows = rows.filter((row) => row.row_kind === 'country');
+      expect(
+        countryRows.map((row) => [row.partner_code, row.value_nominal_usd]),
+      ).toEqual(
+        path.includes('countries')
+          ? [['5330', '0']]
+          : [
+              ['1220', '10'],
+              ['2010', '20'],
+              ['5330', '0'],
+              ['5700', '30'],
+            ],
+      );
+      expect(
+        countryRows.find((row) => row.partner_code === '5330')
+          ?.observation_status,
+      ).toBe('reported_zero');
+      expect(
+        rows.find((row) => row.row_kind === 'world')?.value_nominal_usd,
+      ).toBe('100');
+      if (path.includes('countries'))
+        expect(rows.map((row) => row.row_kind)).toEqual(['world', 'country']);
+      await expect(page).toHaveURL(`${origin}${path}?flow=${flow}`);
+    }
+  });
+
+  test(`${flow} printable summaries retain context without clipped print tables`, async ({
+    page,
+  }, info) => {
+    for (const path of ['/products/09', '/countries/india']) {
+      await page.goto(`${path}?flow=${flow}`);
+      const link = page.getByRole('link', {
+        name: 'Printable summary',
+        exact: true,
+      });
+      await expect(link).toHaveAttribute('href', `${path}/print?flow=${flow}`);
+      await link.click();
+      await expect(page).toHaveURL(`${origin}${path}/print?flow=${flow}`);
+      await expect(
+        page.getByRole('link', { name: 'Back to profile', exact: true }),
+      ).toHaveAttribute('href', `${path}?flow=${flow}`);
+      await expect(page.locator('.print-instructions')).toContainText(
+        'Save as PDF',
+      );
+      await page.emulateMedia({ media: 'print' });
+      const body = page.locator('body');
+      await expect(body).toContainText('Unpublished local review');
+      await expect(page.locator('.review-banner')).toBeVisible();
+      await expect(page.locator('.review-banner')).toContainText(
+        'Fabricated test data — all figures are invented.',
+      );
+      for (const text of [
+        'July 2026',
+        'US merchandise trade',
+        'Chapter 09',
+        flow === 'imports'
+          ? 'General imports'
+          : 'Total exports (domestic exports + re-exports)',
+        flow === 'imports' ? 'Customs value' : 'FAS value',
+        'Monthly',
+        'Not seasonally adjusted',
+        'Unknown',
+        'Not published',
+        '2026-10-02T01:02:03Z',
+        'not identified',
+        'not established',
+        'Schedule C',
+        'Missing values are not zero',
+      ])
+        await expect(body).toContainText(text);
+      await expect(page.locator('script, form')).toHaveCount(0);
+      await expect(
+        page.getByRole('navigation', { name: 'Main navigation' }),
+      ).toBeHidden();
+      await expect(page.locator('.print-instructions')).toBeHidden();
+      const table = page.getByRole('table');
+      await expect(
+        table.getByRole('columnheader', { name: 'Value (USD)' }),
+      ).toBeVisible();
+      const india = table.getByRole('row').filter({ hasText: 'India' });
+      await expect(india).toContainText('$0');
+      await expect(india).toContainText('Reported zero');
+      await expect(body).toContainText(
+        'Includes the Andaman, Nicobar, and Laccadive Islands.',
+      );
+      const url = `https://api.census.gov/data/timeseries/intltrade/${flow}/hs`;
+      await expect(
+        page.getByRole('link', { name: url, exact: true }),
+      ).toBeVisible();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      const clipped = await page
+        .locator(
+          'main h1, main h2, main p, table, table th, table td, table caption, main dd, main li',
+        )
+        .evaluateAll((elements) =>
+          elements
+            .filter((element) => {
+              const box = element.getBoundingClientRect();
+              return (
+                box.width > 0 &&
+                (element.scrollWidth > element.clientWidth + 1 ||
+                  element.scrollHeight > element.clientHeight + 1 ||
+                  box.left < -1 ||
+                  box.right > innerWidth + 1)
+              );
+            })
+            .map((element) => ({
+              text: element.textContent,
+              client: [element.clientWidth, element.clientHeight],
+              scroll: [element.scrollWidth, element.scrollHeight],
+            })),
+        );
+      expect(clipped).toEqual([]);
+      if (path.includes('countries')) {
+        await expect(table.getByRole('row')).toHaveCount(3);
+        for (const value of ['$10', '$20', '$30', '$60'])
+          await expect(table.getByText(value, { exact: true })).toHaveCount(0);
+      }
+      await page.screenshot({
+        path: `.local/research-review/screenshots/print-${path.includes('countries') ? 'country' : 'chapter'}-${flow}-${info.project.name}.png`,
+        fullPage: true,
+      });
+      await page.emulateMedia({ media: 'screen' });
+      await page
+        .getByRole('link', { name: 'Back to profile', exact: true })
+        .click();
+      await expectReviewContext(page, flow);
+    }
+  });
+}
 
 // This deliberate injection has its own transport guard: Playwright emits a
 // request event even when CSP rejects it before a network route can run.

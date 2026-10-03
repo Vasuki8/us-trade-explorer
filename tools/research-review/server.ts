@@ -349,6 +349,17 @@ export async function startReviewServer(
         if (target === '/review.css')
           return send(req, res, 200, css, 'text/css; charset=utf-8');
         const page = renderReview(data, target, mode);
+        if (page.download)
+          return send(
+            req,
+            res,
+            page.status,
+            page.download.csv,
+            'text/csv; charset=utf-8',
+            {
+              'Content-Disposition': `attachment; filename="${page.download.filename}"`,
+            },
+          );
         return send(
           req,
           res,

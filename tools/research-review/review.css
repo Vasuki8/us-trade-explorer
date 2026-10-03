@@ -458,3 +458,202 @@ footer p {
     margin-top: 8px;
   }
 }
+.research-actions {
+  margin-bottom: 24px;
+}
+.research-actions > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  font-weight: 650;
+}
+.research-actions p {
+  margin: 8px 0 0;
+}
+.print-summary {
+  max-width: 1000px;
+  margin-inline: auto;
+}
+.print-instructions {
+  padding: 16px 0 24px;
+}
+.print-summary a,
+.print-summary th,
+.print-summary td,
+.print-summary li {
+  overflow-wrap: anywhere;
+}
+.print-summary table {
+  table-layout: fixed;
+  min-width: 0;
+}
+.print-summary th:nth-child(1) {
+  width: 28%;
+}
+.print-summary th:nth-child(2) {
+  width: 22%;
+}
+.print-summary th:nth-child(3) {
+  width: 27%;
+}
+.print-summary th:nth-child(4) {
+  width: 23%;
+}
+.print-summary th,
+.print-summary td {
+  padding: 12px 8px;
+}
+.print-summary table small {
+  display: block;
+}
+@page {
+  size: A4;
+  margin: 14mm;
+}
+@media print {
+  :root {
+    background: white;
+    color: #111;
+    font-size: 10pt;
+    line-height: 1.35;
+    --muted: #333;
+    --line: #aaa;
+  }
+  .site-header,
+  .skip,
+  .flow-form,
+  .research-actions,
+  .print-instructions,
+  footer {
+    display: none;
+  }
+  .container,
+  .print-summary {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+  .review-banner {
+    display: block;
+    background: white;
+    color: #111;
+    padding: 0 0 8pt;
+    text-align: left;
+    font-size: 9pt;
+    border-bottom: 1px solid #777;
+  }
+  .review-banner strong,
+  .review-banner span {
+    display: block;
+  }
+  .content-grid,
+  .metrics,
+  aside {
+    display: block;
+  }
+  .page-head {
+    padding: 12pt 0 0;
+  }
+  h1 {
+    font-size: 18pt;
+    line-height: 1.3;
+    max-width: none;
+    margin-bottom: 10pt;
+  }
+  h2 {
+    font-size: 12pt;
+  }
+  h3,
+  .lede {
+    font-size: 10pt;
+  }
+  h1,
+  h2,
+  h3,
+  caption,
+  .page-head {
+    break-after: avoid;
+  }
+  p,
+  li {
+    orphans: 3;
+    widows: 3;
+  }
+  .card,
+  .limits,
+  .metric {
+    padding: 0;
+    margin-bottom: 12pt;
+    background: white;
+    border: 0;
+    border-radius: 0;
+  }
+  .card p,
+  .limits p,
+  dd,
+  .card li {
+    font-size: 9pt;
+  }
+  dt,
+  .small,
+  small,
+  .eyebrow {
+    font-size: 8pt;
+  }
+  .eyebrow {
+    margin-bottom: 6pt;
+  }
+  .basis {
+    gap: 4pt;
+    margin-bottom: 6pt;
+  }
+  .basis span {
+    background: white;
+    padding: 3pt 5pt;
+    font-size: 8pt;
+  }
+  .table-scroll {
+    overflow: visible;
+    border: 0;
+  }
+  table,
+  .print-summary table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+    font-size: 9pt;
+  }
+  thead {
+    display: table-header-group;
+  }
+  tr {
+    break-inside: avoid;
+  }
+  th,
+  td,
+  .print-summary th,
+  .print-summary td {
+    padding: 6pt 4pt;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+  thead th,
+  caption {
+    font-size: 8pt;
+  }
+  .numeric small {
+    min-width: 0;
+    max-width: none;
+  }
+  caption {
+    padding: 0 0 6pt;
+  }
+  a {
+    color: #111;
+    overflow-wrap: anywhere;
+  }
+  .notice {
+    background: white;
+    padding: 6pt;
+  }
+}
